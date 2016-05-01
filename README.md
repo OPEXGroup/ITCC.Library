@@ -112,8 +112,10 @@ SystemEventLogger(string source, LogLevel level);
 
 Класс для представления результата запроса. Ключевые свойства:
 
-* `TResult Result;` - Результат запроса (объекта)
-* `ServerResponseStatus Status;` - Определяется по статус-коду ответа сервера (либо невозможности его получить)
+```
+TResult Result; // Результат запроса (объекта)
+ServerResponseStatus Status; // Определяется по статус-коду ответа сервера (либо невозможности его получить)
+```
 
 ##### `static class StaticClient`
 
