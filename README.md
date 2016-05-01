@@ -323,23 +323,75 @@ X509Certificate2 GetCertificate(string subjectName, bool allowSelfSigned)
 
 `HTTP`-сервер. Доступен один экземпляр для приложения.
 
-##### class AuthentificationResult
+##### `class AuthentificationResult`
 
 Представляет результат аутентификации на сервера (получения токена авторизации). Отправляется сервером в ответ на запрос `Login`. Ключевые свойства:
 ```
-object AccountView { get; set; }     // Представление аккауниа
-HttpStatusCode Status { get; set; }  // Код ответа
-object Userdata { get; set; }        // Дополнительные данные (например, значение заголовка Retry-After)
+object AccountView { get; set; }             // Представление аккауниа
+HttpStatusCode Status { get; set; }          // Код ответа
+object Userdata { get; set; }                // Дополнительные данные (например, значение заголовка Retry-After)
 ```
 
-##### class AuthorizationResult\<TAccount>
+##### `class AuthorizationResult<TAccount>`
 
 Представляет результат авторизации на сервере. Ключевые свойства:
 ```
 TAccount Account { get; set; }               // аккаунт пользователя
 AuthorizationStatus Status { get; set; }     // статус авторизации
 string ErrorDescription { get; set; }        // описание ошибки (при ее наличии)
-
 ```
 
+##### `class HandlerResult`
+
+Представляет результат обработки клиентского запроса на сервере. Ключевые свойства:
+```
+object Body { get; set; }                     // Тело ответа
+HttpStatusCode Status { get; set; }           // Код ответа
+```
+
+##### `class HttpServerConfiguration<TAccount>`
+
+Конфигурация сервера. Ключевые методы:
+```
+bool IsEnough();     // Достаточна ли конфигурация для запуска
+```
+
+Ключевые свойства:
+```
+string SubjectName { get; set; }                                    // Доменное имя сервера (главная цель - поис сертификата)
+ushort Port { get; set; }                                           // Порт, на котором принимаем соединения
+Protocol Protocol { get; set; }                                     // Используемый протокол
+
+Delegates.CertificateProvider CertificateProvider { get; set; }     // Метод получения сертификата
+bool AllowSelfSignedCertificates { get; set; }                      // Можно ли использовать самоподписанные сертификаты
+
+bool FilesEnabled { get; set; }                                     // Поддерживает ли сервер работу с файлами
+string FilesLocation { get; set; }                                  // Расположение файлов на сервер
+string FilesBaseUri { get; set; }                                   // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
+bool FilesNeedAuthorization { get; set; }                           // Требуется ли авторизация для доступа к файлам
+
+Delegates.FilesAuthorizer<TAccount> FilesAuthorizer { get; set; }   // Метод авторизации для файлом
+Delegates.Authentificator Authentificator { get; set; }             // Метод аутентификации
+Delegates.Authorizer<TAccount> Authorizer { get; set; }             // Метод авторизации
+
+Delegates.BodySerializer BodySerializer { get; set; }               // Метод для сериализации тел ответов
+
+bool StatisticsEnabled { get; set; }                                // Ведется ли статистика на сервере. Если да, она доступна по <SubjectName>:<Port>/statistics
+
+string FaviconPath { get; set; }                                    // Где лежит favicon.ico
+
+string ServerName { get; set; }                                     // Имя сервера для заголовков Server:
+
+int BufferPoolSize { get; set; } = 100;                             // Размер пула 64к-буферов для чтения из сокетов
+```
+
+##### `class RequestProcessor<TAccount>`
+
+Представляет обработчик запроса. Ключевые поля:
+```
+bool AuthorizationRequired;                  // Требуется ли авторизация для выполнения запроса
+Delegates.RequestHandler<TAccount> Handler;  // Функция-обработчик
+HttpMethod Method;                           // Метод запроса
+string SubUri;                               // URI, к которому нужно обратиться для вызова метода
+```
 

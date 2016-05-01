@@ -10,7 +10,7 @@ namespace ITCC.HTTP.Server
     /// <summary>
     ///     Server response factory
     /// </summary>
-    public static class ResponseFactory
+    internal static class ResponseFactory
     {
         /// <summary>
         ///     Status code -> reason phrase map

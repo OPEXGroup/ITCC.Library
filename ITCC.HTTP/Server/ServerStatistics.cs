@@ -7,7 +7,7 @@ using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server
 {
-    public class ServerStatistics<TAccount>
+    internal class ServerStatistics<TAccount>
         where TAccount : class
     {
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();

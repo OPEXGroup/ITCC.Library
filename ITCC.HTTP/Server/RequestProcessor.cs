@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using ITCC.HTTP.Common;
 
 namespace ITCC.HTTP.Server
@@ -18,6 +19,7 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     Isengard 1.0 API method name (null if not present in 1.0)
         /// </summary>
+        [Obsolete]
         public string LegacyName;
 
         /// <summary>
