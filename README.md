@@ -395,3 +395,20 @@ HttpMethod Method;                           // Метод запроса
 string SubUri;                               // URI, к которому нужно обратиться для вызова метода
 ```
 
+##### `static class StaticServer<TAccount> where TAccount : class`
+
+Представляет `HTTP(S)`-сервер. Доступен один на приложение. Ключевые методы:
+```
+ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration);                 // Запуск сервера
+bool AddRequestProcessor(RequestProcessor<TAccount> requestProcessor);                    // Добавление обработчика запросов
+bool AddRequestProcessorRange(IEnumerable<RequestProcessor<TAccount>> requestProcessors); // Добавление нескольких обработчиков запросов
+```
+
+##### `static class CommonHelper`
+
+Класс для простых общих методов. Ключевые методы:
+```
+bool IsGoodServerResponseStatus(ServerResponseStatus status);
+bool IsBadServerResponseStatus(ServerResponseStatus status);
+HttpMethod HttpMethodToEnum(string methodName);
+```
