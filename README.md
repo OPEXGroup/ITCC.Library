@@ -31,8 +31,10 @@
 
 Интерфейс подписчика на события лога. Сигнатура:
 
-* `LogLevel Level { get; set; }`  
-* `void WriteEntry(object sender, LogEntryEventArgs args);`
+```
+LogLevel Level { get; set; }
+void WriteEntry(object sender, LogEntryEventArgs args);
+```
 
 ##### `enum Loglevel`
 
@@ -45,15 +47,19 @@
 ##### `static class Logger`
 
 Класс-брокер. Создает события, подписывает на них получателей лога. Ключевые методы:
-	
-* `void LogEntry(object scope, LogLevel level, string message)` - записать в лог сообщение 
-* `void LogException(object scope, LogLevel level, Exception exception)` - записать в лог исключение
-* `bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false)` - подписать получателя на события лога
-* `bool UnregisterReceiver(ILogReceiver receiver)`- отписать получателя
+
+```	
+void LogEntry(object scope, LogLevel level, string message); // записать в лог сообщение 
+void LogException(object scope, LogLevel level, Exception exception); // записать в лог исключение
+bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false); // подписать получателя на события лога
+bool UnregisterReceiver(ILogReceiver receiver); // отписать получателя
+```
 
 Ключевые свойства
 
-* `LogLevel Level { get; set; }` - уровень лога
+```
+LogLevel Level { get; set; } // уровень лога
+```
 
 #### Loggers
 
@@ -61,23 +67,38 @@
 
 ##### `class ConsoleLogger : ILogReceiver`
 
-Выводит лог в консоль. Основной конструктор `ConsoleLogger(LogLevel level)`
+Выводит лог в консоль. Основной конструктор 
+```
+ConsoleLogger(LogLevel level);
+```
 
 ##### `class ColouredConsoleLogger : ConsoleLogger`
 
-Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор `ColouredConsoleLogger(LogLevel level)`
+Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор
+```
+ColouredConsoleLogger(LogLevel level);
+```
 
 ##### `class FileLogger : ILogReceiver`
 
-Пишет лог в файл. Основной конструктор `FileLogger(string filename, LogLevel level, bool clearFile = false)`
+Пишет лог в файл. Основной конструктор
+```
+FileLogger(string filename, LogLevel level, bool clearFile = false);
+```
 
 ##### `class BufferedFileLogger : FileLogger`
 
-Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор `BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000)`
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
+```
+BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
+```
 
 ##### `class SystemEventLogger : ILogReceiver, IDisposable`
 
-Пишет лог в системные логи `Windows`. **Не поддерживает уровни логи ниже `Info`.** Основной конструктор `SystemEventLogger(string source, LogLevel level)`
+Пишет лог в системные логи `Windows`. **Не поддерживает уровни логи ниже `Info`.** Основной конструктор 
+```
+SystemEventLogger(string source, LogLevel level);
+```
 
 ### ITCC.HTTP
 
@@ -98,9 +119,9 @@
 
 `HTTP`-клиент. Ключевые методы: 
 
-*
+* Базовый метод. Осуществляет `HTTP`-запрос. Реально почти никогда не используется.
 ```
-public static async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
+async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
             HttpMethod method,
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -111,12 +132,96 @@ public static async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TRes
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
 ```
-- Базовый метод. Осуществляет `HTTP`-запрос. Реально почти никогда не используется.
-* `Task<RequestResult<string>> GetRawAsync(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken))` - Получение ответа на `GET`-запрос в виде простой строки тела
-* `Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.BodyDeserializer<TResult> bodyDeserializer = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Получения ответа на `GET`-запрос в десериализованном виде (десериализатор передается в явном виде)
-* `GetAsync<TResult>(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Получение ответа на `GET`-запрос в десериализованном из `JSON` виде
-* `Task<RequestResult<string>> PostRawAsync(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string data = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken))` - Получение ответа на `POST`-запрос в виде простой строки тела
-* `Task<RequestResult<TResult>> PostAsync<TResult>(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, object data = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Отправка объекта, сериализованного в `JSON` и десериализация ответа из `JSON`
+
+* Получение ответа на `GET`-запрос в виде простой строки тела
+```
+Task<RequestResult<string>> GetRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Получения ответа на `GET`-запрос в десериализованном виде (десериализатор передается в явном виде)
+```
+Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+```
+* Получение ответа на `GET`-запрос в десериализованном из `JSON` виде
+```
+Task<RequestResult<TResult>> GetAsync<TResult>(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+```
+* Получение ответа на `POST`-запрос в виде простой строки тела
+```
+Task<RequestResult<string>> PostRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string data = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Отправка объекта, сериализованного в `JSON` и десериализация ответа из `JSON`
+```
+Task<RequestResult<TResult>> PostAsync<TResult>(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            object data = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+            where TResult : class
+```
+* Загрузка файла на сервер
+```
+Task<RequestResult<object>> PostFileAsync(string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string filePath = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Получение ответа на `PUT`-запрос в виде простой строки тела
+```
+Task<RequestResult<string>> PutRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string data = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Получение ответа на `DELETE`-запрос в виде простой строки тела
+```
+Task<RequestResult<string>> DeleteRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string data = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Разрешить/запретить соединение с сервером с недоверенным сертификатом
+```
+void AllowUntrustedServerCertificates();
+void DisallowUntrustedServerCertificates();
+```
+
+Ключевые свойства:
+```
+string ServerAddress {get; set;}
+Protocol ServerProtocol { get; private set; } = Protocol.Http;
+```
 
 
 

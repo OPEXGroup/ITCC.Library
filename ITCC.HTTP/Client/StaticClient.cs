@@ -287,7 +287,8 @@ namespace ITCC.HTTP.Client
         public static Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(
             string partialUri,
             IDictionary<string, string> parameters = null,
-            IDictionary<string, string> headers = null, Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
+            IDictionary<string, string> headers = null,
+            Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
