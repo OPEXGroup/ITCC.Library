@@ -8,17 +8,17 @@ namespace ITCC.HTTP.Server
     /// </summary>
     public class AuthorizationResult<TAccount>
     {
-        public AuthorizationResult(TAccount account, AuthentificationStatus status, object userdata = null)
+        public AuthorizationResult(TAccount account, AuthorizationStatus status, object userdata = null)
         {
             Account = account;
             Status = status;
             Userdata = userdata;
         }
 
-        public AuthorizationResult(TAccount account, AuthentificationStatus status, string errorDescription, object userdata = null)
+        public AuthorizationResult(TAccount account, AuthorizationStatus status, string errorDescription, object userdata = null)
         {
             // For internal checks
-            if (status == AuthentificationStatus.Ok)
+            if (status == AuthorizationStatus.Ok)
                 throw new ArgumentException("Error description provided, but status is OK");
 
             Account = account;
@@ -35,10 +35,10 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     Authentification status (if positive, then Account is not null)
         /// </summary>
-        public AuthentificationStatus Status { get; set; }
+        public AuthorizationStatus Status { get; set; }
 
         /// <summary>
-        ///     Can be used in case Status != AuthentificationStatus.Ok
+        ///     Can be used in case Status != AuthorizationStatus.Ok
         /// </summary>
         public string ErrorDescription { get; set; }
 

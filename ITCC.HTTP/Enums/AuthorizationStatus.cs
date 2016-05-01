@@ -1,9 +1,9 @@
 ﻿namespace ITCC.HTTP.Enums
 {
     /// <summary>
-    ///     Represents possible authentification result
+    ///     Represents possible authorization result
     /// </summary>
-    public enum AuthentificationStatus
+    public enum AuthorizationStatus
     {
         NotRequired,
         /// <summary>

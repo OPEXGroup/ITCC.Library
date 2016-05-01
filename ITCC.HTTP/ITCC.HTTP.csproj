@@ -46,7 +46,7 @@
     <Compile Include="Client\RequestResult.cs" />
     <Compile Include="Client\StaticClient.cs" />
     <Compile Include="Common\Delegates.cs" />
-    <Compile Include="Enums\AuthentificationStatus.cs" />
+    <Compile Include="Enums\AuthorizationStatus.cs" />
     <Compile Include="Enums\Protocol.cs" />
     <Compile Include="Enums\ServerResponseStatus.cs" />
     <Compile Include="Enums\ServerStartStatus.cs" />

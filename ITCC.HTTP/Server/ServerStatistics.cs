@@ -16,7 +16,7 @@ namespace ITCC.HTTP.Server
 
         private readonly ConcurrentDictionary<string, int> _legacyRequestCounter = new ConcurrentDictionary<string, int>();
 
-        private readonly ConcurrentDictionary<AuthentificationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthentificationStatus, int>();
+        private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
         private readonly DateTime _startTime = DateTime.Now;
 

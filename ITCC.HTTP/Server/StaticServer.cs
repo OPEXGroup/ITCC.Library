@@ -172,14 +172,14 @@ namespace ITCC.HTTP.Server
                 }
                 else
                 {
-                    authResult = new AuthorizationResult<TAccount>(null, AuthentificationStatus.NotRequired);
+                    authResult = new AuthorizationResult<TAccount>(null, AuthorizationStatus.NotRequired);
                 }
 
                 _statistics?.AddAuthResult(authResult);
                 switch (authResult.Status)
                 {
-                    case AuthentificationStatus.NotRequired:
-                    case AuthentificationStatus.Ok:
+                    case AuthorizationStatus.NotRequired:
+                    case AuthorizationStatus.Ok:
                         if (requestProcessor.Handler == null)
                         {
                             LogMessage(LogLevel.Debug,
@@ -194,13 +194,13 @@ namespace ITCC.HTTP.Server
                             response = ResponseFactory.CreateResponse(handleResult.Status, handleResult.Body);
                         }
                         break;
-                    case AuthentificationStatus.Unauthorized:
+                    case AuthorizationStatus.Unauthorized:
                         response = ResponseFactory.CreateResponse(HttpStatusCode.Unauthorized, null);
                         break;
-                    case AuthentificationStatus.Forbidden:
+                    case AuthorizationStatus.Forbidden:
                         response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
                         break;
-                    case AuthentificationStatus.TooManyRequests:
+                    case AuthorizationStatus.TooManyRequests:
                         response = ResponseFactory.CreateResponse((HttpStatusCode)429, null);
                         response.AddHeader("Retry-After", authResult.Userdata.ToString());
                         break;
@@ -496,13 +496,13 @@ namespace ITCC.HTTP.Server
                 }
                 else
                 {
-                    authResult = new AuthorizationResult<TAccount>(null, AuthentificationStatus.NotRequired);
+                    authResult = new AuthorizationResult<TAccount>(null, AuthorizationStatus.NotRequired);
                 }
                 _statistics?.AddAuthResult(authResult);
                 switch (authResult.Status)
                 {
-                    case AuthentificationStatus.NotRequired:
-                    case AuthentificationStatus.Ok:
+                    case AuthorizationStatus.NotRequired:
+                    case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
                             response = HandleFileGetRequest(channel, request, filePath);
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
@@ -518,13 +518,13 @@ namespace ITCC.HTTP.Server
                             response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
                         }
                         break;
-                    case AuthentificationStatus.Unauthorized:
+                    case AuthorizationStatus.Unauthorized:
                         response = ResponseFactory.CreateResponse(HttpStatusCode.Unauthorized, null);
                         break;
-                    case AuthentificationStatus.Forbidden:
+                    case AuthorizationStatus.Forbidden:
                         response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
                         break;
-                    case AuthentificationStatus.TooManyRequests:
+                    case AuthorizationStatus.TooManyRequests:
                         response = ResponseFactory.CreateResponse((HttpStatusCode)429, null);
                         response.AddHeader("Retry-After", authResult.Userdata.ToString());
                         break;

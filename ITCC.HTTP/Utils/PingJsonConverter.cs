@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Utils
 {
-    public class PingJsonConverter : JsonConverter
+    internal class PingJsonConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {

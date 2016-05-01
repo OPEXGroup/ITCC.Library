@@ -5,7 +5,7 @@ namespace ITCC.HTTP.Utils
 {
     internal static class IOHelper
     {
-        public static bool HasWriteAccessToDirectory(string folderPath)
+        internal static bool HasWriteAccessToDirectory(string folderPath)
         {
             try
             {
