@@ -1,0 +1,20 @@
+﻿namespace ITCC.Logging
+{
+    /// <summary>
+    ///     Interface for objects which can write logs
+    /// </summary>
+    public interface ILogReceiver
+    {
+        /// <summary>
+        ///     Gets or sets logger personal loglevel
+        /// </summary>
+        LogLevel Level { get; set; }
+
+        /// <summary>
+        ///     Writes entry if it is interesting to logger
+        /// </summary>
+        /// <param name="sender">Event scope</param>
+        /// <param name="args">Event params</param>
+        void WriteEntry(object sender, LogEntryEventArgs args);
+    }
+}
