@@ -98,7 +98,20 @@
 
 `HTTP`-клиент. Ключевые методы: 
 
-* `async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(HttpMethod method, string partialUri,       IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, TBody bodyArg = default(TBody), Delegates.BodySerializer requestBodySerializer = null, Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null, Delegates.AuthentificationDataAdder authentificationProvider = null,        CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Базовый метод. Осуществляет `HTTP`-запрос. Реально почти никогда не используется.
+*
+```
+public static async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
+            HttpMethod method,
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            TBody bodyArg = default(TBody),
+            Delegates.BodySerializer requestBodySerializer = null,
+            Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+```
+- Базовый метод. Осуществляет `HTTP`-запрос. Реально почти никогда не используется.
 * `Task<RequestResult<string>> GetRawAsync(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken))` - Получение ответа на `GET`-запрос в виде простой строки тела
 * `Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.BodyDeserializer<TResult> bodyDeserializer = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Получения ответа на `GET`-запрос в десериализованном виде (десериализатор передается в явном виде)
 * `GetAsync<TResult>(string partialUri, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, Delegates.AuthentificationDataAdder authentificationProvider = null, CancellationToken cancellationToken = default(CancellationToken)) where TResult : class` - Получение ответа на `GET`-запрос в десериализованном из `JSON` виде
