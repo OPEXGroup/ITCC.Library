@@ -51,7 +51,8 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             TBody bodyArg = default(TBody),
-            Delegates.BodySerializer requestBodySerializer = null, Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
+            Delegates.BodySerializer requestBodySerializer = null,
+            Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
