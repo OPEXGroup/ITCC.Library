@@ -36,6 +36,11 @@
         Forbidden,
 
         /// <summary>
+        ///     Too many requests have been sent from the current client
+        /// </summary>
+        TooManyRequests,
+
+        /// <summary>
         ///     Server responded with good status code, but content cannot be recognized
         /// </summary>
         IncompehensibleResponse,
@@ -48,11 +53,8 @@
         /// <summary>
         ///     No response (some network problems)
         /// </summary>
-        ConnectionError,
+        ConnectionError
 
-        /// <summary>
-        ///     Too many requests have been sent from the current client
-        /// </summary>
-        TooManyRequests
+        
     }
 }

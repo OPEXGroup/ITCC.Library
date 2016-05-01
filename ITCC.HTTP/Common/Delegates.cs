@@ -33,7 +33,8 @@ namespace ITCC.HTTP.Common
         /// <param name="requestProcessor">Way to process request</param>
         /// <returns>Authentification status</returns>
         public delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
-            HttpRequest request, RequestProcessor<TAccount> requestProcessor)
+            HttpRequest request,
+            RequestProcessor<TAccount> requestProcessor)
             where TAccount : class;
 
         /// <summary>
@@ -43,7 +44,8 @@ namespace ITCC.HTTP.Common
         /// <param name="filename">Requested filename</param>
         /// <returns>Authentification status</returns>
         public delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
-            HttpRequest request, string filename)
+            HttpRequest request,
+            string filename)
             where TAccount : class;
 
         /// <summary>
@@ -82,13 +84,13 @@ namespace ITCC.HTTP.Common
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public delegate bool ServiceRequestChecker(HttpRequest request);
+        internal delegate bool ServiceRequestChecker(HttpRequest request);
 
         /// <summary>
         ///     Used to serve service requests, independent from user-registered handlers
         /// </summary>
         /// <param name="channel"></param>
         /// <param name="request"></param>
-        public delegate void ServiceRequestHandler(ITcpChannel channel, HttpRequest request);
+        internal delegate void ServiceRequestHandler(ITcpChannel channel, HttpRequest request);
     }
 }

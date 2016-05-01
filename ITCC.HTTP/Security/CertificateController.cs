@@ -10,7 +10,7 @@ namespace ITCC.HTTP.Security
 {
     public static class CertificateController
     {
-        public static bool RealCertificateValidationCallBack(
+        internal static bool RealCertificateValidationCallBack(
             object sender,
             X509Certificate certificate,
             X509Chain chain,
@@ -35,7 +35,7 @@ namespace ITCC.HTTP.Security
             return requestHostname.Equals(certHostname, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public static bool MockCertificateValidationCallBack(
+        internal static bool MockCertificateValidationCallBack(
             object sender,
             X509Certificate certificate,
             X509Chain chain,

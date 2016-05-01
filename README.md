@@ -49,10 +49,10 @@ void WriteEntry(object sender, LogEntryEventArgs args);
 Класс-брокер. Создает события, подписывает на них получателей лога. Ключевые методы:
 
 ```	
-void LogEntry(object scope, LogLevel level, string message); // записать в лог сообщение 
-void LogException(object scope, LogLevel level, Exception exception); // записать в лог исключение
-bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false); // подписать получателя на события лога
-bool UnregisterReceiver(ILogReceiver receiver); // отписать получателя
+void LogEntry(object scope, LogLevel level, string message);                 // записать в лог сообщение 
+void LogException(object scope, LogLevel level, Exception exception);        // записать в лог исключение
+bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false);  // подписать получателя на события лога
+bool UnregisterReceiver(ILogReceiver receiver);                              // отписать получателя
 ```
 
 Ключевые свойства
@@ -113,8 +113,8 @@ SystemEventLogger(string source, LogLevel level);
 Класс для представления результата запроса. Ключевые свойства:
 
 ```
-TResult Result; // Результат запроса (объекта)
-ServerResponseStatus Status; // Определяется по статус-коду ответа сервера (либо невозможности его получить)
+TResult Result;               // Результат запроса (объекта)
+ServerResponseStatus Status;  // Определяется по статус-коду ответа сервера (либо невозможности его получить)
 ```
 
 ##### `static class StaticClient`
@@ -225,7 +225,97 @@ string ServerAddress {get; set;}
 Protocol ServerProtocol { get; private set; } = Protocol.Http;
 ```
 
+#### Common
 
+Общие классы
 
+##### `class Delegates`
+
+Тут просто хранятся объявления делегатов библитеки. Публичные:
+```
+/*
+	Клиент
+*/
+delegate bool AuthentificationDataAdder(HttpRequestMessage request); // Метод добавления данных авторизации к клиентскому запросу
+delegate TResult BodyDeserializer<out TResult>(string data); // Метод десериализации тела ответа от сервера 
+/*
+	Сервер
+*/
+delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
+            HttpRequest request,
+            RequestProcessor<TAccount> requestProcessor)
+            where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос
+delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
+            HttpRequest request,
+			string filename)
+            where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам
+delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates); // Метод сервера для получения SSL/TLS сертификата
+delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpRequest request); // Обработчик клиентского запроса (после авторизации)
+/*
+	Общие
+*/
+delegate string BodySerializer(object data); // Сериализация тела сообщения
+```
+
+#### Enums
+
+Используемые перечисления
+
+##### `enum AuthentificationStatus`
+
+Результат аутентификации или авторизации на сервере. Значения:
+
+```
+NotRequired,		// Запрос разрешен всем (200)
+Ok,                 // Запрос разрешен (200)
+Unauthorized,       // Данные авторизации неверны или недостаточны (401)
+Forbidden,          // Доступ запрещен для данного аккаунта (403)
+TooManyRequests     // Доступ будет разрешен позже. (429)
+InternalError,      // Внутренняя ошибка сервера (500)
+```
+
+##### `enum Protocol`
+
+Протокол уровня приложения. Значения:
+```
+Http,
+Https   // С шифрованием данных
+```
+
+##### `enum ServerResponseStatus`
+
+Тип ответа сервера. Значения
+
+```
+Ok,                        // Все хорошо (200, 201)
+NothingToDo,               // Данных нет (204)
+ClientError,               // Ошибка в клиентском запросе (400, 404, 409)
+ServerError,               // Ошибка на сервере (500, 501)
+Unauthorized,              // Данные авторизации неверны или недостаточны (401)
+Forbidden,                 // Доступ запрещен для данного аккаунта (403)
+ToManyRequest,             // Слишком много запросов с данного аккаунта (429). При этом в Userdata должно храниться вреся в секундах до следующего разрешенного запроса
+IncompehensibleResponse,   // Ответ непонятен
+RequestCanceled,           // Запрос отменен клиентом до получения ответа
+```
+
+##### `enum ServerStartStatus`
+
+Результат старта сервера. Значения:
+```
+Ok,                 // Сервер работает
+BindingError,       // Ошибка биндинга (вероятнее всего, занят порт)
+CertificateError,   // Ошибка получения сертификата (не найдет для данного subject name)
+BadParameters,      // Ошибка в переданной конфигурации сервера
+UnknownError        // Прочие ошибки
+```
+
+#### Security
+
+##### `static class CertificateController`
+
+Управление сертификатами сервера. Ключевой метод:
+```
+X509Certificate2 GetCertificate(string subjectName, bool allowSelfSigned)
+```
 
 

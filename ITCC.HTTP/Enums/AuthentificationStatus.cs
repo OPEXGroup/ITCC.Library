@@ -22,13 +22,13 @@
         Forbidden,
 
         /// <summary>
-        ///     Internal server error occured during authentification
-        /// </summary>
-        InternalError,
-
-        /// <summary>
         ///     Too many requests from current user
         /// </summary>
-        TooManyRequests
+        TooManyRequests,
+
+        // <summary>
+        ///     Internal server error occured during authentification
+        /// </summary>
+        InternalError
     }
 }
