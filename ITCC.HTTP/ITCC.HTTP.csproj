@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{77016AD7-9655-4918-832C-D26A767E29B4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ITCC.HTTP</RootNamespace>
+    <AssemblyName>ITCC.HTTP</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Client\RequestResult.cs" />
+    <Compile Include="Client\StaticClient.cs" />
+    <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Enums\AuthentificationStatus.cs" />
+    <Compile Include="Enums\Protocol.cs" />
+    <Compile Include="Enums\ServerResponseStatus.cs" />
+    <Compile Include="Enums\ServerStartStatus.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\CertificateController.cs" />
+    <Compile Include="Server\AuthentificationResult.cs" />
+    <Compile Include="Server\AuthorizationResult.cs" />
+    <Compile Include="Server\HandlerResult.cs" />
+    <Compile Include="Server\HttpServerConfiguration.cs" />
+    <Compile Include="Server\RequestProcessor.cs" />
+    <Compile Include="Server\ResponseFactory.cs" />
+    <Compile Include="Server\ServerStatistics.cs" />
+    <Compile Include="Server\StaticServer.cs" />
+    <Compile Include="Utils\CommonHelper.cs" />
+    <Compile Include="Utils\IOHelper.cs" />
+    <Compile Include="Utils\PingJsonConverter.cs" />
+    <Compile Include="Utils\PingResponse.cs" />
+    <Compile Include="Utils\UriHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Griffin.Framework\src\Griffin.Framework\Griffin.Core\Griffin.Core.csproj">
+      <Project>{744709d5-d4d5-4551-9ebd-cbd7bdf58f5f}</Project>
+      <Name>Griffin.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.csproj">
+      <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
+      <Name>ITCC.Logging</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="CERTENROLLLib">
+      <Guid>{728AB348-217D-11DA-B2A4-000E7BBB2B09}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

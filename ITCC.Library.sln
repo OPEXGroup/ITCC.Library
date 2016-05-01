@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging", "ITCC.Loggin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Griffin.Core", "Griffin.Framework\src\Griffin.Framework\Griffin.Core\Griffin.Core.csproj", "{744709D5-D4D5-4551-9EBD-CBD7BDF58F5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.HTTP", "ITCC.HTTP\ITCC.HTTP.csproj", "{77016AD7-9655-4918-832C-D26A767E29B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{744709D5-D4D5-4551-9EBD-CBD7BDF58F5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{744709D5-D4D5-4551-9EBD-CBD7BDF58F5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{744709D5-D4D5-4551-9EBD-CBD7BDF58F5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77016AD7-9655-4918-832C-D26A767E29B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77016AD7-9655-4918-832C-D26A767E29B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77016AD7-9655-4918-832C-D26A767E29B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77016AD7-9655-4918-832C-D26A767E29B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
