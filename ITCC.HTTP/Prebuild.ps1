@@ -13,6 +13,6 @@ if (Test-Path "$NugetPath") {
 if ("$SolutionDir".Contains("ITCC.Library")) {
 	Write-Host "Nothing to do"
 } else {
-	& "$NugetPath" restore "$SolutionDir\ITCC.Library\ITCC.HTTP\packages.config" -OutputDirectory "$SolutionPath\ITCC.Library\packages"
+	& "$NugetPath" restore "$SolutionDir\ITCC.Library\ITCC.HTTP\packages.config" -OutputDirectory "$SolutionDir\ITCC.Library\packages"
 }
 Write-Host "Finished prebuild"
