@@ -43,6 +43,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\RegularClient.cs" />
     <Compile Include="Client\RequestResult.cs" />
     <Compile Include="Client\StaticClient.cs" />
     <Compile Include="Common\Delegates.cs" />
