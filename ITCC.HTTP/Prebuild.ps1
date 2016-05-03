@@ -1,16 +1,18 @@
 ﻿param(
-	[string]$SolutionDir,
-	[string]$SolutionPath
+	[string]$SolutionDir
 )
 
 Write-Host "Started prebuild"
 Write-Host "Solution directory $SolutionDir"
-Write-Host "Solution path: $SolutionPath"
 $NugetPath = "$SolutionDir\nuget.exe"
 if (Test-Path "$NugetPath") {
   
 } else {
 	(New-Object Net.WebClient).DownloadFile('https://nuget.org/nuget.exe', "$NugetPath")
 }
-& "$NugetPath" restore $SolutionPath
+if ("$SolutionDir".Contains("ITCC.Library")) {
+	Write-Host "Nothing to do"
+} else {
+	& "$NugetPath" restore "$SolutionDir\ITCC.Library\ITCC.HTTP\packages.config" -OutputDirectory "$SolutionPath\ITCC.Library\packages"
+}
 Write-Host "Finished prebuild"
