@@ -33,6 +33,11 @@ namespace ITCC.Logging
         public readonly int ThreadId = Thread.CurrentThread.ManagedThreadId;
 
         /// <summary>
+        ///     Event thread human-readable name
+        /// </summary>
+        public readonly string ThreadName = Thread.CurrentThread.Name;
+
+        /// <summary>
         ///     Event time
         /// </summary>
         public DateTime Time = DateTime.Now;
@@ -58,7 +63,8 @@ namespace ITCC.Logging
         {
             try
             {
-                var result = $"[{DateTime.Now, 18}] [{LogLevelRepresentation(Level), 5}] [THR {ThreadId, -6}] [{Scope, 12}] {Message}";
+                var threadInfo = ThreadName == null ? $"{ThreadId,-6}" : $"{ThreadName,-6}";
+                var result = $"[{DateTime.Now, 18}] [{LogLevelRepresentation(Level), 5}] [THR {threadInfo}] [{Scope, 12}] {Message}";
                 _representation = result;
                 return result;
             }
