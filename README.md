@@ -13,7 +13,7 @@
 Потом, для подключения после клонирования родительского проекта
 
 * `git submodule init`
-* `git submodule update --init -- recursive` # у нее есть свои подмодули
+* `git submodule update --init --recursive` # у нее есть свои подмодули
 
 Собирается из `Visual Studio`, целевая среда - `.Net 4.6 (x64)`.
 
