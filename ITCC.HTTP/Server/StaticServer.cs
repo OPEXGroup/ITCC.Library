@@ -472,7 +472,7 @@ namespace ITCC.HTTP.Server
 
         private static bool IsFilesRequest(HttpRequest request)
         {
-            if (request == null)
+            if (request == null || !FilesEnabled)
             {
                 return false;
             }
