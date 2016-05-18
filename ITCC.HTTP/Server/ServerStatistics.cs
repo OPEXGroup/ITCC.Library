@@ -75,7 +75,7 @@ namespace ITCC.HTTP.Server
 
         public void AddRequest(HttpRequest request)
         {
-            var uri = request.Uri.LocalPath.Trim('/');
+            var uri = request.Uri.LocalPath.TrimEnd('/');
             if (!_requestCounters.ContainsKey(uri))
             {
                 _requestCounters[uri] = new ConcurrentDictionary<string, int>();
