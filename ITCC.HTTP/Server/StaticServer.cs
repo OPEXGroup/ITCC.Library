@@ -564,7 +564,7 @@ namespace ITCC.HTTP.Server
             response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
                 FileShare.ReadWrite);
-            response.ContentType = "video/mp4";
+            response.ContentType = DetermineContentType(filePath);
             response.Body = fileStream;
             return response;
         }
@@ -640,6 +640,15 @@ namespace ITCC.HTTP.Server
             sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
             LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
             return FileSections.FirstOrDefault(s => s.Folder == sectionName);
+        }
+
+        private static string DetermineContentType(string filename)
+        {
+            if (!filename.Contains("."))
+                return "x-application/unknown";
+
+            var lastDotIndex = filename.LastIndexOf(".", StringComparison.Ordinal);
+            return MimeTypes.GetTypeByExtenstion(filename.Remove(0, lastDotIndex + 1));
         }
 
         #endregion
