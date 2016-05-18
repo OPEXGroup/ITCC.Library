@@ -72,6 +72,7 @@ namespace ITCC.HTTP.Server
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
                 FilesLocation = configuration.FilesLocation;
+                FileSections = configuration.FileSections;
 
                 if (FilesEnabled && !IOHelper.HasWriteAccessToDirectory(FilesLocation))
                 {
@@ -470,6 +471,8 @@ namespace ITCC.HTTP.Server
 
         public static bool FilesNeedAuthorization { get; private set; }
 
+        public static List<FileSection> FileSections { get; private set; } 
+
         private static bool IsFilesRequest(HttpRequest request)
         {
             if (request == null || !FilesEnabled)
@@ -487,12 +490,19 @@ namespace ITCC.HTTP.Server
             try
             {
                 var filename = ExtractFileName(request.Uri.LocalPath);
-                var filePath = FilesLocation + Path.DirectorySeparatorChar + filename;
+                var section = ExtractFileSection(request.Uri.LocalPath);
+                if (filename == null || section == null)
+                {
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
+                    OnResponseReady(channel, response);
+                    return;
+                }
+                var filePath = FilesLocation + Path.DirectorySeparatorChar + section + Path.DirectorySeparatorChar + filename;
 
                 AuthorizationResult<TAccount> authResult;
                 if (FilesNeedAuthorization)
                 {
-                    authResult = await _fileAuthorizer.Invoke(request, filename);
+                    authResult = await _fileAuthorizer.Invoke(request, section, filename);
                 }
                 else
                 {
@@ -614,10 +624,22 @@ namespace ITCC.HTTP.Server
             if (localPath == null)
                 return null;
             var result = localPath.Trim('/');
-            var slashIndex = result.IndexOf("/");
+            var slashIndex = result.LastIndexOf("/", StringComparison.Ordinal);
             result = result.Remove(0, slashIndex + 1);
             LogMessage(LogLevel.Debug, $"File requested: {result}");
             return result;
+        }
+
+        private static FileSection ExtractFileSection(string localPath)
+        {
+            if (localPath == null)
+                return null;
+            var sectionName = localPath.Trim('/');
+            var slashIndex = sectionName.IndexOf("/", StringComparison.Ordinal);
+            var lastSlashIndex = sectionName.LastIndexOf("/", StringComparison.Ordinal);
+            sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
+            LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
+            return FileSections.FirstOrDefault(s => s.Folder == sectionName);
         }
 
         #endregion
@@ -658,11 +680,7 @@ namespace ITCC.HTTP.Server
             if (requestProcessors == null)
                 return true;
 
-            return
-                requestProcessors.Any(
-                    requestProcessor => AddRequestProcessor(requestProcessor) != true)
-                    ? false
-                    : true;
+            return requestProcessors.All(AddRequestProcessor);
         }
 
         private static bool CheckRequestProcessor(RequestProcessor<TAccount> requestProcessor)

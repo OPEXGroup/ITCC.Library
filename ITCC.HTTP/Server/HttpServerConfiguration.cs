@@ -1,4 +1,5 @@
-﻿using ITCC.HTTP.Common;
+﻿using System.Collections.Generic;
+using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
 
@@ -43,6 +44,10 @@ namespace ITCC.HTTP.Server
         ///     If true, every file request will be checked with Authorizer
         /// </summary>
         public bool FilesNeedAuthorization { get; set; }
+        /// <summary>
+        ///     File sections for separate access grants
+        /// </summary>
+        public List<FileSection> FileSections { get; set; } = new List<FileSection>(); 
         /// <summary>
         ///     Method used to check authorization tokens for files requests
         /// </summary>
@@ -104,6 +109,12 @@ namespace ITCC.HTTP.Server
             if (FilesNeedAuthorization && FilesAuthorizer == null)
             {
                 LogMessage(LogLevel.Warning, "No files authorizer passed to Start()");
+                return false;
+            }
+
+            if (FilesEnabled && FileSections.Count == 0)
+            {
+                LogMessage(LogLevel.Warning, "No file sections passed to Start()");
                 return false;
             }
 

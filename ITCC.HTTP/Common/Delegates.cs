@@ -45,6 +45,7 @@ namespace ITCC.HTTP.Common
         /// <returns>Authentification status</returns>
         public delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
             HttpRequest request,
+            FileSection section,
             string filename)
             where TAccount : class;
 
