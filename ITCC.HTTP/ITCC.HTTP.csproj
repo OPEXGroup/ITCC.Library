@@ -55,8 +55,10 @@
     <Compile Include="Security\CertificateController.cs" />
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
+    <Compile Include="Server\FileSection.cs" />
     <Compile Include="Server\HandlerResult.cs" />
     <Compile Include="Server\HttpServerConfiguration.cs" />
+    <Compile Include="Server\MimeTypes.cs" />
     <Compile Include="Server\RequestProcessor.cs" />
     <Compile Include="Server\ResponseFactory.cs" />
     <Compile Include="Server\ServerStatistics.cs" />
