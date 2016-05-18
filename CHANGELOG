@@ -1,3 +1,7 @@
+## 0.3.1 (2016-05-18)
+
+GET for files uses actual content types
+
 ## 0.3.0 (2016-05-18)
 
 File sections with separate access rights added
