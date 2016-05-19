@@ -40,6 +40,7 @@ namespace ITCC.HTTP.Server
             {
                 StatisticsEnabled = true;
                 _statistics = new ServerStatistics<TAccount>();
+                _statisticsAuthorizer = configuration.StatisticsAuthorizer;
             }
 
             var listener = new HttpListener(configuration.BufferPoolSize)
@@ -357,7 +358,9 @@ namespace ITCC.HTTP.Server
 
         public static bool StatisticsEnabled;
 
-        private static ServerStatistics<TAccount> _statistics; 
+        private static ServerStatistics<TAccount> _statistics;
+
+        private static Delegates.StatisticsAuthorizer _statisticsAuthorizer;
 
         private static bool IsStatisticsRequest(HttpRequest request)
         {
@@ -368,11 +371,21 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
         }
 
-        private static void HandleStatistics(ITcpChannel channel, HttpRequest request)
+        private static async void HandleStatistics(ITcpChannel channel, HttpRequest request)
         {
-            var responseBody = _statistics?.Serialize();
-            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
-            response.ContentType = "text/plain";
+            HttpResponse response;
+            if (_statisticsAuthorizer != null && await _statisticsAuthorizer.Invoke(request))
+            {
+                var responseBody = _statistics?.Serialize();
+                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
+                response.ContentType = "text/plain";
+            }
+            else
+            {
+                response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
+            }
+            
+            
             OnResponseReady(channel, response);
         }
         #endregion

@@ -73,6 +73,11 @@ namespace ITCC.HTTP.Server
         public bool StatisticsEnabled { get; set; }
 
         /// <summary>
+        ///     Method used to grand or deny access to /statistics uri
+        /// </summary>
+        public Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }
+
+        /// <summary>
         ///     Favicon requests (Just for fun)
         /// </summary>
         public string FaviconPath { get; set; }

@@ -38,6 +38,13 @@ namespace ITCC.HTTP.Common
             where TAccount : class;
 
         /// <summary>
+        ///     Check if account is allowed to see server statistics
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public delegate Task<bool> StatisticsAuthorizer(HttpRequest request);
+
+        /// <summary>
         ///     Kind of authorization procedure
         /// </summary>
         /// <param name="request">Request</param>
