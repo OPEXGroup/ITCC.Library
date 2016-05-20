@@ -1,3 +1,8 @@
+## 0.4.0 (2016-05-20)
+
+* Server-side SSL can be configured at start  
+* Client SSL cipher suite information is avaible in logs (per connection) and in /statistics section
+
 ## 0.3.2 (2016-05-19)
 
 Statistics requires authorization
