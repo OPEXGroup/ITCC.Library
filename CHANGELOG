@@ -1,3 +1,7 @@
+## 0.4.1 (2016-05-20)
+
+Statistics authorization mechanism fix
+
 ## 0.4.0 (2016-05-20)
 
 * Server-side SSL can be configured at start  
