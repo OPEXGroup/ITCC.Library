@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Griffin.Net.Channels;
@@ -52,6 +53,8 @@ namespace ITCC.HTTP.Server
 
             try
             {
+                Protocol = configuration.Protocol;
+                SuitableSslProtocols = configuration.SuitableSslProtocols;
                 if (configuration.Protocol == Protocol.Https)
                 {
                     var certificate = configuration.CertificateProvider.Invoke(configuration.SubjectName,
@@ -61,7 +64,7 @@ namespace ITCC.HTTP.Server
                         LogMessage(LogLevel.Warning, "Certificate error");
                         return ServerStartStatus.CertificateError;
                     }
-                    listener.ChannelFactory = new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate));
+                    listener.ChannelFactory = new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
                     LogMessage(LogLevel.Info, $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
                 }
                 _authorizer = configuration.Authorizer;
@@ -108,6 +111,14 @@ namespace ITCC.HTTP.Server
                 return ServerStartStatus.UnknownError;
             }
         }
+
+        #endregion
+
+        #region security
+
+        public static Protocol Protocol { get; private set; }
+
+        public static SslProtocols SuitableSslProtocols { get; private set; }
 
         #endregion
 
@@ -356,7 +367,7 @@ namespace ITCC.HTTP.Server
 
         #region statistics
 
-        public static bool StatisticsEnabled;
+        public static bool StatisticsEnabled { get; private set; }
 
         private static ServerStatistics<TAccount> _statistics;
 

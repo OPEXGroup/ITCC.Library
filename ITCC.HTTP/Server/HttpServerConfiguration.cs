@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Authentication;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
@@ -28,6 +29,10 @@ namespace ITCC.HTTP.Server
         ///     If false, CertificateProvider cannot provide self-signed certificates
         /// </summary>
         public bool AllowSelfSignedCertificates { get; set; }
+        /// <summary>
+        ///     Allowed SSL protocols in case of https
+        /// </summary>
+        public SslProtocols SuitableSslProtocols { get; set; }
         /// <summary>
         ///     Does server support file streaming?
         /// </summary>
