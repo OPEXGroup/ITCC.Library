@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Security.Authentication;
 using System.Text;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
@@ -15,6 +16,8 @@ namespace ITCC.HTTP.Server
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _requestCounters = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
         private readonly ConcurrentDictionary<string, int> _legacyRequestCounter = new ConcurrentDictionary<string, int>();
+
+        private readonly ConcurrentDictionary<SslProtocols, int> _sslProtocolCounter = new ConcurrentDictionary<SslProtocols, int>(); 
 
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
@@ -45,6 +48,12 @@ namespace ITCC.HTTP.Server
             authKeys.ForEach(k => builder.AppendLine($"\t{k, 12}: {_authentificationResults[k]}"));
             builder.AppendLine();
 
+            builder.AppendLine("SSL statistics:");
+            var sslKeys = _sslProtocolCounter.Keys.ToList();
+            sslKeys.Sort();
+            sslKeys.ForEach(k => builder.AppendLine($"\t{k,12}: {_sslProtocolCounter[k]}"));
+            builder.AppendLine();
+
             builder.AppendLine("Request statistics:");
             var uris = _requestCounters.Keys.ToList();
             uris.Sort();
@@ -63,14 +72,7 @@ namespace ITCC.HTTP.Server
 
         public void AddResponse(HttpResponse response)
         {
-            if (!_responseCodes.ContainsKey(response.StatusCode))
-            {
-                _responseCodes[response.StatusCode] = 1;
-            }
-            else
-            {
-                _responseCodes[response.StatusCode]++;
-            }
+            InitOrIncrement(_responseCodes, response.StatusCode);
         }
 
         public void AddRequest(HttpRequest request)
@@ -83,14 +85,7 @@ namespace ITCC.HTTP.Server
             }
             else
             {
-                if (!_requestCounters[uri].ContainsKey(request.HttpMethod))
-                {
-                    _requestCounters[uri][request.HttpMethod] = 1;
-                }
-                else
-                {
-                    _requestCounters[uri][request.HttpMethod]++;
-                }
+                InitOrIncrement(_requestCounters[uri], request.HttpMethod);
             }
         }
 
@@ -99,25 +94,28 @@ namespace ITCC.HTTP.Server
             var legacyMethod = requestProcessor.LegacyName;
             if (legacyMethod == null)
                 return;
-            if (!_legacyRequestCounter.ContainsKey(legacyMethod))
-            {
-                _legacyRequestCounter[legacyMethod] = 1;
-            }
-            else
-            {
-                _legacyRequestCounter[legacyMethod]++;
-            }
+           InitOrIncrement(_legacyRequestCounter, legacyMethod);
         }
 
         public void AddAuthResult(AuthorizationResult<TAccount> authResult)
         {
-            if (! _authentificationResults.ContainsKey(authResult.Status))
+            InitOrIncrement(_authentificationResults, authResult.Status);
+        }
+
+        public void AddSslProtocol(SslProtocols protocol)
+        {
+            InitOrIncrement(_sslProtocolCounter, protocol);
+        }
+
+        private static void InitOrIncrement<TType>(ConcurrentDictionary<TType, int> dictionary, TType value)
+        {
+            if (!dictionary.ContainsKey(value))
             {
-                _authentificationResults[authResult.Status] = 1;
+                dictionary[value] = 1;
             }
             else
             {
-                _authentificationResults[authResult.Status]++;
+                dictionary[value]++;
             }
         }
     }

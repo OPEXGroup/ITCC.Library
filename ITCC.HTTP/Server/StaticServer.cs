@@ -238,7 +238,24 @@ namespace ITCC.HTTP.Server
         /// <param name="clientConnectedEventArgs">Event params</param>
         private static void OnClientConnected(object sender, ClientConnectedEventArgs clientConnectedEventArgs)
         {
-            LogMessage(LogLevel.Trace, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}");
+            var sslDescription = string.Empty;
+            if (Protocol == Protocol.Https)
+            {
+                var secureChannel = clientConnectedEventArgs.Channel as SecureTcpChannel;
+                if (secureChannel != null)
+                {
+                    var protocol = secureChannel.SslProtocol;
+                    sslDescription = $"; SSL version={protocol}";
+                    if (StatisticsEnabled)
+                        _statistics.AddSslProtocol(protocol);
+                }
+            }
+            else
+            {
+                if (StatisticsEnabled)
+                    _statistics.AddSslProtocol(SslProtocols.None);
+            }
+            LogMessage(LogLevel.Debug, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}{sslDescription}");
         }
 
         /// <summary>
