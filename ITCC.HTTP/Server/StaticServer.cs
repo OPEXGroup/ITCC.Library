@@ -402,18 +402,26 @@ namespace ITCC.HTTP.Server
         private static async void HandleStatistics(ITcpChannel channel, HttpRequest request)
         {
             HttpResponse response;
-            if (_statisticsAuthorizer != null && await _statisticsAuthorizer.Invoke(request))
+            if (_statisticsAuthorizer != null)
+            {
+                if (await _statisticsAuthorizer.Invoke(request))
+                {
+                    var responseBody = _statistics?.Serialize();
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
+                    response.ContentType = "text/plain";
+                }
+                else
+                {
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
+                }
+            }
+            else
             {
                 var responseBody = _statistics?.Serialize();
                 response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
                 response.ContentType = "text/plain";
             }
-            else
-            {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
-            }
-            
-            
+
             OnResponseReady(channel, response);
         }
         #endregion
