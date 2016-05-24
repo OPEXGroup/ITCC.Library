@@ -546,7 +546,7 @@ namespace ITCC.HTTP.Server
                     OnResponseReady(channel, response);
                     return;
                 }
-                var filePath = FilesLocation + Path.DirectorySeparatorChar + section + Path.DirectorySeparatorChar + filename;
+                var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
 
                 AuthorizationResult<TAccount> authResult;
                 if (FilesNeedAuthorization)
