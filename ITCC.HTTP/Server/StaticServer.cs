@@ -152,10 +152,12 @@ namespace ITCC.HTTP.Server
         private static async void OnMessage(ITcpChannel channel, object message)
 #pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
         {
+            var request = (HttpRequest)message;
+            var startTime = DateTime.Now;
             try
             {
-                var request = (HttpRequest) message;
                 _statistics?.AddRequest(request);
+                
                 HttpResponse response;
                 LogMessage(LogLevel.Debug,
                     $"Request from {channel.RemoteEndpoint}. Method: {request.HttpMethod}, URI: {request.Uri.LocalPath}");
@@ -164,7 +166,7 @@ namespace ITCC.HTTP.Server
                 {
                     if (checker.Invoke(request))
                     {
-                        await Task.Run(() => ServiceHandlers[checker].Invoke(channel, request));
+                        await Task.Run(() => ServiceHandlers[checker].Invoke(channel, request, startTime));
                         return;
                     }
                 }
@@ -173,7 +175,7 @@ namespace ITCC.HTTP.Server
                 if (requestProcessor == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                    OnResponseReady(channel, response);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
                     return;
                 }
                 _statistics?.AddRequestProcessor(requestProcessor);
@@ -221,13 +223,16 @@ namespace ITCC.HTTP.Server
                         response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                         break;
                 }
-                OnResponseReady(channel, response);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
             }
             catch (Exception exception)
             {
                 LogMessage(LogLevel.Warning, $"Error handling client request from {channel.RemoteEndpoint}");
                 LogException(LogLevel.Warning, exception);
-                OnResponseReady(channel, ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null));
+                OnResponseReady(channel,
+                    ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null),
+                    "/" + request.Uri.LocalPath.Trim('/'),
+                    DateTime.Now.Subtract(startTime).TotalMilliseconds);
             }
         }
 
@@ -273,13 +278,15 @@ namespace ITCC.HTTP.Server
         /// </summary>
         /// <param name="channel">Client TCP channel</param>
         /// <param name="response">Server HTTP response</param>
-        private static void OnResponseReady(ITcpChannel channel, HttpResponse response)
+        /// <param name="uri">For performance statistics</param>
+        /// /// <param name="processingTime">For performance statistics</param>
+        private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, double processingTime)
         {
             try
             {
                 LogMessage(LogLevel.Trace,
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
-                _statistics?.AddResponse(response);
+                _statistics?.AddResponse(response, uri, processingTime);
                 channel.Send(response);
                 LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent");
             }
@@ -333,7 +340,7 @@ namespace ITCC.HTTP.Server
         }
 
 #pragma warning disable AsyncFixer03 // Avoid fire & forget async void methods
-        private static async void Authentificate(ITcpChannel channel, HttpRequest request)
+        private static async void Authentificate(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
 #pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
         {
             AuthentificationResult authResult;
@@ -348,7 +355,7 @@ namespace ITCC.HTTP.Server
             {
                 response.AddHeader("Retry-After", authResult.Userdata.ToString());
             }
-            OnResponseReady(channel, response);
+            OnResponseReady(channel, response, "login", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
         }
 
         private static Delegates.Authentificator _authentificator;
@@ -371,13 +378,13 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "ping";
         }
 
-        private static void HandlePing(ITcpChannel channel, HttpRequest request)
+        private static void HandlePing(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             var converter = new PingJsonConverter();
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
             var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
-            OnResponseReady(channel, response);
+            OnResponseReady(channel, response, "ping", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
         }
 
         #endregion
@@ -399,7 +406,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
         }
 
-        private static async void HandleStatistics(ITcpChannel channel, HttpRequest request)
+        private static async void HandleStatistics(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             HttpResponse response;
             if (_statisticsAuthorizer != null)
@@ -422,7 +429,7 @@ namespace ITCC.HTTP.Server
                 response.ContentType = "text/plain";
             }
 
-            OnResponseReady(channel, response);
+            OnResponseReady(channel, response, "statistics", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
         }
         #endregion
 
@@ -437,7 +444,7 @@ namespace ITCC.HTTP.Server
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        private static void HandleOptions(ITcpChannel channel, HttpRequest request)
+        private static void HandleOptions(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             var allowValues = new List<string>();
             if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
@@ -470,7 +477,7 @@ namespace ITCC.HTTP.Server
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
             }
             
-            OnResponseReady(channel, response);
+            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
         }
 
         #endregion
@@ -488,14 +495,14 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/').ToLower() == "favicon.ico";
         }
 
-        private static void HandleFavicon(ITcpChannel channel, HttpRequest request)
+        private static void HandleFavicon(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             HttpResponse response;
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {_faviconPath}");
             if (string.IsNullOrEmpty(_faviconPath) || !File.Exists(_faviconPath))
             {
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                OnResponseReady(channel, response);
+                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
                 return;
             }
             response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
@@ -504,7 +511,7 @@ namespace ITCC.HTTP.Server
             response.ContentType = "image/x-icon";
             response.Body = fileStream;
 
-            OnResponseReady(channel, response);
+            OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
         }
         #endregion
 
@@ -532,7 +539,7 @@ namespace ITCC.HTTP.Server
         }
 
 #pragma warning disable AsyncFixer03 // Avoid fire & forget async void methods
-        private static async void HandleFileRequest(ITcpChannel channel, HttpRequest request)
+        private static async void HandleFileRequest(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
 #pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
         {
             HttpResponse response;
@@ -543,7 +550,7 @@ namespace ITCC.HTTP.Server
                 if (filename == null || section == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
-                    OnResponseReady(channel, response);
+                    OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
                     return;
                 }
                 var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
@@ -591,13 +598,13 @@ namespace ITCC.HTTP.Server
                         response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                         break;
                 }
-                OnResponseReady(channel, response);
+                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Warning, exception);
                 response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
-                OnResponseReady(channel, response);
+                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
             }    
         }
 

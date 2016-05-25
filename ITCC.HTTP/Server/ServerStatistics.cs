@@ -13,7 +13,15 @@ namespace ITCC.HTTP.Server
     {
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();
 
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _requestCounters = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _requestMethodCounters = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+
+        private readonly ConcurrentDictionary<string, int> _requestSuccessCounters = new ConcurrentDictionary<string, int>();
+
+        private readonly ConcurrentDictionary<string, int> _requestFailCounters = new ConcurrentDictionary<string, int>();
+
+        private readonly ConcurrentDictionary<string, double> _requestSuccessTimeCounters = new ConcurrentDictionary<string, double>();
+
+        private readonly ConcurrentDictionary<string, double> _requestFailTimeCounters = new ConcurrentDictionary<string, double>();
 
         private readonly ConcurrentDictionary<string, int> _legacyRequestCounter = new ConcurrentDictionary<string, int>();
 
@@ -22,6 +30,23 @@ namespace ITCC.HTTP.Server
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
         private readonly DateTime _startTime = DateTime.Now;
+
+        /// <summary>
+        ///     In milliseconds
+        /// </summary>
+        private double _minRequestTime = double.PositiveInfinity;
+
+        /// <summary>
+        ///     In milliseconds
+        /// </summary>
+        private double _maxRequestTime = double.NegativeInfinity;
+
+        /// <summary>
+        ///     In milliseconds
+        /// </summary>
+        private double _totalRequestTime;
+
+        private long _requestCount;
 
         public string Serialize()
         {
@@ -55,37 +80,108 @@ namespace ITCC.HTTP.Server
             builder.AppendLine();
 
             builder.AppendLine("Request statistics:");
-            var uris = _requestCounters.Keys.ToList();
+            var uris = _requestMethodCounters.Keys.ToList();
             uris.Sort();
             uris.ForEach(u =>
             {
+                var methodDict = _requestMethodCounters[u];
+                double totalSuccessTime;
+                double totalFailTime;
+                if (!_requestSuccessTimeCounters.TryGetValue(u, out totalSuccessTime))
+                    totalSuccessTime = 0;
+                if (!_requestFailTimeCounters.TryGetValue(u, out totalFailTime))
+                    totalFailTime = 0;
+                double averageSuccessTime;
+                double averageFailTime;
+                if (_requestSuccessCounters.ContainsKey(u))
+                {
+                    averageSuccessTime = totalSuccessTime/_requestSuccessCounters[u];
+                }
+                else
+                {
+                    averageSuccessTime = 0;
+                }
+
+                if (_requestFailCounters.ContainsKey(u))
+                {
+                    averageFailTime = totalFailTime / _requestFailCounters[u];
+                }
+                else
+                {
+                    averageFailTime = 0;
+                }
+
                 builder.AppendLine($"\t{u}");
-                var methodDict = _requestCounters[u];
+                builder.AppendLine($"\t\tAverage success time (2xx):      {averageSuccessTime,10} ms");
+                builder.AppendLine($"\t\tAverage fail    time (4xx, 5xx): {averageFailTime,10} ms");
+
                 var methodKeys = methodDict.Keys.ToList();
                 methodKeys.Sort();
                 methodKeys.ForEach(m => builder.AppendLine($"\t\t{m, 10}: { methodDict[m]}"));
             });
             builder.AppendLine();
 
+            if (_requestCount > 0)
+            {
+                builder.AppendLine("Total performance statistics:");
+                builder.AppendLine($"\tRequest count:        {_requestCount, 10} ms");
+                builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount, 10} ms");
+                builder.AppendLine($"\tMax     request time: {_maxRequestTime, 10} ms");
+                builder.AppendLine($"\tMin     request time: {_minRequestTime, 10} ms");
+                builder.AppendLine($"\tTotal   request time: {_totalRequestTime, 10} ms");
+            }
+            
+
             return builder.ToString();
         }
 
-        public void AddResponse(HttpResponse response)
+        public void AddResponse(HttpResponse response, string uri, double processingTime)
         {
             InitOrIncrement(_responseCodes, response.StatusCode);
+
+            _minRequestTime = Math.Min(processingTime, _minRequestTime);
+            _maxRequestTime = Math.Min(processingTime, _maxRequestTime);
+            _totalRequestTime += processingTime;
+            _requestCount++;
+
+            if (HasGoodStatusCode(response))
+            {
+                if (!_requestSuccessTimeCounters.ContainsKey(uri))
+                {
+                    _requestSuccessTimeCounters[uri] = processingTime;
+                }
+                else
+                {
+                    _requestSuccessTimeCounters[uri] += processingTime;
+                }
+                InitOrIncrement(_requestSuccessCounters, uri);
+            }
+            else
+            {
+                if (!_requestFailTimeCounters.ContainsKey(uri))
+                {
+                    _requestFailTimeCounters[uri] = processingTime;
+                }
+                else
+                {
+                    _requestFailTimeCounters[uri] += processingTime;
+                }
+                InitOrIncrement(_requestFailCounters, uri);
+            }
+            
         }
 
         public void AddRequest(HttpRequest request)
         {
             var uri = request.Uri.LocalPath.TrimEnd('/');
-            if (!_requestCounters.ContainsKey(uri))
+            if (!_requestMethodCounters.ContainsKey(uri))
             {
-                _requestCounters[uri] = new ConcurrentDictionary<string, int>();
-                _requestCounters[uri].TryAdd(request.HttpMethod, 1);
+                _requestMethodCounters[uri] = new ConcurrentDictionary<string, int>();
+                _requestMethodCounters[uri].TryAdd(request.HttpMethod, 1);
             }
             else
             {
-                InitOrIncrement(_requestCounters[uri], request.HttpMethod);
+                InitOrIncrement(_requestMethodCounters[uri], request.HttpMethod);
             }
         }
 
@@ -117,6 +213,12 @@ namespace ITCC.HTTP.Server
             {
                 dictionary[value]++;
             }
+        }
+
+        private bool HasGoodStatusCode(HttpResponse response)
+        {
+            // Little hack, but...
+            return response.StatusCode/100 < 4;
         }
     }
 }

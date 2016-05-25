@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Griffin.Net.Channels;
@@ -99,6 +100,7 @@ namespace ITCC.HTTP.Common
         /// </summary>
         /// <param name="channel"></param>
         /// <param name="request"></param>
-        internal delegate void ServiceRequestHandler(ITcpChannel channel, HttpRequest request);
+        /// <param name="requestStartTime">For performance measuring</param>
+        internal delegate void ServiceRequestHandler(ITcpChannel channel, HttpRequest request, DateTime requestStartTime);
     }
 }
