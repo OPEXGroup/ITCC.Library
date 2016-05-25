@@ -64,7 +64,7 @@ namespace ITCC.Logging
             try
             {
                 var threadInfo = ThreadName == null ? $"{ThreadId,-6}" : $"{ThreadName,-6}";
-                var result = $"[{DateTime.Now, 18}] [{LogLevelRepresentation(Level), 5}] [THR {threadInfo}] [{Scope, 12}] {Message}";
+                var result = $"[{DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss.fff tt")}] [{LogLevelRepresentation(Level), 5}] [THR {threadInfo}] [{Scope, 12}] {Message}";
                 _representation = result;
                 return result;
             }
