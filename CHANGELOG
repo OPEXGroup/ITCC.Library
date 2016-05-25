@@ -1,3 +1,8 @@
+## 0.5.1 (2016-05-26)
+
+* Performans stats output enhanced
+* Datetime format changed for ITCC.Logging
+
 ## 0.5.0 (2016-05-25)
 
 Performance measuring added
