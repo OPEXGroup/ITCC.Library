@@ -46,6 +46,8 @@ namespace ITCC.HTTP.Server
         /// </summary>
         private double _totalRequestTime;
 
+        private string _slowestRequest;
+
         private long _requestCount;
 
         public string Serialize()
@@ -117,18 +119,19 @@ namespace ITCC.HTTP.Server
 
                 var methodKeys = methodDict.Keys.ToList();
                 methodKeys.Sort();
-                methodKeys.ForEach(m => builder.AppendLine($"\t\t{m, 10}: { methodDict[m]}"));
+                methodKeys.ForEach(m => builder.AppendLine($"\t\t{m, -10}: { methodDict[m]}"));
             });
             builder.AppendLine();
 
             if (_requestCount > 0)
             {
                 builder.AppendLine("Total performance statistics:");
-                builder.AppendLine($"\tRequest count:        {_requestCount, 10} ms");
+                builder.AppendLine($"\tRequest count:        {_requestCount}");
                 builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount, 10} ms");
                 builder.AppendLine($"\tMax     request time: {_maxRequestTime, 10} ms");
                 builder.AppendLine($"\tMin     request time: {_minRequestTime, 10} ms");
                 builder.AppendLine($"\tTotal   request time: {_totalRequestTime, 10} ms");
+                builder.AppendLine($"\tSlowest request:      {_slowestRequest}");
             }
             
 
@@ -140,7 +143,11 @@ namespace ITCC.HTTP.Server
             InitOrIncrement(_responseCodes, response.StatusCode);
 
             _minRequestTime = Math.Min(processingTime, _minRequestTime);
-            _maxRequestTime = Math.Min(processingTime, _maxRequestTime);
+            if (processingTime > _maxRequestTime)
+            {
+                _maxRequestTime = processingTime;
+                _slowestRequest = uri;
+            }
             _totalRequestTime += processingTime;
             _requestCount++;
 
