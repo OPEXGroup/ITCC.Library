@@ -166,7 +166,7 @@ namespace ITCC.HTTP.Server
                 {
                     if (checker.Invoke(request))
                     {
-                        await Task.Run(() => ServiceHandlers[checker].Invoke(channel, request, startTime));
+                        await ServiceHandlers[checker].Invoke(channel, request, startTime);
                         return;
                     }
                 }
@@ -343,9 +343,7 @@ namespace ITCC.HTTP.Server
             return request.QueryString["login"] != null && request.QueryString["password"] != null;
         }
 
-#pragma warning disable AsyncFixer03 // Avoid fire & forget async void methods
-        private static async void Authentificate(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
-#pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
+        private static async Task Authentificate(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             AuthentificationResult authResult;
             if (_authentificator != null)
@@ -382,13 +380,14 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "ping";
         }
 
-        private static void HandlePing(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandlePing(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             var converter = new PingJsonConverter();
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
             var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
             OnResponseReady(channel, response, "ping", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -410,7 +409,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
         }
 
-        private static async void HandleStatistics(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static async Task HandleStatistics(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             HttpResponse response;
             if (_statisticsAuthorizer != null)
@@ -448,7 +447,7 @@ namespace ITCC.HTTP.Server
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        private static void HandleOptions(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandleOptions(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             var allowValues = new List<string>();
             if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
@@ -482,6 +481,7 @@ namespace ITCC.HTTP.Server
             }
             
             OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -499,7 +499,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/').ToLower() == "favicon.ico";
         }
 
-        private static void HandleFavicon(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandleFavicon(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             HttpResponse response;
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {_faviconPath}");
@@ -507,7 +507,7 @@ namespace ITCC.HTTP.Server
             {
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
                 OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
-                return;
+                return Task.CompletedTask;
             }
             response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
             var fileStream = new FileStream(_faviconPath, FileMode.Open, FileAccess.Read,
@@ -516,6 +516,7 @@ namespace ITCC.HTTP.Server
             response.Body = fileStream;
 
             OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            return Task.CompletedTask;
         }
         #endregion
 
@@ -542,9 +543,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-#pragma warning disable AsyncFixer03 // Avoid fire & forget async void methods
-        private static async void HandleFileRequest(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
-#pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
+        private static async Task HandleFileRequest(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
         {
             HttpResponse response;
             try

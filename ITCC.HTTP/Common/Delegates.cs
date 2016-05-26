@@ -101,6 +101,6 @@ namespace ITCC.HTTP.Common
         /// <param name="channel"></param>
         /// <param name="request"></param>
         /// <param name="requestStartTime">For performance measuring</param>
-        internal delegate void ServiceRequestHandler(ITcpChannel channel, HttpRequest request, DateTime requestStartTime);
+        internal delegate Task ServiceRequestHandler(ITcpChannel channel, HttpRequest request, DateTime requestStartTime);
     }
 }
