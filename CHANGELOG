@@ -1,52 +1,62 @@
-## 0.5.1 (2016-05-26)
+## 0.6.0 (2016-05-26)
 
-* Performans stats output enhanced
-* Datetime format changed for ITCC.Logging
+* **New**:  `BodyEncoding`, `LogResponseBodies` and `ResponseBodyLogLimit` added to `HttpServerConfiguration`
+* **New**:  Correct request timeout processing added to client (`ServerResponseStatus.RequestTimeout`) status
+* **Edit**: Critical log colour changed in `ColouredConsoleLogger`
+* **Edit**: Changelog format changed
+* **Fix**:  Possible `Logger` concurrency issues fixed
+* **Fix**:  Possible `ServerStatistics` concurrency issues fixed
+
+## 0.5.1 (2016-05-25)
+
+* **Edit**: Performans stats output enhanced
+* **Edit**: Datetime format changed for `ITCC.Logging`
 
 ## 0.5.0 (2016-05-25)
 
-Performance measuring added
+* **New**:  Performance measuring added
 
 ## 0.4.2 (2016-05-24)
 
-File sections fix
+* **Fix**:  File sections fix
 
 ## 0.4.1 (2016-05-20)
 
-Statistics authorization mechanism fix
+* **Fix**:  Statistics authorization mechanism fix
 
 ## 0.4.0 (2016-05-20)
 
-* Server-side SSL can be configured at start  
-* Client SSL cipher suite information is avaible in logs (per connection) and in /statistics section
+* **New**:  `SuitableSslProtocols` added to `HttpServerConfiguration`
+* **New**:  Client SSL cipher suite information is avaible in logs (per connection) and in /statistics section
 
 ## 0.3.2 (2016-05-19)
 
-Statistics requires authorization
+* **New**:  `StatisticsAuthorizer` added to `HttpServerConfiguration`
 
 ## 0.3.1 (2016-05-18)
 
-GET for files uses actual content types
+* **Edit**: GET for files uses actual content types (`MimeTypes` added)
 
 ## 0.3.0 (2016-05-18)
 
-File sections with separate access rights added
+* **New**:  File sections with separate access rights added (`FileSections` added to `HttpServerConfiguration`)
+* **Edit**: `FilesAuthorizer` signature changed (now it also takes requested `FileSection`)
 
 ## 0.2.3 (2016-05-18)
 
-Small statistics enhancement
+* **Edit**: Small statistics enhancement
 
 ## 0.2.2 (2016-05-15)
 
-IsFilesRequest fixed for servers with files disabled
+* **Fix**:  `IsFilesRequest` fixed for servers with files disabled
 
 ## 0.2.1 (2016-05-14)
 
-Better thread info
+* **Edit**: Better thread info in logger output
 
 ## 0.2.0 (2016-05-03)
 
-Non-static HTTP client
+* **New**:  Non-static HTTP client (`RegularClient`) added
 
 ## 0.1.2 (2016-05-03)
 
@@ -54,8 +64,8 @@ Correct prebuild
 
 ## 0.1.1 (2016-05-03)
 
-Prebuild added (correct submodule build)
+* **Fix**:  Prebuild added (correct submodule build)
 
 ## 0.1.0 (2016-05-01)
 
-Library created (HTTP and Logging modules)
+* **New**:  Library created (HTTP and Logging modules)
