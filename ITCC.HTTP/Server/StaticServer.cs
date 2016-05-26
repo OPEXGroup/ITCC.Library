@@ -204,9 +204,13 @@ namespace ITCC.HTTP.Server
                         else
                         {
                             var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request);
-                            if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
-                                handleResult.Body = null;
                             response = ResponseFactory.CreateResponse(handleResult.Status, handleResult.Body);
+                            if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
+                            {
+                                var savedBody = response.Body;
+                                response.Body = null;
+                                response.ContentLength = Convert.ToInt32(savedBody.Length);
+                            }
                         }
                         break;
                     case AuthorizationStatus.Unauthorized:
