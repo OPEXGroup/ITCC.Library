@@ -79,6 +79,16 @@ namespace ITCC.HTTP.Server
         public Encoding BodyEncoding { get; set; } = Encoding.UTF8;
 
         /// <summary>
+        ///     If true, server will write response bodies into trace logs
+        /// </summary>
+        public bool LogResponseBodies { get; set; } = true;
+
+        /// <summary>
+        ///     Max response body size to write to trace logs. Negative values mean no limit
+        /// </summary>
+        public int ResponseBodyLogLimit { get; set; } = -1;
+
+        /// <summary>
         ///     If true, then unauthorized /statistics requests are enabled
         /// </summary>
         public bool StatisticsEnabled { get; set; }

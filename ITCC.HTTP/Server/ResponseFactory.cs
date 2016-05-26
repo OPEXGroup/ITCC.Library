@@ -118,6 +118,9 @@ namespace ITCC.HTTP.Server
                 return builder.ToString();
 
             builder.AppendLine();
+            if (!LogResponseBodies)
+                return builder.ToString();
+
             if (response.Body is FileStream)
             {
                 builder.AppendLine($"<File {((FileStream) response.Body).Name} content>");
@@ -125,7 +128,15 @@ namespace ITCC.HTTP.Server
             else
             {
                 var reader = new StreamReader(response.Body);
-                builder.AppendLine(reader.ReadToEnd());
+                if (ResponseBodyLogLimit < 1 || response.Body.Length <= ResponseBodyLogLimit)
+                    builder.AppendLine(reader.ReadToEnd());
+                else
+                {
+                    var buffer = new byte[ResponseBodyLogLimit];
+                    response.Body.Read(buffer, 0, ResponseBodyLogLimit);
+                    builder.AppendLine(_bodyEncoding.GetString(buffer));
+                    builder.AppendLine($"[And {response.Body.Length - ResponseBodyLogLimit} more bytes...]");
+                }
                 response.Body.Position = 0;
             }
 
@@ -142,6 +153,8 @@ namespace ITCC.HTTP.Server
             return ReasonPhrases.ContainsKey(code) ? ReasonPhrases[code] : "UNKNOWN REASON";
         }
 
-        private static Encoding _bodyEncoding;
+        private static Encoding _bodyEncoding = Encoding.UTF8;
+        public static bool LogResponseBodies = true;
+        public static int ResponseBodyLogLimit = -1;
     }
 }

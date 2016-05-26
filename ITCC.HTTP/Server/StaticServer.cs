@@ -72,6 +72,9 @@ namespace ITCC.HTTP.Server
                 _fileAuthorizer = configuration.FilesAuthorizer;
 
                 ResponseFactory.SetBodySerializer(configuration.BodySerializer);
+                ResponseFactory.SetBodyEncoding(configuration.BodyEncoding);
+                ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
+                ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
 
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;

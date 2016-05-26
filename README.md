@@ -400,6 +400,9 @@ Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }               
 Delegates.BodySerializer BodySerializer { get; set; }                             // Метод для сериализации тел ответов
 System.Text.Encoding BodyEncoding { get; set; } = Encoding.UTF8;                  // Кодировка ответов
 
+bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
+int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого значения. Отрицательное значение - нет ограничения
+
 bool StatisticsEnabled { get; set; }                                              // Ведется ли статистика на сервере. Если да, она доступна по <SubjectName>:<Port>/statistics
 
 string FaviconPath { get; set; }                                                  // Где лежит favicon.ico
