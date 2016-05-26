@@ -31,6 +31,8 @@ namespace ITCC.HTTP.Server
 
         private readonly DateTime _startTime = DateTime.Now;
 
+        private readonly object _counterLock = new object();
+
         /// <summary>
         ///     In milliseconds
         /// </summary>
@@ -142,14 +144,17 @@ namespace ITCC.HTTP.Server
         {
             InitOrIncrement(_responseCodes, response.StatusCode);
 
-            _minRequestTime = Math.Min(processingTime, _minRequestTime);
-            if (processingTime > _maxRequestTime)
+            lock (_counterLock)
             {
-                _maxRequestTime = processingTime;
-                _slowestRequest = uri;
+                _minRequestTime = Math.Min(processingTime, _minRequestTime);
+                if (processingTime > _maxRequestTime)
+                {
+                    _maxRequestTime = processingTime;
+                    _slowestRequest = uri;
+                }
+                _totalRequestTime += processingTime;
+                _requestCount++;
             }
-            _totalRequestTime += processingTime;
-            _requestCount++;
 
             if (HasGoodStatusCode(response))
             {
