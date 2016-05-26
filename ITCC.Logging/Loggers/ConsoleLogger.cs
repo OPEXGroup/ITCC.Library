@@ -23,12 +23,8 @@ namespace ITCC.Logging.Loggers
         {
             if (args.Level > Level)
                 return;
-            lock (LockObject)
-            {
-                Console.WriteLine(args);
-            }
-        }
 
-        protected readonly object LockObject = new object();
+            Console.WriteLine(args);
+        }
     }
 }

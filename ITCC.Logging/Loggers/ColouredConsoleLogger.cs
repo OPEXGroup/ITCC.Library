@@ -13,7 +13,7 @@ namespace ITCC.Logging.Loggers
         {
             if (args.Level > Level)
                 return;
-            lock (LockObject)
+            lock (_lockObject)
             {
                 switch (args.Level)
                 {
@@ -37,5 +37,7 @@ namespace ITCC.Logging.Loggers
                 Console.ResetColor();
             }
         }
+
+        private readonly object _lockObject = new object();
     }
 }

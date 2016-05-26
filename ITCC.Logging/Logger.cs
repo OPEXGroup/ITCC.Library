@@ -31,9 +31,13 @@ namespace ITCC.Logging
         {
             if (receiver == null)
                 return false;
-            LogEntryEvent += receiver.WriteEntry;
-            if (mutableReceiver)
-                MutableReceivers.Add(receiver);
+            lock (LockObject)
+            {
+                LogEntryEvent += receiver.WriteEntry;
+                if (mutableReceiver)
+                    MutableReceivers.Add(receiver);
+            }
+
             return true;
         }
 
@@ -49,8 +53,11 @@ namespace ITCC.Logging
 
             try
             {
-                LogEntryEvent -= receiver.WriteEntry;
-                return  true;
+                lock (LockObject)
+                {
+                    LogEntryEvent -= receiver.WriteEntry;
+                }
+                return true;
             }
             catch (Exception)
             {
@@ -67,28 +74,30 @@ namespace ITCC.Logging
         {
             if (logEventHandler == null)
                 return false;
-            LogEntryEvent += logEventHandler;
+            lock (LockObject)
+            {
+                LogEntryEvent += logEventHandler;
+            }
             return true;
         }
 
         public static bool AddBannedScope(object scope)
-        { 
-            if (scope == null)
-                return false;
-            var scopeName = scope.ToString();
-            if (BannedScopes.Contains(scopeName))
-                return false;
-            BannedScopes.Add(scopeName);
-            return true;
+        {
+            lock (LockObject)
+            {
+                if (scope == null)
+                    return false;
+                var scopeName = scope.ToString();
+                if (BannedScopes.Contains(scopeName))
+                    return false;
+                BannedScopes.Add(scopeName);
+                return true;
+            }
         }
 
         public static bool AddBannedScopeRange(IEnumerable scopeRange)
         {
-            if (scopeRange.Cast<object>().Any(scope => AddBannedScope(scope) != true))
-            {
-                return false;
-            }
-            return false;
+            return scopeRange.Cast<object>().All(AddBannedScope);
         }
 
         /// <summary>
