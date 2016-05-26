@@ -18,7 +18,7 @@ namespace ITCC.Logging.Loggers
                 switch (args.Level)
                 {
                     case LogLevel.Critical:
-                        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                        Console.ForegroundColor = ConsoleColor.Magenta;
                         break;
                     case LogLevel.Error:
                         Console.ForegroundColor = ConsoleColor.Red;
