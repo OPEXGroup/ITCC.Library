@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Authentication;
+using System.Text;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
@@ -73,6 +74,11 @@ namespace ITCC.HTTP.Server
         public Delegates.BodySerializer BodySerializer { get; set; }
 
         /// <summary>
+        ///     Response body encoding
+        /// </summary>
+        public Encoding BodyEncoding { get; set; } = Encoding.UTF8;
+
+        /// <summary>
         ///     If true, then unauthorized /statistics requests are enabled
         /// </summary>
         public bool StatisticsEnabled { get; set; }
@@ -113,6 +119,12 @@ namespace ITCC.HTTP.Server
             if (BodySerializer == null)
             {
                 LogMessage(LogLevel.Warning, "No body serializer passed to Start()");
+                return false;
+            }
+
+            if (BodyEncoding == null)
+            {
+                LogMessage(LogLevel.Warning, "Null body encoding passed to Start()");
                 return false;
             }
 

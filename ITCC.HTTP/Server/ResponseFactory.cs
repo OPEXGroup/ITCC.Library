@@ -53,10 +53,14 @@ namespace ITCC.HTTP.Server
             return true;
         }
 
-        public static bool SetBodySerializer(Delegates.BodySerializer serializer)
+        public static void SetBodySerializer(Delegates.BodySerializer serializer)
         {
             _bodySerializer = serializer;
-            return true;
+        }
+
+        public static void SetBodyEncoding(Encoding encoding)
+        {
+            _bodyEncoding = encoding;
         }
 
         /// <summary>
@@ -84,9 +88,11 @@ namespace ITCC.HTTP.Server
                 {
                     bodyString = body as string;
                 }
-                
-                httpResponse.Body = new MemoryStream(Encoding.UTF8.GetBytes(bodyString ?? string.Empty));
+
+                var encoding = _bodyEncoding;
+                httpResponse.Body = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty));
                 httpResponse.ContentType = "application/json";
+                httpResponse.ContentCharset = encoding;
             }
 
             return httpResponse;
@@ -135,5 +141,7 @@ namespace ITCC.HTTP.Server
         {
             return ReasonPhrases.ContainsKey(code) ? ReasonPhrases[code] : "UNKNOWN REASON";
         }
+
+        private static Encoding _bodyEncoding;
     }
 }

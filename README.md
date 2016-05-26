@@ -398,6 +398,7 @@ Delegates.Authorizer<TAccount> Authorizer { get; set; }                         
 Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
 Delegates.BodySerializer BodySerializer { get; set; }                             // Метод для сериализации тел ответов
+System.Text.Encoding BodyEncoding { get; set; } = Encoding.UTF8;                  // Кодировка ответов
 
 bool StatisticsEnabled { get; set; }                                              // Ведется ли статистика на сервере. Если да, она доступна по <SubjectName>:<Port>/statistics
 
