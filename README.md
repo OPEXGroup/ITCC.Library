@@ -226,11 +226,15 @@ string ServerAddress {get; set;}
 Protocol ServerProtocol { get; private set; } = Protocol.Http;
 ```
 
+##### `class RegularClient`
+
+Предоставляет тот же интефейс, что и `StaticClient`, но не является статическим.
+
 #### Common
 
 Общие классы
 
-##### `class Delegates`
+##### `static class Delegates`
 
 Тут просто хранятся объявления делегатов библитеки. Публичные:
 ```
@@ -242,14 +246,17 @@ delegate TResult BodyDeserializer<out TResult>(string data); // Метод де�
 /*
 	Сервер
 */
+delegate Task<AuthentificationResult> Authentificator(HttpRequest request); // Метод аутентификации на сервере (применяется к запросам на /login)
 delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
             HttpRequest request,
             RequestProcessor<TAccount> requestProcessor)
             where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос
+delegate Task<bool> StatisticsAuthorizer(HttpRequest request); // Метод сервера, позволяющий определить, разрешен ли запрос на /statistics
 delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
             HttpRequest request,
+            FileSection section,
 			string filename)
-            where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам
+            where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам.
 delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates); // Метод сервера для получения SSL/TLS сертификата
 delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpRequest request); // Обработчик клиентского запроса (после авторизации)
 /*
@@ -294,9 +301,11 @@ ClientError,               // Ошибка в клиентском запрос�
 ServerError,               // Ошибка на сервере (500, 501)
 Unauthorized,              // Данные авторизации неверны или недостаточны (401)
 Forbidden,                 // Доступ запрещен для данного аккаунта (403)
-ToManyRequest,             // Слишком много запросов с данного аккаунта (429). При этом в Userdata должно храниться вреся в секундах до следующего разрешенного запроса
+TooManyRequests,           // Слишком много запросов с данного аккаунта (429). При этом в Userdata должно храниться время в секундах до следующего разрешенного запроса
 IncompehensibleResponse,   // Ответ непонятен
 RequestCanceled,           // Запрос отменен клиентом до получения ответа
+RequestTimeout,            // Ответ не получен за заданное время
+ConnectionError            // Ошибка сетевого соединения
 ```
 
 ##### `enum ServerStartStatus`
@@ -327,7 +336,7 @@ X509Certificate2 GetCertificate(string subjectName, bool allowSelfSigned)
 
 Представляет результат аутентификации на сервера (получения токена авторизации). Отправляется сервером в ответ на запрос `Login`. Ключевые свойства:
 ```
-object AccountView { get; set; }             // Представление аккауниа
+object AccountView { get; set; }             // Представление аккаунта
 HttpStatusCode Status { get; set; }          // Код ответа
 object Userdata { get; set; }                // Дополнительные данные (например, значение заголовка Retry-After)
 ```
@@ -340,6 +349,16 @@ TAccount Account { get; set; }               // аккаунт пользова�
 AuthorizationStatus Status { get; set; }     // статус авторизации
 string ErrorDescription { get; set; }        // описание ошибки (при ее наличии)
 ```
+
+##### `class FileSection`
+
+Представление секции файлов на сервере. Файловые секции соответствуют локальным папкам и имеют раздельные права доступа. Ключевые свойства:
+
+```
+string Name { get; set; }      // Название секции. Не имеет прямого отношения к пути
+string Folder { get; set; }    // Папка (часть uri и часть пути в файловой системе
+```
+
 
 ##### `class HandlerResult`
 
@@ -358,31 +377,43 @@ bool IsEnough();     // Достаточна ли конфигурация дл�
 
 Ключевые свойства:
 ```
-string SubjectName { get; set; }                                    // Доменное имя сервера (главная цель - поис сертификата)
-ushort Port { get; set; }                                           // Порт, на котором принимаем соединения
-Protocol Protocol { get; set; }                                     // Используемый протокол
+string SubjectName { get; set; }                                                  // Доменное имя сервера (главная цель - поис сертификата)
+ushort Port { get; set; }                                                         // Порт, на котором принимаем соединения
+Protocol Protocol { get; set; }                                                   // Используемый протокол
 
-Delegates.CertificateProvider CertificateProvider { get; set; }     // Метод получения сертификата
-bool AllowSelfSignedCertificates { get; set; }                      // Можно ли использовать самоподписанные сертификаты
+Delegates.CertificateProvider CertificateProvider { get; set; }                   // Метод получения сертификата
+bool AllowSelfSignedCertificates { get; set; }                                    // Можно ли использовать самоподписанные сертификаты
+System.Security.Authentification.SslProtocols SuitableSslProtocols { get; set; }  // Разрешенные для клиентов версии SSL/TLS 
 
-bool FilesEnabled { get; set; }                                     // Поддерживает ли сервер работу с файлами
-string FilesLocation { get; set; }                                  // Расположение файлов на сервер
-string FilesBaseUri { get; set; }                                   // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
-bool FilesNeedAuthorization { get; set; }                           // Требуется ли авторизация для доступа к файлам
+bool FilesEnabled { get; set; }                                                   // Поддерживает ли сервер работу с файлами
+string FilesLocation { get; set; }                                                // Расположение файлов на сервер
+string FilesBaseUri { get; set; }                                                 // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
+bool FilesNeedAuthorization { get; set; }                                         // Требуется ли авторизация для доступа к файлам
+/* Секции файлов, используемые на сервере. Если список пуст, на любой файловый запрос сервер будет отвечать 400 Bad Request */
+List<FileSection> FileSections { get; set; } = new List<FileSection>();           
 
-Delegates.FilesAuthorizer<TAccount> FilesAuthorizer { get; set; }   // Метод авторизации для файлом
-Delegates.Authentificator Authentificator { get; set; }             // Метод аутентификации
-Delegates.Authorizer<TAccount> Authorizer { get; set; }             // Метод авторизации
+Delegates.FilesAuthorizer<TAccount> FilesAuthorizer { get; set; }                 // Метод авторизации для файлов
+Delegates.Authentificator Authentificator { get; set; }                           // Метод аутентификации
+Delegates.Authorizer<TAccount> Authorizer { get; set; }                           // Метод авторизации
+Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
-Delegates.BodySerializer BodySerializer { get; set; }               // Метод для сериализации тел ответов
+Delegates.BodySerializer BodySerializer { get; set; }                             // Метод для сериализации тел ответов
 
-bool StatisticsEnabled { get; set; }                                // Ведется ли статистика на сервере. Если да, она доступна по <SubjectName>:<Port>/statistics
+bool StatisticsEnabled { get; set; }                                              // Ведется ли статистика на сервере. Если да, она доступна по <SubjectName>:<Port>/statistics
 
-string FaviconPath { get; set; }                                    // Где лежит favicon.ico
+string FaviconPath { get; set; }                                                  // Где лежит favicon.ico
 
-string ServerName { get; set; }                                     // Имя сервера для заголовков Server:
+string ServerName { get; set; }                                                   // Имя сервера для заголовков Server:
 
-int BufferPoolSize { get; set; } = 100;                             // Размер пула 64к-буферов для чтения из сокетов
+int BufferPoolSize { get; set; } = 100;                                           // Размер пула 64к-буферов для чтения из сокетов
+```
+
+##### `static class MimeTypes`
+
+Класс для работы с `Content-Type` заголовками в ответах сервера. Ключевые методы:
+
+```
+string GetTypeByExtenstion(string extension); // Получение стандартного значения Content-Type по расширению файла
 ```
 
 ##### `class RequestProcessor<TAccount>`
