@@ -646,7 +646,7 @@ namespace ITCC.HTTP.Client
         /// <summary>
         ///     Server request timeout in seconds. Negative values mean infinity
         /// </summary>
-        public double RequestTimeout = -1;
+        public double RequestTimeout { get; set; } = -1;
 
         /// <summary>
         ///     Does the client use SSL/TLS?

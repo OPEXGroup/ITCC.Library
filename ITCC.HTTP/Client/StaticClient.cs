@@ -369,22 +369,49 @@ namespace ITCC.HTTP.Client
         /// <exception cref="ArgumentOutOfRangeException">Thrown if non-http(s) connection is requested</exception>
         public static string ServerAddress
         {
-            get { return RegularClient.ServerAddress; }
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.ServerAddress;
+                }
+            }
             set
             {
-                RegularClient.ServerAddress = value;
+                lock (ClientLock)
+                {
+                    RegularClient.ServerAddress = value;
+                }
             }
         }
 
         /// <summary>
         ///     Server request timeout in seconds. Negative values mean infinity
         /// </summary>
-        public static double RequestTimeout => RegularClient.RequestTimeout;
+        public static double RequestTimeout
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.RequestTimeout;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.RequestTimeout = value;
+                }
+            }
+        }
 
         /// <summary>
         ///     Does the client use SSL/TLS?
         /// </summary>
         public static Protocol ServerProtocol => RegularClient.ServerProtocol;
+
+        private static readonly object ClientLock = new object();
 
         #endregion
     }
