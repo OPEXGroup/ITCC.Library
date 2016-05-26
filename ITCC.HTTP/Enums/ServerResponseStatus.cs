@@ -59,7 +59,5 @@
         ///     No response (some network problems)
         /// </summary>
         ConnectionError
-
-        
     }
 }

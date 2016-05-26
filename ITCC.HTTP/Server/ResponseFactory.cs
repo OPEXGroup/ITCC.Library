@@ -85,10 +85,9 @@ namespace ITCC.HTTP.Server
                     bodyString = body as string;
                 }
                 
-                httpResponse.Body = new MemoryStream(Encoding.UTF8.GetBytes(bodyString));
-                
+                httpResponse.Body = new MemoryStream(Encoding.UTF8.GetBytes(bodyString ?? string.Empty));
+                httpResponse.ContentType = "application/json";
             }
-            httpResponse.ContentType = "application/json";
 
             return httpResponse;
         }
