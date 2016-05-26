@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.HTTP", "ITCC.HTTP\ITCC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2F9C501-ED7C-4A91-8974-32D81A3C3B60}"
 	ProjectSection(SolutionItems) = preProject
-		CHANGELOG = CHANGELOG
+		CHANGELOG.md = CHANGELOG.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
