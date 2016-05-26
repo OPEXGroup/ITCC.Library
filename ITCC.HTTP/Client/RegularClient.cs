@@ -217,11 +217,21 @@ namespace ITCC.HTTP.Client
             }
             catch (OperationCanceledException ocex)
             {
-                LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been cancelled");
+                if (ocex.CancellationToken == cancellationToken)
+                {
+                    LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been cancelled");
+                    return new RequestResult<TResult>
+                    {
+                        Result = default(TResult),
+                        Status = ServerResponseStatus.RequestCanceled,
+                        Userdata = ocex
+                    };
+                }
+                LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");
                 return new RequestResult<TResult>
                 {
                     Result = default(TResult),
-                    Status = ServerResponseStatus.RequestCanceled,
+                    Status = ServerResponseStatus.RequestTimeout,
                     Userdata = ocex
                 };
             }

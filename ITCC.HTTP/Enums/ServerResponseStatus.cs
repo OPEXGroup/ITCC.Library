@@ -51,6 +51,11 @@
         RequestCanceled,
 
         /// <summary>
+        ///     Request has been timed out
+        /// </summary>
+        RequestTimeout,
+
+        /// <summary>
         ///     No response (some network problems)
         /// </summary>
         ConnectionError
