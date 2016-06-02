@@ -1,3 +1,8 @@
+## 0.6.1 (2016-06-02)
+
+* **New**: `Method Not Allowed` responses added
+* **Edit**: Do not log full or partial response bodies if TRACE constant is not defined  
+
 ## 0.6.0 (2016-05-26)
 
 * **New**:  `BodyEncoding`, `LogResponseBodies` and `ResponseBodyLogLimit` added to `HttpServerConfiguration`
