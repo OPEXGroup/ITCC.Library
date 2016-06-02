@@ -300,8 +300,10 @@ namespace ITCC.HTTP.Server
         {
             try
             {
+#if TRACE
                 LogMessage(LogLevel.Trace,
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
+#endif
                 _statistics?.AddResponse(response, uri, processingTime);
                 channel.Send(response);
                 LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent");
