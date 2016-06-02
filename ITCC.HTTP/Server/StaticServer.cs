@@ -174,13 +174,22 @@ namespace ITCC.HTTP.Server
                     }
                 }
 
-                var requestProcessor = SelectRequestProcessor(request);
-                if (requestProcessor == null)
+                var requestProcessorSelectionResult = SelectRequestProcessor(request);
+                if (requestProcessorSelectionResult == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
                     OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
                     return;
                 }
+
+                if (!requestProcessorSelectionResult.MethodMatches)
+                {
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
+                    return;
+                }
+
+                var requestProcessor = requestProcessorSelectionResult.RequestProcessor;
                 _statistics?.AddRequestProcessor(requestProcessor);
 
                 AuthorizationResult<TAccount> authResult;
@@ -766,7 +775,7 @@ namespace ITCC.HTTP.Server
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Request processor or null if it is not found</returns>
-        private static RequestProcessor<TAccount> SelectRequestProcessor(HttpRequest request)
+        private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
         {
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
             foreach (var requestProcessor in RequestProcessors)
@@ -775,7 +784,11 @@ namespace ITCC.HTTP.Server
                     && request.QueryString[requestProcessor.LegacyName] != null
                     && requestMethod == requestProcessor.Method)
                 {
-                    return requestProcessor;
+                    return new RequestProcessorSelectionResult<TAccount>
+                    {
+                        RequestProcessor = requestProcessor,
+                        MethodMatches = true
+                    };
                 }
             }
 
@@ -786,8 +799,17 @@ namespace ITCC.HTTP.Server
                     if (requestMethod == requestProcessor.Method ||
                         (requestMethod == HttpMethod.Head && requestProcessor.Method == HttpMethod.Get))
                     {
-                        return requestProcessor;
+                        return new RequestProcessorSelectionResult<TAccount>
+                        {
+                            RequestProcessor = requestProcessor,
+                            MethodMatches = true
+                        };
                     }
+                    return new RequestProcessorSelectionResult<TAccount>
+                    {
+                        RequestProcessor = requestProcessor,
+                        MethodMatches = false
+                    };
                 }
             }
             return null;

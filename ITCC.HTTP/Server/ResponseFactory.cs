@@ -29,7 +29,8 @@ namespace ITCC.HTTP.Server
             {HttpStatusCode.Conflict, "Conflict"},
             {(HttpStatusCode)429, "Too many requests"},
             {HttpStatusCode.InternalServerError, "Internal Server Error"},
-            {HttpStatusCode.NotImplemented, "Not implemented"}
+            {HttpStatusCode.NotImplemented, "Not implemented"},
+            {HttpStatusCode.MethodNotAllowed, "Method Not Allowed" }
         };
 
         /// <summary>

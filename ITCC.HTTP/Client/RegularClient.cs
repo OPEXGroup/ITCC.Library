@@ -159,6 +159,7 @@ namespace ITCC.HTTP.Client
                                 case HttpStatusCode.Conflict:
                                 case HttpStatusCode.BadRequest:
                                 case HttpStatusCode.NotFound:
+                                case HttpStatusCode.MethodNotAllowed:
                                     status = ServerResponseStatus.ClientError;
                                     break;
                                 case HttpStatusCode.InternalServerError:
