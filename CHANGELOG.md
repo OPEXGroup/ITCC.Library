@@ -1,3 +1,7 @@
+## 0.6.2 (2016-06-07)
+
+* **Fix**:  ResponseFactory type initialization fixed
+
 ## 0.6.1 (2016-06-02)
 
 * **New**: `Method Not Allowed` responses added
