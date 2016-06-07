@@ -1,3 +1,7 @@
+## 0.6.3 (2016-06-07)
+
+* **Edit**: Griffin.Framework updated
+
 ## 0.6.2 (2016-06-07)
 
 * **Fix**:  ResponseFactory type initialization fixed
