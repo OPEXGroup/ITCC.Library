@@ -25,7 +25,6 @@ namespace ITCC.HTTP.Server
             {HttpStatusCode.Unauthorized, "Unauthorized"},
             {HttpStatusCode.Forbidden, "Forbidden"},
             {HttpStatusCode.NotFound, "Not found"},
-            {HttpStatusCode.MethodNotAllowed, "Not allowed"},
             {HttpStatusCode.Conflict, "Conflict"},
             {(HttpStatusCode)429, "Too many requests"},
             {HttpStatusCode.InternalServerError, "Internal Server Error"},
