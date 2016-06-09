@@ -1,3 +1,7 @@
+## 0.6.4 (2016-06-09)
+
+* **Fix**:  Wrong `Method Not Allowed` condition fixed
+
 ## 0.6.3 (2016-06-07)
 
 * **Edit**: Griffin.Framework updated
