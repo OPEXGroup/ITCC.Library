@@ -782,9 +782,9 @@ namespace ITCC.HTTP.Server
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
             foreach (var requestProcessor in RequestProcessors)
             {
-                if (requestProcessor.LegacyName != null
-                    && request.QueryString[requestProcessor.LegacyName] != null
-                    && requestMethod == requestProcessor.Method)
+                if ((requestProcessor.LegacyName != null
+                    && request.QueryString[requestProcessor.LegacyName] != null)
+                    || requestMethod == requestProcessor.Method)
                 {
                     return new RequestProcessorSelectionResult<TAccount>
                     {
