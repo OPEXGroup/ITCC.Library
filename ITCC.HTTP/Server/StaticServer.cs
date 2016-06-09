@@ -784,7 +784,7 @@ namespace ITCC.HTTP.Server
             {
                 if ((requestProcessor.LegacyName != null
                     && request.QueryString[requestProcessor.LegacyName] != null)
-                    || requestMethod == requestProcessor.Method)
+                    && requestMethod == requestProcessor.Method)
                 {
                     return new RequestProcessorSelectionResult<TAccount>
                     {
@@ -796,7 +796,7 @@ namespace ITCC.HTTP.Server
 
             foreach (var requestProcessor in RequestProcessors)
             {
-                if (request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri)
+                if (request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri.Trim('/'))
                 {
                     if (requestMethod == requestProcessor.Method ||
                         (requestMethod == HttpMethod.Head && requestProcessor.Method == HttpMethod.Get))
@@ -807,6 +807,7 @@ namespace ITCC.HTTP.Server
                             MethodMatches = true
                         };
                     }
+                    LogMessage(LogLevel.Debug, $"Method {requestMethod.Method} not allowed for resourse {requestProcessor.SubUri.Trim('/')}");
                     return new RequestProcessorSelectionResult<TAccount>
                     {
                         RequestProcessor = requestProcessor,
