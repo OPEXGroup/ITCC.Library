@@ -1,3 +1,8 @@
+## 0.6.6 (2016-06-09)
+
+* **Fix**:  `PostFileAsync` returns `ServerResponseStatus.Ok` on good codes
+* **Edit**: `POST` for files returns `201 Created` instread of `200 OK`
+
 ## 0.6.5 (2016-06-09)
 
 * **Fix**:  Request processor selection fixed
