@@ -664,7 +664,7 @@ namespace ITCC.HTTP.Server
             GC.Collect();
             LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
             LogMessage(LogLevel.Debug, $"File {filePath} created");
-            response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
+            response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
             
             return response;
         }
