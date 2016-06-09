@@ -794,29 +794,15 @@ namespace ITCC.HTTP.Server
                 }
             }
 
-            foreach (var requestProcessor in RequestProcessors)
+            var processorsForUri = RequestProcessors.Where(requestProcessor => request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri.Trim('/')).ToList();
+            if (processorsForUri.Count == 0)
+                return null;
+            var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
+            return new RequestProcessorSelectionResult<TAccount>
             {
-                if (request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri.Trim('/'))
-                {
-                    if (requestMethod == requestProcessor.Method ||
-                        (requestMethod == HttpMethod.Head && requestProcessor.Method == HttpMethod.Get))
-                    {
-                        return new RequestProcessorSelectionResult<TAccount>
-                        {
-                            RequestProcessor = requestProcessor,
-                            MethodMatches = true
-                        };
-                    }
-                    LogMessage(LogLevel.Debug, $"Method {requestMethod.Method} not allowed for resourse {requestProcessor.SubUri.Trim('/')}");
-                    return new RequestProcessorSelectionResult<TAccount>
-                    {
-                        RequestProcessor = requestProcessor,
-                        MethodMatches = false
-                    };
-                }
-            }
-            return null;
-
+                RequestProcessor = suitableProcessor,
+                MethodMatches = suitableProcessor != null
+            };
         }
 
         /// <summary>
