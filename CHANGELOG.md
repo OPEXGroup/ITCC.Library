@@ -1,3 +1,7 @@
+## 0.6.8 (2016-06-09)
+
+* **Fix**:  Statistics improved
+
 ## 0.6.7 (2016-06-09)
 
 * **Fix**:  Use ling in processor selection
