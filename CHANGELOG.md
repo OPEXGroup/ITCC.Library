@@ -1,3 +1,7 @@
+## 0.6.5 (2016-06-09)
+
+* **Fix**:  Request processor selection fixed
+
 ## 0.6.4 (2016-06-09)
 
 * **Fix**:  Wrong `Method Not Allowed` condition fixed
