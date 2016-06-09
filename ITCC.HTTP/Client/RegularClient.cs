@@ -197,7 +197,7 @@ namespace ITCC.HTTP.Client
                                     };
                                 }
                             }
-                            if (typeof(TResult) != typeof(string))
+                            if (typeof(TResult) != typeof(string) && typeof(TResult) != typeof(object))
                             {
                                 return new RequestResult<TResult>
                                 {
@@ -421,7 +421,7 @@ namespace ITCC.HTTP.Client
                 );
         }
 
-        public async Task<RequestResult<object>> PostFileAsync(string partialUri,
+        public async Task<RequestResult<string>> PostFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             string filePath = null,
@@ -431,7 +431,7 @@ namespace ITCC.HTTP.Client
             try
             {
                 var fileStream = new FileStream(filePath, FileMode.Open);
-                return await PerformRequestAsync<FileStream, object>(
+                return await PerformRequestAsync<FileStream, string>(
                     HttpMethod.Post,
                     partialUri,
                     parameters,
@@ -446,7 +446,7 @@ namespace ITCC.HTTP.Client
             catch (Exception ex)
             {
                 LogException(LogLevel.Warning, ex);
-                return new RequestResult<object>
+                return new RequestResult<string>
                 {
                     Status = ServerResponseStatus.ClientError,
                     Result = null
