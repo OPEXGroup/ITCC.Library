@@ -1,3 +1,7 @@
+## 0.6.7 (2016-06-09)
+
+* **Fix**:  Use ling in processor selection
+
 ## 0.6.6 (2016-06-09)
 
 * **Fix**:  `PostFileAsync` returns `ServerResponseStatus.Ok` on good codes
