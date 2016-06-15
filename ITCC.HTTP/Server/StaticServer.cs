@@ -123,6 +123,8 @@ namespace ITCC.HTTP.Server
                 _started = true;
                 ServiceUris.AddRange(configuration.GetReservedUris());
                 LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
+                if (ServiceUris.Any())
+                    LogMessage(LogLevel.Debug, $"Reserved sections:\n{string.Join("\n", ServiceUris)}");
 
                 return ServerStartStatus.Ok;
             }

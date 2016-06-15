@@ -427,7 +427,10 @@ string GetTypeByExtenstion(string extension); // Получение станда
 ```
 bool AuthorizationRequired;                  // Требуется ли авторизация для выполнения запроса
 Delegates.RequestHandler<TAccount> Handler;  // Функция-обработчик
-HttpMethod Method;                           // Метод запроса
+/*
+  **ВАЖНО**: `StaticServer` не поддерживает регистрацию обработчиков с методами `HEAD` и `OPTIONS`. Запросы с этими методами обрабатываются в соответствием со стандартом.
+*/
+HttpMethod Method;                           // Метод запроса. 
 string SubUri;                               // URI, к которому нужно обратиться для вызова метода
 ```
 
