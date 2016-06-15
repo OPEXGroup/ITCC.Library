@@ -1,3 +1,7 @@
+## 0.6.9 (2016-06-15)
+
+* **Fix**:  Log entries' time fixed  
+
 ## 0.6.8 (2016-06-09)
 
 * **Fix**:  Statistics improved
