@@ -7,7 +7,9 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
 using ITCC.Logging;
@@ -31,6 +33,13 @@ namespace ITCC.Library.Testing
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
             StartServer();
+
+            var source = new CancellationTokenSource();
+            StaticClient.ServerAddress = "http://localhost:8888";
+            StaticClient.RequestTimeout = 30;
+            source.CancelAfter(3000);
+            var result = await StaticClient.GetRawAsync("delay", new Dictionary<string, string> { { "value", "100"}}, null, null, source.Token);
+            Logger.LogEntry("CLIENT", LogLevel.Info, result.Status.ToString());
 
             Console.ReadLine();
 
@@ -97,7 +106,7 @@ namespace ITCC.Library.Testing
                     {
                         delay = 5;
                     }
-                    Logger.LogEntry("HANDLER", LogLevel.Trace, $"Will sleep for ${delay} seconds, then respond to {request.RemoteEndPoint}");
+                    Logger.LogEntry("HANDLER", LogLevel.Trace, $"Will sleep for {delay} seconds, then respond to {request.RemoteEndPoint}");
                     await Task.Delay(delay * 1000);
                     return new HandlerResult(HttpStatusCode.OK, "Hello ^_^");
                 },

@@ -218,7 +218,7 @@ namespace ITCC.HTTP.Client
             }
             catch (OperationCanceledException ocex)
             {
-                if (ocex.CancellationToken == cancellationToken)
+                if (ocex.CancellationToken.Equals(cancellationToken))
                 {
                     LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been cancelled");
                     return new RequestResult<TResult>
