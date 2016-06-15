@@ -1,3 +1,9 @@
+## 0.7.0 (2016-06-15)
+
+* **New**:  Server asynchronous stop supported  
+* **New**:  Use reserved uris and methods set  
+* **Edit**: More thorough server configuration check  
+
 ## 0.6.10 (2016-06-15)
 
 * **Fix**:  Correct timeout/cancellation conditions in `RegularClient`  
