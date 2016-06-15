@@ -48,7 +48,7 @@ void WriteEntry(object sender, LogEntryEventArgs args);
 
 Класс-брокер. Создает события, подписывает на них получателей лога. Ключевые методы:
 
-```	
+```    
 void LogEntry(object scope, LogLevel level, string message);                 // записать в лог сообщение 
 void LogException(object scope, LogLevel level, Exception exception);        // записать в лог исключение
 bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false);  // подписать получателя на события лога
@@ -239,12 +239,12 @@ Protocol ServerProtocol { get; private set; } = Protocol.Http;
 Тут просто хранятся объявления делегатов библитеки. Публичные:
 ```
 /*
-	Клиент
+    Клиент
 */
 delegate bool AuthentificationDataAdder(HttpRequestMessage request); // Метод добавления данных авторизации к клиентскому запросу
 delegate TResult BodyDeserializer<out TResult>(string data); // Метод десериализации тела ответа от сервера 
 /*
-	Сервер
+    Сервер
 */
 delegate Task<AuthentificationResult> Authentificator(HttpRequest request); // Метод аутентификации на сервере (применяется к запросам на /login)
 delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
@@ -255,12 +255,12 @@ delegate Task<bool> StatisticsAuthorizer(HttpRequest request); // Метод с�
 delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
             HttpRequest request,
             FileSection section,
-			string filename)
+                  string filename)
             where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам.
 delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates); // Метод сервера для получения SSL/TLS сертификата
 delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpRequest request); // Обработчик клиентского запроса (после авторизации)
 /*
-	Общие
+    Общие
 */
 delegate string BodySerializer(object data); // Сериализация тела сообщения
 ```
@@ -274,7 +274,7 @@ delegate string BodySerializer(object data); // Сериализация тел�
 Результат авторизации на сервере. Значения:
 
 ```
-NotRequired,		// Запрос разрешен всем (200)
+NotRequired,        // Запрос разрешен всем (200)
 Ok,                 // Запрос разрешен (200)
 Unauthorized,       // Данные авторизации неверны или недостаточны (401)
 Forbidden,          // Доступ запрещен для данного аккаунта (403)
@@ -316,6 +316,7 @@ Ok,                 // Сервер работает
 BindingError,       // Ошибка биндинга (вероятнее всего, занят порт)
 CertificateError,   // Ошибка получения сертификата (не найдет для данного subject name)
 BadParameters,      // Ошибка в переданной конфигурации сервера
+AlreadyStarted,     // Ошибка в переданной конфигурации сервера
 UnknownError        // Прочие ошибки
 ```
 
@@ -435,6 +436,7 @@ string SubUri;                               // URI, к которому нуж�
 Представляет `HTTP(S)`-сервер. Доступен один на приложение. Ключевые методы:
 ```
 ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration);                 // Запуск сервера
+void Stop();                                                                              // Синхронная остановка сервера (с очисткой списка обработчиков)
 bool AddRequestProcessor(RequestProcessor<TAccount> requestProcessor);                    // Добавление обработчика запросов
 bool AddRequestProcessorRange(IEnumerable<RequestProcessor<TAccount>> requestProcessors); // Добавление нескольких обработчиков запросов
 ```

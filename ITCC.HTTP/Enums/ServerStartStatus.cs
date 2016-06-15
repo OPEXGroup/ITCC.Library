@@ -25,6 +25,11 @@
         /// </summary>
         BadParameters,
 
+        /// <summary>
+        ///     Server is up and running already
+        /// </summary>
+        AlreadyStarted,
+
         UnknownError
     }
 }

@@ -1,3 +1,9 @@
+## 0.6.10 (2016-06-15)
+
+* **Fix**:  Correct timeout/cancellation conditions in `RegularClient`  
+* **Edit**: Enum element renamed from `RequestCanceled` to `RequestCancelled`
+* **New**:  Test project added
+
 ## 0.6.9 (2016-06-15)
 
 * **Fix**:  Log entries' time fixed  

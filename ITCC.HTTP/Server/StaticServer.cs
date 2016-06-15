@@ -25,7 +25,7 @@ namespace ITCC.HTTP.Server
     /// </summary>
     public static class StaticServer<TAccount> where TAccount : class
     {
-        #region start
+        #region main
 
         /// <summary>
         ///     Starts server for incoming connection listening
@@ -34,6 +34,11 @@ namespace ITCC.HTTP.Server
         /// <returns></returns>
         public static ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration)
         {
+            if (_started)
+            {
+                LogMessage(LogLevel.Warning, "Server is already running");
+                return ServerStartStatus.AlreadyStarted;
+            }
             if (configuration == null || !configuration.IsEnough())
                 return ServerStartStatus.BadParameters;
 
@@ -43,13 +48,19 @@ namespace ITCC.HTTP.Server
                 _statistics = new ServerStatistics<TAccount>();
                 _statisticsAuthorizer = configuration.StatisticsAuthorizer;
             }
+            else
+            {
+                StatisticsEnabled = false;
+                _statistics = null;
+                _statisticsAuthorizer = null;
+            }
 
-            var listener = new HttpListener(configuration.BufferPoolSize)
+            _listener = new HttpListener(configuration.BufferPoolSize)
             {
                 MessageReceived = OnMessage
             };
-            listener.ClientConnected += OnClientConnected;
-            listener.ClientDisconnected += OnClientDisconnected;
+            _listener.ClientConnected += OnClientConnected;
+            _listener.ClientDisconnected += OnClientDisconnected;
 
             try
             {
@@ -64,7 +75,7 @@ namespace ITCC.HTTP.Server
                         LogMessage(LogLevel.Warning, "Certificate error");
                         return ServerStartStatus.CertificateError;
                     }
-                    listener.ChannelFactory = new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
+                    _listener.ChannelFactory = new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
                     LogMessage(LogLevel.Info, $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
                 }
                 _authorizer = configuration.Authorizer;
@@ -86,7 +97,6 @@ namespace ITCC.HTTP.Server
                     LogMessage(LogLevel.Warning, $"Cannot use file folder {FilesLocation} : no write access");
                     return ServerStartStatus.BadParameters;
                 }
-                    
 
                 FilesNeedAuthorization = configuration.FilesNeedAuthorization;
                 _faviconPath = configuration.FaviconPath;
@@ -98,7 +108,8 @@ namespace ITCC.HTTP.Server
                         {"Server", configuration.ServerName}
                     });
                 }
-                listener.Start(IPAddress.Any, configuration.Port);
+                _listener.Start(IPAddress.Any, configuration.Port);
+                _started = true;
                 LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
 
                 return ServerStartStatus.Ok;
@@ -114,6 +125,30 @@ namespace ITCC.HTTP.Server
                 return ServerStartStatus.UnknownError;
             }
         }
+
+        public static void Stop()
+        {
+            if (!_started)
+                return;
+
+            LogMessage(LogLevel.Info, "Shutting down");
+            try
+            {
+                _listener.Stop();
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return;
+            }
+            _started = false;
+            RequestProcessors.Clear();
+            _listener = null;
+            LogMessage(LogLevel.Info, "Stopped");
+        }
+
+        private static bool _started;
+        private static HttpListener _listener;
 
         #endregion
 

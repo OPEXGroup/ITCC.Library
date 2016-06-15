@@ -41,6 +41,7 @@ namespace ITCC.Library.Testing
             var result = await StaticClient.GetRawAsync("delay", new Dictionary<string, string> { { "value", "100"}}, null, null, source.Token);
             Logger.LogEntry("CLIENT", LogLevel.Info, result.Status.ToString());
 
+            StopServer();
             Console.ReadLine();
 
             await Task.Delay(1);
@@ -113,6 +114,11 @@ namespace ITCC.Library.Testing
                 Method = HttpMethod.Get,
                 SubUri = "delay"
             });
+        }
+
+        private static void StopServer()
+        {
+            StaticServer<object>.Stop();
         }
     }
 }
