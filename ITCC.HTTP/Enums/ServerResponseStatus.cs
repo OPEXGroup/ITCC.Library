@@ -48,7 +48,7 @@
         /// <summary>
         ///     Request was canceled before whole response
         /// </summary>
-        RequestCanceled,
+        RequestCancelled,
 
         /// <summary>
         ///     Request has been timed out

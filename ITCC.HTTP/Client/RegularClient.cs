@@ -224,7 +224,7 @@ namespace ITCC.HTTP.Client
                     return new RequestResult<TResult>
                     {
                         Result = default(TResult),
-                        Status = ServerResponseStatus.RequestCanceled,
+                        Status = ServerResponseStatus.RequestCancelled,
                         Userdata = ocex
                     };
                 }
