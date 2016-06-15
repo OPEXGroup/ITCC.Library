@@ -121,6 +121,7 @@ namespace ITCC.HTTP.Server
                 }
                 _listener.Start(IPAddress.Any, configuration.Port);
                 _started = true;
+                ServiceUris.AddRange(configuration.GetReservedUris());
                 LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
 
                 return ServerStartStatus.Ok;
@@ -163,8 +164,7 @@ namespace ITCC.HTTP.Server
             {
                 _listener.Stop();
                 _started = false;
-                RequestProcessors.Clear();
-                _listener = null;
+                CleanUp();
                 LogMessage(LogLevel.Info, "Stopped");
             }
             catch (Exception ex)
@@ -178,6 +178,13 @@ namespace ITCC.HTTP.Server
                     _operationInProgress = false;
                 }
             }
+        }
+
+        private static void CleanUp()
+        {
+            RequestProcessors.Clear();
+            _listener = null;
+            ServiceUris.Clear();
         }
 
         private static bool _started;
@@ -408,7 +415,9 @@ namespace ITCC.HTTP.Server
             { IsStatisticsRequest, HandleStatistics },
             { IsFilesRequest, HandleFileRequest },
             { IsFaviconRequest, HandleFavicon }
-        }; 
+        };
+        
+        private static readonly List<string> ServiceUris = new List<string>();
 
         #endregion
 
@@ -416,7 +425,7 @@ namespace ITCC.HTTP.Server
 
         private static bool IsLoginRequest(HttpRequest request)
         {
-            if (request == null)
+            if (request == null || _authentificator == null)
             {
                 return false;
             }
@@ -837,8 +846,22 @@ namespace ITCC.HTTP.Server
 
         private static bool CheckRequestProcessor(RequestProcessor<TAccount> requestProcessor)
         {
-            if (requestProcessor.SubUri == null && requestProcessor.LegacyName == null)
+            if (requestProcessor.SubUri == null)
                 return false;
+
+            if (requestProcessor.Method == HttpMethod.Options || requestProcessor.Method == HttpMethod.Head)
+            {
+                LogMessage(LogLevel.Warning, $"Cannot explicitely register {requestProcessor.Method.Method.ToUpperInvariant()} processor");
+                return false;
+            }
+
+            var serviceDuplicate = ServiceUris.FirstOrDefault(su => requestProcessor.SubUri.Trim('/').StartsWith(su));
+            if (serviceDuplicate != null)
+            {
+                LogMessage(LogLevel.Warning, $"Failed to register uri '{requestProcessor.SubUri}'. Section '{serviceDuplicate}' is reserved.");
+                return false;
+            }
+
             return true;
         }
 

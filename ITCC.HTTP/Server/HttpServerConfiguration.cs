@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Authentication;
 using System.Text;
 using ITCC.HTTP.Common;
@@ -150,8 +151,37 @@ namespace ITCC.HTTP.Server
                 return false;
             }
 
+            if (FilesEnabled && FilesBaseUri == null)
+            {
+                LogMessage(LogLevel.Warning, "No files base uri passed to Start()");
+                return false;
+            }
+
+            if (FilesEnabled && FilesLocation == null)
+            {
+                LogMessage(LogLevel.Warning, "No file location passed to Start()");
+                return false;
+            }
+
             return true;
         }
+
+        internal IEnumerable<string> GetReservedUris()
+        {
+            if (!IsEnough())
+                throw new InvalidOperationException("Configuration is inconsistent");
+
+            var result = new List<string>();
+            if (Authentificator != null)
+                result.Add("login");
+            if (FilesEnabled)
+                result.Add(FilesBaseUri.Trim('/'));
+            if (StatisticsEnabled)
+                result.Add("statistics");
+            result.Add("ping");
+
+            return result;
+        } 
 
         private void LogMessage(LogLevel level, string message)
         {
