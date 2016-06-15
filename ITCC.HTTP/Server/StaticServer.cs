@@ -39,6 +39,15 @@ namespace ITCC.HTTP.Server
                 LogMessage(LogLevel.Warning, "Server is already running");
                 return ServerStartStatus.AlreadyStarted;
             }
+            lock (OperationLock)
+            {
+                if (_operationInProgress)
+                {
+                    LogMessage(LogLevel.Info, "Cannot start now, operation in progress");
+                    return ServerStartStatus.AlreadyStarted;
+                }
+                _operationInProgress = true;
+            }
             if (configuration == null || !configuration.IsEnough())
                 return ServerStartStatus.BadParameters;
 
@@ -75,8 +84,10 @@ namespace ITCC.HTTP.Server
                         LogMessage(LogLevel.Warning, "Certificate error");
                         return ServerStartStatus.CertificateError;
                     }
-                    _listener.ChannelFactory = new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
-                    LogMessage(LogLevel.Info, $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
+                    _listener.ChannelFactory =
+                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
+                    LogMessage(LogLevel.Info,
+                        $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
                 }
                 _authorizer = configuration.Authorizer;
                 _authentificator = configuration.Authentificator;
@@ -124,31 +135,55 @@ namespace ITCC.HTTP.Server
                 LogException(LogLevel.Critical, ex);
                 return ServerStartStatus.UnknownError;
             }
+            finally
+            {
+                lock (OperationLock)
+                {
+                    _operationInProgress = false;
+                }
+            }
         }
 
         public static void Stop()
         {
             if (!_started)
                 return;
+            lock (OperationLock)
+            {
+                if (_operationInProgress)
+                {
+                    LogMessage(LogLevel.Info, "Cannot stop now, operation in progress");
+                    return;
+                }
+                _operationInProgress = true;
+            }
 
             LogMessage(LogLevel.Info, "Shutting down");
             try
             {
                 _listener.Stop();
+                _started = false;
+                RequestProcessors.Clear();
+                _listener = null;
+                LogMessage(LogLevel.Info, "Stopped");
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Warning, ex);
-                return;
             }
-            _started = false;
-            RequestProcessors.Clear();
-            _listener = null;
-            LogMessage(LogLevel.Info, "Stopped");
+            finally
+            {
+                lock (OperationLock)
+                {
+                    _operationInProgress = false;
+                }
+            }
         }
 
         private static bool _started;
         private static HttpListener _listener;
+        private static bool _operationInProgress;
+        private static readonly object OperationLock = new object();
 
         #endregion
 
