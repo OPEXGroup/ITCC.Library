@@ -648,7 +648,7 @@ namespace ITCC.HTTP.Server
                 if (filename == null || section == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
-                    OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
                     return;
                 }
                 var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
@@ -696,13 +696,13 @@ namespace ITCC.HTTP.Server
                         response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                         break;
                 }
-                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Warning, exception);
                 response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
-                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
             }    
         }
 
@@ -777,23 +777,37 @@ namespace ITCC.HTTP.Server
         {
             if (localPath == null)
                 return null;
-            var result = localPath.Trim('/');
-            var slashIndex = result.LastIndexOf("/", StringComparison.Ordinal);
-            result = result.Remove(0, slashIndex + 1);
-            LogMessage(LogLevel.Debug, $"File requested: {result}");
-            return result;
+            try
+            {
+                var result = localPath.Trim('/');
+                var slashIndex = result.LastIndexOf("/", StringComparison.Ordinal);
+                result = result.Remove(0, slashIndex + 1);
+                LogMessage(LogLevel.Debug, $"File requested: {result}");
+                return result;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private static FileSection ExtractFileSection(string localPath)
         {
             if (localPath == null)
                 return null;
-            var sectionName = localPath.Trim('/');
-            var slashIndex = sectionName.IndexOf("/", StringComparison.Ordinal);
-            var lastSlashIndex = sectionName.LastIndexOf("/", StringComparison.Ordinal);
-            sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
-            LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
-            return FileSections.FirstOrDefault(s => s.Folder == sectionName);
+            try
+            {
+                var sectionName = localPath.Trim('/');
+                var slashIndex = sectionName.IndexOf("/", StringComparison.Ordinal);
+                var lastSlashIndex = sectionName.LastIndexOf("/", StringComparison.Ordinal);
+                sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
+                LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
+                return FileSections.FirstOrDefault(s => s.Folder == sectionName);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private static string DetermineContentType(string filename)
