@@ -1,3 +1,8 @@
+## 0.7.1 (2016-06-16)
+
+* **Fix**:  Statistic fixed for file requests
+* **Fix**:  Respond with 400 instead of 500 for bad file requests
+
 ## 0.7.0 (2016-06-15)
 
 * **New**:  Server asynchronous stop supported  
