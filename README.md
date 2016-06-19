@@ -452,3 +452,5 @@ bool IsGoodServerResponseStatus(ServerResponseStatus status);
 bool IsBadServerResponseStatus(ServerResponseStatus status);
 HttpMethod HttpMethodToEnum(string methodName);
 ```
+
+### ITCC.UI
