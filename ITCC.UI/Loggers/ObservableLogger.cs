@@ -9,6 +9,14 @@ namespace ITCC.UI.Loggers
     {
         public ObservableLogger(int capacity, UiThreadRunner uiThreadRunner)
         {
+            Level = Logger.Level;
+            LogEntryCollection = new BoundedObservableCollection<LogEntryEventArgsViewModel>(capacity);
+            _uiThreadRunner = uiThreadRunner;
+        }
+
+        public ObservableLogger(LogLevel level, int capacity, UiThreadRunner uiThreadRunner)
+        {
+            Level = level;
             LogEntryCollection = new BoundedObservableCollection<LogEntryEventArgsViewModel>(capacity);
             _uiThreadRunner = uiThreadRunner;
         }

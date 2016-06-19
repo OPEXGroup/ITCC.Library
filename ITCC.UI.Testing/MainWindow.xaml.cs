@@ -33,7 +33,6 @@ namespace ITCC.UI.Testing
             {
                 Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
             }
-
         }
 
         private LogWindow _logWindow;
