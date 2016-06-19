@@ -15,8 +15,8 @@ namespace ITCC.UI.Testing
             InitializeComponent();
 
             Logger.Level = LogLevel.Trace;
-            _logger = new ObservableLogger(1000, App.RunOnUiThread);
-            Logger.RegisterReceiver(_logger);
+            _observableLogger = new ObservableLogger(1000, App.RunOnUiThread);
+            Logger.RegisterReceiver(_observableLogger);
 
             Logger.LogEntry("Test", LogLevel.Info, "Started");
         }
@@ -24,14 +24,19 @@ namespace ITCC.UI.Testing
         private void LogWindowButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (_logWindow == null)
-                _logWindow = new LogWindow(_logger);
+                _logWindow = new LogWindow(_observableLogger);
 
             _logWindow.Show();
-            Logger.LogEntry("Test", LogLevel.Info, "Started");
+            Logger.LogEntry("Test", LogLevel.Info, "Opened");
+
+            for (var i = 0; i < 50; ++i)
+            {
+                Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
+            }
 
         }
 
         private LogWindow _logWindow;
-        private readonly ObservableLogger _logger;
+        private readonly ObservableLogger _observableLogger;
     }
 }
