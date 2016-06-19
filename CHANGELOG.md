@@ -1,3 +1,7 @@
+## 0.8.0 (2016-06-19)
+
+* **New**:  ITCC.UI added
+
 ## 0.7.1 (2016-06-16)
 
 * **Fix**:  Statistic fixed for file requests
