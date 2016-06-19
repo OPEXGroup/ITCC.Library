@@ -459,6 +459,8 @@ HttpMethod HttpMethodToEnum(string methodName);
 
 ### ITCC.UI
 
+Библиотека классов (в том числе, окон) для использования в WPF-приложениях
+
 #### Attributes
 
 Классы используемых атрибутов
