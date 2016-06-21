@@ -1,3 +1,7 @@
+## 0.9.0 (2016-06-21)
+
+* **New**:  Email logger added
+
 ## 0.8.0 (2016-06-19)
 
 * **New**:  ITCC.UI added
