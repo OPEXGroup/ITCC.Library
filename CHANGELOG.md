@@ -1,6 +1,7 @@
 ## 0.9.0 (2016-06-21)
 
 * **New**:  Email logger added
+* **New**:  `RequestMaxServeTime` added to `HttpServerConfiguration`
 
 ## 0.8.0 (2016-06-19)
 

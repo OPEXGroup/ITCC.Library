@@ -386,7 +386,7 @@ namespace ITCC.HTTP.Server
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
 #endif
                 _statistics?.AddResponse(response, uri, processingTime);
-                if (_requestMaxServeTime < processingTime)
+                if (_requestMaxServeTime > 0 && _requestMaxServeTime < processingTime)
                 {
                     LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {processingTime} milliseconds to process!");
                 }
