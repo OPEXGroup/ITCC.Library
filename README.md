@@ -411,6 +411,7 @@ string FaviconPath { get; set; }                                                
 string ServerName { get; set; }                                                   // Имя сервера для заголовков Server:
 
 int BufferPoolSize { get; set; } = 100;                                           // Размер пула 64к-буферов для чтения из сокетов
+double RequestMaxServeTime { get; set; } = 1;                                     // Допустимое время обработки запроса (после него кидается предупреждение)
 ```
 
 ##### `static class MimeTypes`

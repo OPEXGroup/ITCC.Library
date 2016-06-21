@@ -112,6 +112,8 @@ namespace ITCC.HTTP.Server
                 FilesNeedAuthorization = configuration.FilesNeedAuthorization;
                 _faviconPath = configuration.FaviconPath;
 
+                _requestMaxServeTime = configuration.RequestMaxServeTime;
+
                 if (configuration.ServerName != null)
                 {
                     ResponseFactory.SetCommonHeaders(new Dictionary<string, string>
@@ -384,8 +386,12 @@ namespace ITCC.HTTP.Server
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
 #endif
                 _statistics?.AddResponse(response, uri, processingTime);
+                if (_requestMaxServeTime < processingTime)
+                {
+                    LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {processingTime} milliseconds to process!");
+                }
                 channel.Send(response);
-                LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent");
+                LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent ({processingTime} milliseconds)");
             }
             catch (SocketException)
             {
@@ -405,10 +411,12 @@ namespace ITCC.HTTP.Server
             }
         }
 
+
+        private static double _requestMaxServeTime;
         #endregion
 
         #region service
-        
+
         private static readonly Dictionary<Delegates.ServiceRequestChecker, Delegates.ServiceRequestHandler> ServiceHandlers = new Dictionary<Delegates.ServiceRequestChecker, Delegates.ServiceRequestHandler>
         {
             { IsOptionsRequest, HandleOptions },

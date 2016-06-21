@@ -114,6 +114,11 @@ namespace ITCC.HTTP.Server
         /// </summary>
         public int BufferPoolSize { get; set; } = 100;
 
+        /// <summary>
+        ///     Warning will be given if request handle workes for more milliseconds. Negatime values mean infinity
+        /// </summary>
+        public double RequestMaxServeTime { get; set; } = 1;
+
         public bool IsEnough()
         {
             if (SubjectName == null)
