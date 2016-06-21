@@ -100,6 +100,36 @@ BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, doub
 SystemEventLogger(string source, LogLevel level);
 ```
 
+##### `class EmailLogger : ILogReceiver`
+
+Отправляет логи по почте Основной конструктор 
+```
+EmailLogger(LogLevel level, EmailLoggerConfiguration configuration);
+```
+
+#### Utils
+
+Ключевые свойства:
+```
+string Login { get; set; }                  // Логин отправителя
+string Password { get; set; }               // Пароль отправителя
+
+string Subject { get; set; }                // Общая часть заголовка писем
+string Sender { get; set; }                 // Плдпись отправителя (рекомендуется делать равной Login)
+List<string> Receivers { get; set; }        // Список адресов получателей
+
+string SmtpHost { get; set; }               // Адрес используемого SMTP-сервера
+int SmptPort { get; set; }                  // Порт используемого SMTP-сервера
+
+double ReportPeriod { get; set; }           // Частота штатной отправки отчетов (в секундах)
+LogLevel FlushLevel { get; set; }           // Уровень сообщений, при котором производится немедленная отправка всей очереди
+bool SendEmptyReports { get; set; }         // Надо ли слать письма о том, что очередь сообщений пуста
+```
+
+##### `class EmailLoggerConfiguration`
+
+Конфигурация почтового логгера.
+
 ### ITCC.HTTP
 
 Библиотека для асинхронной работы с сетью по протоколу `HTTP(S)/1.1`. Поддерживает и сторону клиента, и сторону сервера. Основана на `Griffin.Framework` в серверной части. Содержит следующие компоненты (более подробное описание - исходники):

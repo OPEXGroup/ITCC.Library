@@ -14,6 +14,7 @@ using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
 using ITCC.Logging;
 using ITCC.Logging.Loggers;
+using ITCC.Logging.Utils;
 using Newtonsoft.Json;
 
 namespace ITCC.Library.Testing
@@ -32,19 +33,15 @@ namespace ITCC.Library.Testing
 
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            StartServer();
+            //StartServer();
 
-            var source = new CancellationTokenSource();
-            StaticClient.ServerAddress = "http://localhost:8888";
-            StaticClient.RequestTimeout = 30;
-            source.CancelAfter(3000);
-            var result = await StaticClient.GetRawAsync("delay", new Dictionary<string, string> { { "value", "100"}}, null, null, source.Token);
-            Logger.LogEntry("CLIENT", LogLevel.Info, result.Status.ToString());
-
-            StopServer();
+            
+            Logger.LogEntry("TEST", LogLevel.Error, "test");
+            Logger.LogEntry("TEST", LogLevel.Critical, "crit");
+            // StopServer();
             Console.ReadLine();
 
-            await Task.Delay(1);
+            await Task.Delay(100000);
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
@@ -67,6 +64,22 @@ namespace ITCC.Library.Testing
             }
             Logger.RegisterReceiver(
                 new BufferedFileLogger($"Log\\Test_{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}.txt"), true);
+
+            var emailLogger = new EmailLogger(LogLevel.Error, new EmailLoggerConfiguration
+            {
+                FlushLevel = LogLevel.Critical,
+                Login = "yobalawson@outlook.com",
+                Password = "PASSWORD",
+                Receivers = new List<string> { "b0-0b@yandex.ru" },
+                ReportPeriod = 60,
+                Sender = "ISENGARD@itcc.company",
+                SmtpHost = "smtp-mail.outlook.com",
+                SmptPort = 587,
+                Subject = "ISENGARD",
+                SendEmptyReports = true
+            });
+            emailLogger.Start();
+            Logger.RegisterReceiver(emailLogger);
 
             return true;
         }
