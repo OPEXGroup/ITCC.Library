@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using ITCC.Logging;
+using ITCC.UI.Attributes;
 
 namespace ITCC.UI.Utils
 {
@@ -10,6 +11,13 @@ namespace ITCC.UI.Utils
         public static void HandleAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e,
             string lastColumnName = null)
         {
+            var dataGridIgnore = PropertyHelper.GetPropertyAttribute<DataGridIgnoreAttribute>(e.PropertyDescriptor);
+            if (dataGridIgnore != null && dataGridIgnore.IgnoreColumn)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             var displayName = PropertyHelper.GetPropertyDisplayName(e.PropertyDescriptor);
 
             if (!string.IsNullOrEmpty(displayName))
@@ -32,7 +40,7 @@ namespace ITCC.UI.Utils
                 }
             }
 
-            var headerTooltip = PropertyHelper.GetPropertyHeaderTooltip(e.PropertyDescriptor);
+            var headerTooltip = PropertyHelper.GetPropertyAttribute<HeaderTooltipAttribute>(e.PropertyDescriptor);
             if (headerTooltip != null)
             {
                 Logger.LogEntry("GENERATOR", LogLevel.Trace, $"Adding tooltip {headerTooltip.TooltipContent}");

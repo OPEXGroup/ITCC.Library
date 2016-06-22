@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using ITCC.UI.Attributes;
 
@@ -38,13 +39,14 @@ namespace ITCC.UI.Utils
             return null;
         }
 
-        public static HeaderTooltipAttribute GetPropertyHeaderTooltip(object descriptor)
+        public static TAttribute GetPropertyAttribute<TAttribute>(object descriptor)
+            where TAttribute : Attribute
         {
             var propertyDescriptor = descriptor as PropertyDescriptor;
 
             if (propertyDescriptor != null)
             {
-                var headerTooltipAttribute = propertyDescriptor.Attributes[typeof(HeaderTooltipAttribute)] as HeaderTooltipAttribute;
+                var headerTooltipAttribute = propertyDescriptor.Attributes[typeof(TAttribute)] as TAttribute;
                 if (headerTooltipAttribute != null)
                 {
                     return headerTooltipAttribute;
@@ -55,10 +57,10 @@ namespace ITCC.UI.Utils
                 var propertyInfo = descriptor as PropertyInfo;
                 if (propertyInfo == null) return null;
 
-                var attributes = propertyInfo.GetCustomAttributes(typeof(HeaderTooltipAttribute), true);
+                var attributes = propertyInfo.GetCustomAttributes(typeof(TAttribute), true);
                 foreach (var attr in attributes)
                 {
-                    var headerTooltipAttribute = attr as HeaderTooltipAttribute;
+                    var headerTooltipAttribute = attr as TAttribute;
                     if (headerTooltipAttribute != null)
                     {
                         return headerTooltipAttribute;

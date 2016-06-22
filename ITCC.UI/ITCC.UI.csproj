@@ -51,6 +51,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DataGridIgnoreAttribute.cs" />
     <Compile Include="Attributes\HeaderTooltipAttribute.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Loggers\MessageLogger.cs" />

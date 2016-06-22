@@ -494,6 +494,14 @@ HttpMethod HttpMethodToEnum(string methodName);
 
 Классы используемых атрибутов
 
+##### `class DataGridIgnoreAttribute`
+
+Используется `DataGridHelper` для опционального игнорирования столбца:
+
+```
+DataGridIgnoreAttribute(bool ignoreColumn = true)
+```
+
 ##### `class HeaderTooltipAttribute`
 
 Используется `DataGridHelper` для генерации пояснений к заголовкам в `Datagrid`. Используется при создании `ViewModel`'ов. Конструктор:
