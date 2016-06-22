@@ -1,3 +1,7 @@
+## 0.9.1 (2016-06-22)
+
+* **New**:  `DataGridIgnoreAttribute` added
+
 ## 0.9.0 (2016-06-21)
 
 * **New**:  Email logger added
