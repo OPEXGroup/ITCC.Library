@@ -65,6 +65,7 @@ namespace ITCC.HTTP.Server
             };
             _listener.ClientConnected += OnClientConnected;
             _listener.ClientDisconnected += OnClientDisconnected;
+            _listener.ListenerError += OnListenerError;
 
             try
             {
@@ -342,6 +343,11 @@ namespace ITCC.HTTP.Server
         private static void OnClientDisconnected(object sender, ClientDisconnectedEventArgs clientDisconnectedEventArgs)
         {
             LogMessage(LogLevel.Trace, $"Client {clientDisconnectedEventArgs.Channel.RemoteEndpoint} disconnected with status {clientDisconnectedEventArgs.Exception.Message}");
+        }
+
+        private static void OnListenerError(object sender, ErrorEventArgs errorEventArgs)
+        {
+            LogException(LogLevel.Warning, errorEventArgs.GetException());
         }
 
         private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, Stopwatch requestStopwatch)
