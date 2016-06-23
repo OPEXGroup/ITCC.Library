@@ -55,6 +55,7 @@ namespace ITCC.Logging.Loggers
             _updateTimer = new Timer(ReportPeriod * 1000);
             _updateTimer.Elapsed += UpdateTimerOnElapsed;
             _updateTimer.AutoReset = true;
+            Flush(EmailLoggerFlushReason.LoggerStarted).Wait();
             _updateTimer.Start();
         }
 
@@ -119,7 +120,14 @@ namespace ITCC.Logging.Loggers
             string subject;
             var body = string.Empty;
             MailPriority priority;
-            if (_messageQueue.IsEmpty)
+            if (reason == EmailLoggerFlushReason.LoggerStarted)
+            {
+                subject = $"{Subject} (Started)";
+                body = $"Logger started\nLevel: {Level}\nFlush level: {FlushLevel}\nQueue size: {MaxQueueSize}";
+                priority = MailPriority.Low;
+                logMessage = "Email logger starting";
+            }
+            else if (_messageQueue.IsEmpty)
             {
                 if (!SendEmptyReports)
                 {
