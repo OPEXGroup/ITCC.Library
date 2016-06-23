@@ -1,3 +1,7 @@
+## 0.9.4 (2016-06-23)
+
+* **New**:  `EmailLogger` will now report about it's start
+
 ## 0.9.3 (2016-06-23)
 
 * **New**:  `MaxQueueSize` parameter added to `EmailLogger` configuration
