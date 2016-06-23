@@ -12,7 +12,7 @@ namespace ITCC.Geocoding.Yandex
 
         public static string Key { get; set; } = string.Empty;
 
-        private static string KeyQueryParam => string.IsNullOrEmpty(Key) ? string.Empty : "&apikey=" + Key;
+        private static string KeyQueryParam => string.IsNullOrEmpty(Key) ? string.Empty : "&key=" + Key;
 
         #endregion
 
@@ -38,17 +38,7 @@ namespace ITCC.Geocoding.Yandex
         }
         #endregion
 
-
-        // ToDo: back geocoding methods
-        #region ReGeokode
-        private static string ReGeocode(double _long, double lat)
-        {
-            return "";
-        }
-        #endregion
-
         #region helpers
-        // ToDo: encode
         private static string StringMakeValid(string location)
         {
             // return Uri.EscapeUriString(location);
