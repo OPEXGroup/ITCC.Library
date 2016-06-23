@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using ITCC.Logging.Enums;
 using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers
@@ -23,7 +24,13 @@ namespace ITCC.Logging.Loggers
             if (args.Level <= FlushLevel)
             {
                 _updateTimer.Stop();
-                await Flush(true);
+                await Flush(EmailLoggerFlushReason.ImportantMessage);
+                _updateTimer.Start();
+            }
+            else if (_messageQueue.Count >= MaxQueueSize)
+            {
+                _updateTimer.Stop();
+                await Flush(EmailLoggerFlushReason.QueueFull);
                 _updateTimer.Start();
             }
         }
@@ -70,6 +77,8 @@ namespace ITCC.Logging.Loggers
         public LogLevel FlushLevel { get; private set; }
 
         public bool SendEmptyReports { get; private set; }
+
+        public int MaxQueueSize { get; private set; }
         #endregion
 
         #region private
@@ -92,14 +101,15 @@ namespace ITCC.Logging.Loggers
             ReportPeriod = configuration.ReportPeriod;
             FlushLevel = configuration.FlushLevel;
             SendEmptyReports = configuration.SendEmptyReports;
+            MaxQueueSize = configuration.MaxQueueSize;
         }
 
         private async void UpdateTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            await Flush(false);
+            await Flush(EmailLoggerFlushReason.RegularPeriodical);
         }
 
-        private async Task Flush(bool isForced)
+        private async Task Flush(EmailLoggerFlushReason reason)
         {
             if (_flushInProgress)
                 return;
@@ -132,8 +142,17 @@ namespace ITCC.Logging.Loggers
                     body += $"\n\n{temp.Representation}";
                 }
                 logMessage = $"Sending email with {counter} entries";
-                var alarmStr = isForced ? ", ALARM" : string.Empty;
-                priority = isForced ? MailPriority.High : MailPriority.Normal;
+                var alarmStr = string.Empty;
+                switch (reason)
+                {
+                    case EmailLoggerFlushReason.ImportantMessage:
+                        alarmStr = ", ALARM CRIT LEVEL";
+                        break;
+                    case EmailLoggerFlushReason.QueueFull:
+                        alarmStr = ", ALARM QUEUE FULL";
+                        break;
+                }
+                priority = reason == EmailLoggerFlushReason.RegularPeriodical ? MailPriority.Normal : MailPriority.High;
                 subject = $"{Subject} ({counter} new entries{alarmStr})";
             }
             Logger.LogEntry("MAIL LOG", LogLevel.Debug, logMessage);
@@ -148,20 +167,12 @@ namespace ITCC.Logging.Loggers
             {
                 using (var client = new SmtpClient
                 {
-                    Port = SmptPort,
-                    Host = SmtpHost,
-                    EnableSsl = true,
-                    Timeout = 10000,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false,
-                    Credentials = new System.Net.NetworkCredential(Login, Password),
+                    Port = SmptPort, Host = SmtpHost, EnableSsl = true, Timeout = 10000, DeliveryMethod = SmtpDeliveryMethod.Network, UseDefaultCredentials = false, Credentials = new System.Net.NetworkCredential(Login, Password),
                 })
                 {
                     var mailMessage = new MailMessage(Sender, Receivers.First(), subject, body)
                     {
-                        BodyEncoding = Encoding.UTF8,
-                        DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure,
-                        Priority = priority
+                        BodyEncoding = Encoding.UTF8, DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure, Priority = priority
                     };
                     Receivers.ForEach(r =>
                     {

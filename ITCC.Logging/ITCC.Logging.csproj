@@ -36,6 +36,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\EmailLoggerFlushReason.cs" />
     <Compile Include="Loggers\BufferedFileLogger.cs" />
     <Compile Include="Loggers\ColouredConsoleLogger.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />

@@ -74,7 +74,8 @@ namespace ITCC.Library.Testing
                 SmtpHost = "smtp-mail.outlook.com",
                 SmptPort = 587,
                 Subject = "ISENGARD",
-                SendEmptyReports = true
+                SendEmptyReports = true,
+                MaxQueueSize = 50
             });
             // emailLogger.Start();
             // Logger.RegisterReceiver(emailLogger);

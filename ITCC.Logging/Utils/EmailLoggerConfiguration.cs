@@ -25,6 +25,8 @@ namespace ITCC.Logging.Utils
         public LogLevel FlushLevel { get; set; }
 
         public bool SendEmptyReports { get; set; }
+
+        public int MaxQueueSize { get; set; }
         #endregion
 
         #region methods
@@ -75,6 +77,12 @@ namespace ITCC.Logging.Utils
             if (ReportPeriod < 1)
             {
                 Logger.LogEntry("MAIL CONFOG", LogLevel.Warning, "Incorrect report period in email config");
+                return false;
+            }
+
+            if (MaxQueueSize < 1)
+            {
+                Logger.LogEntry("MAIL CONFOG", LogLevel.Warning, "Incorrect queue size in email config");
                 return false;
             }
 
