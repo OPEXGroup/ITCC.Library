@@ -9,6 +9,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ITCC.Geocoding.Yandex;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
@@ -33,19 +34,36 @@ namespace ITCC.Library.Testing
 
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            StartServer();
+            //StartServer();
 
+            var requestList = new List<string>
+            {
+                "Большой Симоновский переулок, 11"
+            };
+
+            try
+            {
+                foreach (var request in requestList)
+                {
+                    var result = await YandexGeocoder.GeocodeAsync(request, 10, LangType.ru_RU);
+                    Logger.LogEntry("TEST", LogLevel.Debug, $"Got {result.Count} result");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException("TEST", LogLevel.Warning, ex);    
+            }
             
-           
+
             Console.ReadLine();
 
-            await Task.Delay(100000);
-            Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
+            //await Task.Delay(100000);
+            //Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Info;
+            Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             if (!Directory.Exists("Log"))

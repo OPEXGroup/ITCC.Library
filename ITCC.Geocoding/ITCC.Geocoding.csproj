@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{097A520A-5AB7-45A1-86BA-F094C698F5E1}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.Library.Testing</RootNamespace>
-    <AssemblyName>ITCC.Library.Testing</AssemblyName>
+    <RootNamespace>ITCC.Geocoding</RootNamespace>
+    <AssemblyName>ITCC.Geocoding</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,21 +21,18 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1-beta1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,26 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Yandex\GeoBound.cs" />
+    <Compile Include="Yandex\GeocodeEnums.cs" />
+    <Compile Include="Yandex\GeoMetaData.cs" />
+    <Compile Include="Yandex\GeoObject.cs" />
+    <Compile Include="Yandex\GeoObjectCollection.cs" />
+    <Compile Include="Yandex\GeoPoint.cs" />
+    <Compile Include="Yandex\SearchArea.cs" />
+    <Compile Include="Yandex\YandexGeocoder.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Griffin.Framework\src\Griffin.Framework\Griffin.Core\Griffin.Core.csproj">
-      <Project>{744709d5-d4d5-4551-9ebd-cbd7bdf58f5f}</Project>
-      <Name>Griffin.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.Geocoding\ITCC.Geocoding.csproj">
-      <Project>{e0d80db9-1d0e-4fdc-ba31-4d0deb76bb56}</Project>
-      <Name>ITCC.Geocoding</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP\ITCC.HTTP.csproj">
-      <Project>{77016ad7-9655-4918-832c-d26a767e29b4}</Project>
-      <Name>ITCC.HTTP</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.csproj">
       <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
       <Name>ITCC.Logging</Name>

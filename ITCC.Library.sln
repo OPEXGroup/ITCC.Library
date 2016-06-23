@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.UI", "ITCC.UI\ITCC.UI.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.UI.Testing", "ITCC.UI.Testing\ITCC.UI.Testing.csproj", "{B2BA0903-819E-429B-9206-B93B67A29F4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Geocoding", "ITCC.Geocoding\ITCC.Geocoding.csproj", "{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{B2BA0903-819E-429B-9206-B93B67A29F4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2BA0903-819E-429B-9206-B93B67A29F4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2BA0903-819E-429B-9206-B93B67A29F4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
