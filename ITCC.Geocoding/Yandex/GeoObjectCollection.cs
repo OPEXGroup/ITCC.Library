@@ -39,6 +39,8 @@ namespace ITCC.Geocoding.Yandex
                 var boundsNode = node.SelectSingleNode("opengis:boundedBy/opengis:Envelope", ns);
                 var metaNode = node.SelectSingleNode("opengis:metaDataProperty/geocoder:GeocoderMetaData", ns);
 
+                if (metaNode == null)
+                    continue;
                 var obj = new GeoObject
                 {
                     Point = pointNode == null ? new GeoPoint() : GeoPoint.Parse(pointNode.InnerText),

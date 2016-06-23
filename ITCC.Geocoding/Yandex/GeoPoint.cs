@@ -21,18 +21,10 @@ namespace ITCC.Geocoding.Yandex
             Latitude = latitude;
         }
 
-        public override string ToString()
-        {
-            return $"{Longitude.ToString(CultureInfo.InvariantCulture)} {Latitude.ToString(CultureInfo.InvariantCulture)}";
-        }
-        public string ToString(string format)
-        {
-            return string.Format(format, Longitude.ToString(CultureInfo.InvariantCulture), Latitude.ToString(CultureInfo.InvariantCulture));
-        }
+        public override string ToString() => $"{Longitude.ToString(CultureInfo.InvariantCulture)} {Latitude.ToString(CultureInfo.InvariantCulture)}";
 
-        public string ToString(ToStringFunc formatFunc)
-        {
-            return formatFunc(Longitude, Latitude);
-        }
+        public string ToString(string format) => string.Format(format, Longitude.ToString(CultureInfo.InvariantCulture), Latitude.ToString(CultureInfo.InvariantCulture));
+
+        public string ToString(ToStringFunc formatFunc) => formatFunc(Longitude, Latitude);
     }
 }

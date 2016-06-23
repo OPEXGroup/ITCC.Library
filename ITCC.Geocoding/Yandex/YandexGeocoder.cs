@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using ITCC.Logging;
 
@@ -46,10 +47,7 @@ namespace ITCC.Geocoding.Yandex
             return location;
         }
 
-        private static string BuildCommonUrlPart(string location, short results, LangType lang)
-        {
-            return string.Format(RequestUrlFormat, StringMakeValid(location), results, LangTypeToStr(lang));
-        }
+        private static string BuildCommonUrlPart(string location, short results, LangType lang) => string.Format(RequestUrlFormat, StringMakeValid(location), results, LangTypeToStr(lang));
 
         private static string LangTypeToStr(LangType lang)
         {
@@ -74,11 +72,14 @@ namespace ITCC.Geocoding.Yandex
                     if (response.IsSuccessStatusCode)
                         return await response.Content.ReadAsStringAsync();
 
-                    Logger.LogEntry("GEO BAD", LogLevel.Trace, $"HTTP/{response.Version} {(int)response.StatusCode} {response.ReasonPhrase}");
+                    var builder = new StringBuilder();
+                    builder.AppendLine("Bad response:");
+                    builder.AppendLine($"HTTP/{response.Version} {(int) response.StatusCode} {response.ReasonPhrase}");
                     foreach (var httpResponseHeader in response.Headers)
                     {
-                        Logger.LogEntry("GEO BAD", LogLevel.Trace, $"{httpResponseHeader.Key}: {string.Join(";", httpResponseHeader.Value)}");
+                        builder.AppendLine($"{httpResponseHeader.Key}: {string.Join(";", httpResponseHeader.Value)}");
                     }
+                    Logger.LogEntry("GEO BAD", LogLevel.Trace, builder.ToString());
                     return null;
                 }
             }

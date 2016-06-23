@@ -31,7 +31,7 @@
                 case "locality": return KindType.locality;
                 case "metro": return KindType.metro;
                 case "street": return KindType.street;
-                default: return KindType.locality; //throw new System.Exception();
+                default: return KindType.locality;
             }
         }
 

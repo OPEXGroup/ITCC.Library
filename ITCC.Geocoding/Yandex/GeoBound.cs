@@ -10,9 +10,6 @@
             UpperCorner = upperCorner;
         }
 
-        public override string ToString()
-        {
-            return $"[{LowerCorner}] [{UpperCorner}]";
-        }
+        public override string ToString() => $"[{LowerCorner}] [{UpperCorner}]";
     }
 }
