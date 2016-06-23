@@ -2,7 +2,8 @@
 {
     public struct GeoBound
     {
-        public GeoPoint LowerCorner, UpperCorner;
+        public GeoPoint LowerCorner;
+        public GeoPoint UpperCorner;
         public GeoBound(GeoPoint lowerCorner, GeoPoint upperCorner)
         {
             LowerCorner = lowerCorner;
