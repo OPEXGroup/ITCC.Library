@@ -27,12 +27,6 @@ namespace ITCC.HTTP.Server
     public static class StaticServer<TAccount> where TAccount : class
     {
         #region main
-
-        /// <summary>
-        ///     Starts server for incoming connection listening
-        /// </summary>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
         public static ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration)
         {
             if (_started)
@@ -209,11 +203,6 @@ namespace ITCC.HTTP.Server
 
         #region log
 
-        /// <summary>
-        ///     Simple server logger
-        /// </summary>
-        /// <param name="level">Message level</param>
-        /// <param name="message">Message text</param>
         private static void LogMessage(LogLevel level, string message)
         {
             Logger.LogEntry("HTTP SERVER", level, message);
@@ -228,14 +217,7 @@ namespace ITCC.HTTP.Server
 
         #region handlers
 
-#pragma warning disable AsyncFixer03 // Avoid fire & forget async void methods
-        /// <summary>
-        ///     Event handler for received HTTP message
-        /// </summary>
-        /// <param name="channel">Client TCP channel</param>
-        /// <param name="message">Receiver request</param>
         private static async void OnMessage(ITcpChannel channel, object message)
-#pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
         {
             var request = (HttpRequest)message;
             // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
@@ -335,11 +317,6 @@ namespace ITCC.HTTP.Server
             }
         }
 
-        /// <summary>
-        ///     Client connection handler
-        /// </summary>
-        /// <param name="sender">Event context</param>
-        /// <param name="clientConnectedEventArgs">Event params</param>
         private static void OnClientConnected(object sender, ClientConnectedEventArgs clientConnectedEventArgs)
         {
             var sslDescription = string.Empty;
@@ -362,23 +339,11 @@ namespace ITCC.HTTP.Server
             LogMessage(LogLevel.Debug, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}{sslDescription}");
         }
 
-        /// <summary>
-        ///     Client disconnection handler
-        /// </summary>
-        /// <param name="sender">Event context</param>
-        /// <param name="clientDisconnectedEventArgs">Event params</param>
         private static void OnClientDisconnected(object sender, ClientDisconnectedEventArgs clientDisconnectedEventArgs)
         {
             LogMessage(LogLevel.Trace, $"Client {clientDisconnectedEventArgs.Channel.RemoteEndpoint} disconnected with status {clientDisconnectedEventArgs.Exception.Message}");
         }
 
-        /// <summary>
-        ///     Method invoked when response is prepared
-        /// </summary>
-        /// <param name="channel">Client TCP channel</param>
-        /// <param name="response">Server HTTP response</param>
-        /// <param name="uri">For performance statistics</param>
-        /// /// <param name="requestStopwatch">For performance statistics</param>
         private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, Stopwatch requestStopwatch)
         {
             try
@@ -464,7 +429,7 @@ namespace ITCC.HTTP.Server
             {
                 response.AddHeader("Retry-After", authResult.Userdata.ToString());
             }
-            OnResponseReady(channel, response, "login", requestStopwatch);
+            OnResponseReady(channel, response, "/login", requestStopwatch);
         }
 
         private static Delegates.Authentificator _authentificator;
@@ -493,7 +458,7 @@ namespace ITCC.HTTP.Server
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
             var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
-            OnResponseReady(channel, response, "ping", requestStopwatch);
+            OnResponseReady(channel, response, "/ping", requestStopwatch);
             return Task.CompletedTask;
         }
 
@@ -539,7 +504,7 @@ namespace ITCC.HTTP.Server
                 response.ContentType = "text/plain";
             }
 
-            OnResponseReady(channel, response, "statistics", requestStopwatch);
+            OnResponseReady(channel, response, "/statistics", requestStopwatch);
         }
         #endregion
 
@@ -613,7 +578,7 @@ namespace ITCC.HTTP.Server
             if (string.IsNullOrEmpty(_faviconPath) || !File.Exists(_faviconPath))
             {
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                OnResponseReady(channel, response, "favicon.ico", requestStopwatch);
+                OnResponseReady(channel, response, "/favicon.ico", requestStopwatch);
                 return Task.CompletedTask;
             }
             response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
@@ -622,7 +587,7 @@ namespace ITCC.HTTP.Server
             response.ContentType = "image/x-icon";
             response.Body = fileStream;
 
-            OnResponseReady(channel, response, "favicon.ico", requestStopwatch);
+            OnResponseReady(channel, response, "/favicon.ico", requestStopwatch);
             return Task.CompletedTask;
         }
         #endregion
@@ -844,11 +809,6 @@ namespace ITCC.HTTP.Server
             return first.SubUri == second.SubUri && first.Method == second.Method;
         }
 
-        /// <summary>
-        ///     Add server request processor
-        /// </summary>
-        /// <param name="requestProcessor"></param>
-        /// <returns></returns>
         public static bool AddRequestProcessor(RequestProcessor<TAccount> requestProcessor)
         {
             if (CheckRequestProcessor(requestProcessor) != true)
@@ -893,11 +853,6 @@ namespace ITCC.HTTP.Server
             return true;
         }
 
-        /// <summary>
-        ///     Selects a way to handle incoming request
-        /// </summary>
-        /// <param name="request">Request</param>
-        /// <returns>Request processor or null if it is not found</returns>
         private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
         {
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
@@ -926,9 +881,6 @@ namespace ITCC.HTTP.Server
             };
         }
 
-        /// <summary>
-        ///     Legacy API method -> Request processor map
-        /// </summary>
         public static readonly List<RequestProcessor<TAccount>> RequestProcessors =
             new List<RequestProcessor<TAccount>>();
 
