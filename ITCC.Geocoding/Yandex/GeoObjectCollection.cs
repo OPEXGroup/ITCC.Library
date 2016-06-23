@@ -29,7 +29,7 @@ namespace ITCC.Geocoding.Yandex
             var nodes = doc.SelectNodes("//ns:ymaps/ns:GeoObjectCollection/opengis:featureMember/ns:GeoObject", ns);
             if (nodes == null)
             {
-                Logger.LogEntry("GEO YANDEX", LogLevel.Debug, "Null nodex");
+                Logger.LogEntry("GEO YANDEX", LogLevel.Debug, "Null nodes");
                 return;
             }
 
@@ -43,9 +43,8 @@ namespace ITCC.Geocoding.Yandex
                 {
                     Point = pointNode == null ? new GeoPoint() : GeoPoint.Parse(pointNode.InnerText),
                     BoundedBy = boundsNode == null ? new GeoBound() : new GeoBound(
-                        GeoPoint.Parse(boundsNode["lowerCorner"]?.InnerText), GeoPoint.Parse(boundsNode["upperCorner"]?.InnerText)
-                        ),
-                    GeocoderMetaData = new GeoMetaData(metaNode["text"].InnerText, metaNode["kind"].InnerText)
+                        GeoPoint.Parse(boundsNode["lowerCorner"]?.InnerText), GeoPoint.Parse(boundsNode["upperCorner"]?.InnerText)),
+                    GeocoderMetaData = new GeoMetaData(metaNode["text"]?.InnerText, metaNode["kind"]?.InnerText)
                 };
                 Add(obj);
             }
