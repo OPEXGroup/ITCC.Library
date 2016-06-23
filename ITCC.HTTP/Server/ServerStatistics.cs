@@ -159,11 +159,16 @@ namespace ITCC.HTTP.Server
                 _requestCount++;
             }
 
-            var timeDict = HasGoodStatusCode(response) ? _requestSuccessTimeCounters : _requestFailTimeCounters;
-            var counterDict = HasGoodStatusCode(response) ? _requestSuccessCounters : _requestFailCounters;
-
-            timeDict.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
-            counterDict.AddOrUpdate(uri, 1, (key, value) => value + 1);
+            if (HasGoodStatusCode(response))
+            {
+                _requestSuccessTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
+                _requestSuccessCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+            }
+            else
+            {
+                _requestFailTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
+                _requestFailCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+            }
         }
 
         public void AddRequest(HttpRequest request)

@@ -33,12 +33,10 @@ namespace ITCC.Library.Testing
 
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            //StartServer();
+            StartServer();
 
             
-            Logger.LogEntry("TEST", LogLevel.Error, "test");
-            Logger.LogEntry("TEST", LogLevel.Critical, "crit");
-            // StopServer();
+           
             Console.ReadLine();
 
             await Task.Delay(100000);
@@ -47,7 +45,7 @@ namespace ITCC.Library.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Info;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             if (!Directory.Exists("Log"))
@@ -78,8 +76,8 @@ namespace ITCC.Library.Testing
                 Subject = "ISENGARD",
                 SendEmptyReports = true
             });
-            emailLogger.Start();
-            Logger.RegisterReceiver(emailLogger);
+            // emailLogger.Start();
+            // Logger.RegisterReceiver(emailLogger);
 
             return true;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -237,7 +238,8 @@ namespace ITCC.HTTP.Server
 #pragma warning restore AsyncFixer03 // Avoid fire & forget async void methods
         {
             var request = (HttpRequest)message;
-            var startTime = DateTime.Now;
+            // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
+            var stopWatch = Stopwatch.StartNew();
             try
             {
                 _statistics?.AddRequest(request);
@@ -250,7 +252,7 @@ namespace ITCC.HTTP.Server
                 {
                     if (checker.Invoke(request))
                     {
-                        await ServiceHandlers[checker].Invoke(channel, request, startTime);
+                        await ServiceHandlers[checker].Invoke(channel, request, stopWatch);
                         return;
                     }
                 }
@@ -259,14 +261,14 @@ namespace ITCC.HTTP.Server
                 if (requestProcessorSelectionResult == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
                     return;
                 }
 
                 if (!requestProcessorSelectionResult.MethodMatches)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
                     return;
                 }
 
@@ -320,7 +322,7 @@ namespace ITCC.HTTP.Server
                         response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                         break;
                 }
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(startTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
             }
             catch (Exception exception)
             {
@@ -329,7 +331,7 @@ namespace ITCC.HTTP.Server
                 OnResponseReady(channel,
                     ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null),
                     "/" + request.Uri.LocalPath.Trim('/'),
-                    DateTime.Now.Subtract(startTime).TotalMilliseconds);
+                    stopWatch);
             }
         }
 
@@ -376,8 +378,8 @@ namespace ITCC.HTTP.Server
         /// <param name="channel">Client TCP channel</param>
         /// <param name="response">Server HTTP response</param>
         /// <param name="uri">For performance statistics</param>
-        /// /// <param name="processingTime">For performance statistics</param>
-        private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, double processingTime)
+        /// /// <param name="requestStopwatch">For performance statistics</param>
+        private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, Stopwatch requestStopwatch)
         {
             try
             {
@@ -385,13 +387,15 @@ namespace ITCC.HTTP.Server
                 LogMessage(LogLevel.Trace,
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
 #endif
-                _statistics?.AddResponse(response, uri, processingTime);
-                if (_requestMaxServeTime > 0 && _requestMaxServeTime < processingTime)
+                requestStopwatch.Stop();
+                var elapsedMilliseconds = requestStopwatch.ElapsedTicks*1000.0/Stopwatch.Frequency;
+                _statistics?.AddResponse(response, uri, elapsedMilliseconds);
+                if (_requestMaxServeTime > 0 && _requestMaxServeTime < elapsedMilliseconds)
                 {
-                    LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {processingTime} milliseconds to process!");
+                    LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {elapsedMilliseconds} milliseconds to process!");
                 }
                 channel.Send(response);
-                LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent ({processingTime} milliseconds)");
+                LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent ({elapsedMilliseconds} milliseconds)");
             }
             catch (SocketException)
             {
@@ -446,7 +450,7 @@ namespace ITCC.HTTP.Server
             return request.QueryString["login"] != null && request.QueryString["password"] != null;
         }
 
-        private static async Task Authentificate(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static async Task Authentificate(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             AuthentificationResult authResult;
             if (_authentificator != null)
@@ -460,7 +464,7 @@ namespace ITCC.HTTP.Server
             {
                 response.AddHeader("Retry-After", authResult.Userdata.ToString());
             }
-            OnResponseReady(channel, response, "login", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            OnResponseReady(channel, response, "login", requestStopwatch);
         }
 
         private static Delegates.Authentificator _authentificator;
@@ -483,13 +487,13 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "ping";
         }
 
-        private static Task HandlePing(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandlePing(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
             var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
-            OnResponseReady(channel, response, "ping", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            OnResponseReady(channel, response, "ping", requestStopwatch);
             return Task.CompletedTask;
         }
 
@@ -512,7 +516,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
         }
 
-        private static async Task HandleStatistics(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static async Task HandleStatistics(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             HttpResponse response;
             if (_statisticsAuthorizer != null)
@@ -535,7 +539,7 @@ namespace ITCC.HTTP.Server
                 response.ContentType = "text/plain";
             }
 
-            OnResponseReady(channel, response, "statistics", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            OnResponseReady(channel, response, "statistics", requestStopwatch);
         }
         #endregion
 
@@ -550,7 +554,7 @@ namespace ITCC.HTTP.Server
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        private static Task HandleOptions(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandleOptions(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             var allowValues = new List<string>();
             if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
@@ -583,7 +587,7 @@ namespace ITCC.HTTP.Server
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
             }
             
-            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
             return Task.CompletedTask;
         }
 
@@ -602,14 +606,14 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/').ToLower() == "favicon.ico";
         }
 
-        private static Task HandleFavicon(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static Task HandleFavicon(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             HttpResponse response;
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {_faviconPath}");
             if (string.IsNullOrEmpty(_faviconPath) || !File.Exists(_faviconPath))
             {
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "favicon.ico", requestStopwatch);
                 return Task.CompletedTask;
             }
             response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
@@ -618,7 +622,7 @@ namespace ITCC.HTTP.Server
             response.ContentType = "image/x-icon";
             response.Body = fileStream;
 
-            OnResponseReady(channel, response, "favicon.ico", DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+            OnResponseReady(channel, response, "favicon.ico", requestStopwatch);
             return Task.CompletedTask;
         }
         #endregion
@@ -646,7 +650,7 @@ namespace ITCC.HTTP.Server
             return request.Uri.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-        private static async Task HandleFileRequest(ITcpChannel channel, HttpRequest request, DateTime requestStartTime)
+        private static async Task HandleFileRequest(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
             HttpResponse response;
             try
@@ -656,7 +660,7 @@ namespace ITCC.HTTP.Server
                 if (filename == null || section == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
                     return;
                 }
                 var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
@@ -704,13 +708,13 @@ namespace ITCC.HTTP.Server
                         response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                         break;
                 }
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Warning, exception);
                 response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), DateTime.Now.Subtract(requestStartTime).TotalMilliseconds);
+                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
             }    
         }
 

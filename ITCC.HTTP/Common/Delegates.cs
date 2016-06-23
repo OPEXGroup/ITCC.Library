@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -100,7 +101,7 @@ namespace ITCC.HTTP.Common
         /// </summary>
         /// <param name="channel"></param>
         /// <param name="request"></param>
-        /// <param name="requestStartTime">For performance measuring</param>
-        internal delegate Task ServiceRequestHandler(ITcpChannel channel, HttpRequest request, DateTime requestStartTime);
+        /// <param name="requestStopWatch">For performance measuring</param>
+        internal delegate Task ServiceRequestHandler(ITcpChannel channel, HttpRequest request, Stopwatch requestStopWatch);
     }
 }
