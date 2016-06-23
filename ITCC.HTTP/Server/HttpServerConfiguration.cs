@@ -117,7 +117,7 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     Warning will be given if request handle workes for more milliseconds. Negatime values mean infinity
         /// </summary>
-        public double RequestMaxServeTime { get; set; } = 1;
+        public double RequestMaxServeTime { get; set; } = -1;
 
         public bool IsEnough()
         {
