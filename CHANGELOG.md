@@ -1,3 +1,8 @@
+## 0.9.2 (2016-06-23)
+
+* **Edit**: More accurate time counters in `ServerStatistics`  
+* **Fix**:  Fixed service requests performance measuring in `StaticServer`  
+
 ## 0.9.1 (2016-06-22)
 
 * **New**:  `DataGridIgnoreAttribute` added
