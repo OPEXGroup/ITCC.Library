@@ -1,3 +1,7 @@
+## 0.9.3 (2016-06-23)
+
+* **New**:  `MaxQueueSize` parameter added to `EmailLogger` configuration
+
 ## 0.9.2 (2016-06-23)
 
 * **Edit**: More accurate time counters in `ServerStatistics`  
