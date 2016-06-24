@@ -420,6 +420,7 @@ System.Security.Authentification.SslProtocols SuitableSslProtocols { get; set; }
 
 bool FilesEnabled { get; set; }                                                   // Поддерживает ли сервер работу с файлами
 string FilesLocation { get; set; }                                                // Расположение файлов на сервер
+long MaxFileSize { get; set; } = -1;                                              // Максимально разрешенный размер файлов. При отправке бОльшего файла будет выдан код 413. Отрицательное значение - нет ограничения
 string FilesBaseUri { get; set; }                                                 // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
 bool FilesNeedAuthorization { get; set; }                                         // Требуется ли авторизация для доступа к файлам
 /* Секции файлов, используемые на сервере. Если список пуст, на любой файловый запрос сервер будет отвечать 400 Bad Request */

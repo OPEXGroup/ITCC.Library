@@ -97,6 +97,7 @@ namespace ITCC.HTTP.Server
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
                 FilesLocation = configuration.FilesLocation;
+                MaxFileSize = configuration.MaxFileSize;
                 FileSections = configuration.FileSections;
 
                 if (FilesEnabled && !IOHelper.HasWriteAccessToDirectory(FilesLocation))
@@ -595,6 +596,8 @@ namespace ITCC.HTTP.Server
 
         public static string FilesLocation { get; private set; }
 
+        public static long MaxFileSize { get; private set; }
+
         public static string FilesBaseUri { get; private set; }
 
         public static bool FilesNeedAuthorization { get; private set; }
@@ -695,6 +698,12 @@ namespace ITCC.HTTP.Server
                 return response;
             }
             var fileContent = request.Body;
+            if (MaxFileSize > 0 && fileContent.Length > MaxFileSize)
+            {
+                LogMessage(LogLevel.Debug, $"Trying to create {filePath} of size {fileContent.Length}. Max allowed size is {MaxFileSize}");
+                response = ResponseFactory.CreateResponse(HttpStatusCode.RequestEntityTooLarge, null);
+                return response;
+            }
             using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 await fileContent.CopyToAsync(file).ConfigureAwait(false);
