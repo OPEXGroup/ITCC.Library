@@ -1,3 +1,9 @@
+## 0.10.0 (2016-06-24)
+
+* **New**:  `ITCC.Geocoding` project added  
+* **New**:  `MaxFileSize` added to `FileSection`. `413 Request Entity Too Large` support added  
+* **Edit**: General HTTP refactor (See `HandlerResult` and `RequestResult`)  
+
 ## 0.9.4 (2016-06-23)
 
 * **New**:  `EmailLogger` will now report about it's start
