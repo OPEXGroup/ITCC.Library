@@ -643,7 +643,7 @@ namespace ITCC.HTTP.Server
                             response = HandleFileGetRequest(channel, request, filePath);
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
-                            response = await HandleFilePostRequest(channel, request, filePath).ConfigureAwait(false);
+                            response = await HandleFilePostRequest(channel, request, section, filePath).ConfigureAwait(false);
                         }
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
                         {

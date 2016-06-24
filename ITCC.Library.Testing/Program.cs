@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.Geocoding.Yandex;
+using ITCC.Geocoding.Yandex.Enums;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
