@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -30,6 +31,23 @@ namespace ITCC.HTTP.Client
         #region private
 
         private string _serverAddress = "http://127.0.0.1/";
+
+        private static readonly Dictionary<HttpStatusCode, ServerResponseStatus> ServerResponseStatusDictionary = new Dictionary<HttpStatusCode, ServerResponseStatus>
+        {
+            {HttpStatusCode.OK, ServerResponseStatus.Ok },
+            {HttpStatusCode.Created, ServerResponseStatus.Ok },
+            {HttpStatusCode.NoContent, ServerResponseStatus.NothingToDo },
+            {HttpStatusCode.Unauthorized, ServerResponseStatus.Unauthorized },
+            {HttpStatusCode.Forbidden, ServerResponseStatus.Forbidden },
+            {HttpStatusCode.BadRequest, ServerResponseStatus.ClientError },
+            {HttpStatusCode.NotFound, ServerResponseStatus.ClientError },
+            {HttpStatusCode.Conflict, ServerResponseStatus.ClientError },
+            {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError },
+            {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
+            {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
+            {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError },
+            {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError }
+        };
 
         #endregion
 
@@ -66,11 +84,7 @@ namespace ITCC.HTTP.Client
             if (fullUri == null)
             {
                 LogMessage(LogLevel.Debug, $"Failed to build uri with addr={_serverAddress} and uri {partialUri}");
-                return new RequestResult<TResult>
-                {
-                    Result = default(TResult),
-                    Status = ServerResponseStatus.ClientError
-                };
+                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
             }
 
             try
@@ -107,11 +121,7 @@ namespace ITCC.HTTP.Client
                                     if (requestBodySerializer == null)
                                     {
                                         LogMessage(LogLevel.Debug, "Unable to serialize request body");
-                                        return new RequestResult<TResult>
-                                        {
-                                            Result = default(TResult),
-                                            Status = ServerResponseStatus.ClientError
-                                        };
+                                        return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
                                     }
                                     requestBody = requestBodySerializer(bodyArg);
                                     request.Content = new StringContent(requestBody);
@@ -128,89 +138,40 @@ namespace ITCC.HTTP.Client
                         LogMessage(LogLevel.Trace,
                             $"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
 #endif
-
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
+                            var responseHeaders = response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key, httpResponseHeader => string.Join(";", httpResponseHeader.Value));
 #if TRACE
                             LogMessage(LogLevel.Trace,
                                 $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
 #endif
 
-                            object userdata = null;
-                            ServerResponseStatus status;
-                            switch (response.StatusCode)
-                            {
-                                case HttpStatusCode.OK:
-                                case HttpStatusCode.Created:
-                                    status = ServerResponseStatus.Ok;
-                                    break;
-                                case HttpStatusCode.NoContent:
-                                    status = ServerResponseStatus.NothingToDo;
-                                    break;
-                                case HttpStatusCode.Unauthorized:
-                                    status = ServerResponseStatus.Unauthorized;
-                                    break;
-                                case HttpStatusCode.Forbidden:
-                                    status = ServerResponseStatus.Forbidden;
-                                    break;
-                                case HttpStatusCode.Conflict:
-                                case HttpStatusCode.BadRequest:
-                                case HttpStatusCode.NotFound:
-                                case HttpStatusCode.MethodNotAllowed:
-                                    status = ServerResponseStatus.ClientError;
-                                    break;
-                                case HttpStatusCode.InternalServerError:
-                                case HttpStatusCode.NotImplemented:
-                                    status = ServerResponseStatus.ServerError;
-                                    break;
-                                case (HttpStatusCode)429:
-                                    status = ServerResponseStatus.TooManyRequests;
-                                    userdata = response.Headers.RetryAfter?.Delta;
-                                    break;
-                                default:
-                                    status = ServerResponseStatus.IncompehensibleResponse;
-                                    break;
-                            }
+                            var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
+                                ? ServerResponseStatusDictionary[response.StatusCode]
+                                : ServerResponseStatus.IncompehensibleResponse;
 
                             if (responseBodyDeserializer != null)
                             {
                                 try
                                 {
-                                    return new RequestResult<TResult>
-                                    {
-                                        Result = responseBodyDeserializer(responseBody),
-                                        Status = status,
-                                        Userdata = userdata
-                                    };
+                                    return new RequestResult<TResult>(responseBodyDeserializer(responseBody), status,
+                                        responseHeaders);
                                 }
                                 catch (Exception ex)
                                 {
                                     LogException(LogLevel.Debug, ex);
-                                    return new RequestResult<TResult>
-                                    {
-                                        Result = default(TResult),
-                                        Status = ServerResponseStatus.IncompehensibleResponse,
-                                        Userdata = userdata
-                                    };
+                                    return new RequestResult<TResult>(default(TResult),
+                                        ServerResponseStatus.IncompehensibleResponse, responseHeaders);
                                 }
                             }
                             if (typeof(TResult) != typeof(string) && typeof(TResult) != typeof(object))
                             {
-                                return new RequestResult<TResult>
-                                {
-                                    Result = default(TResult),
-                                    Status = ServerResponseStatus.ClientError,
-                                    Userdata = userdata
-                                };
+                                return new RequestResult<TResult>(default(TResult),
+                                        ServerResponseStatus.ClientError, responseHeaders);
                             }
-                            return new RequestResult<TResult>
-                            {
-                                Result = responseBody as TResult,
-                                Status = status,
-                                Userdata = userdata
-                            };
+                            return new RequestResult<TResult>(responseBody as TResult,
+                                        status, responseHeaders);
                         }
                     }
                 }
@@ -220,40 +181,20 @@ namespace ITCC.HTTP.Client
                 if (cancellationToken.IsCancellationRequested)
                 {
                     LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been cancelled");
-                    return new RequestResult<TResult>
-                    {
-                        Result = default(TResult),
-                        Status = ServerResponseStatus.RequestCancelled,
-                        Userdata = ocex
-                    };
+                    return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestCancelled, ocex);
                 }
                 LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");
-                return new RequestResult<TResult>
-                {
-                    Result = default(TResult),
-                    Status = ServerResponseStatus.RequestTimeout,
-                    Userdata = ocex
-                };
+                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestTimeout, ocex);
             }
             catch (HttpRequestException networkException)
             {
                 LogException(LogLevel.Debug, networkException);
-                return new RequestResult<TResult>
-                {
-                    Result = default(TResult),
-                    Status = ServerResponseStatus.ConnectionError,
-                    Userdata = networkException
-                };
+                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ConnectionError, networkException);
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Debug, exception);
-                return new RequestResult<TResult>
-                {
-                    Result = default(TResult),
-                    Status = ServerResponseStatus.ClientError,
-                    Userdata = exception
-                };
+                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError, exception);
             }
         }
 

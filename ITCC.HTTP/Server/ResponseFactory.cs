@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
+using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server
 {
@@ -12,6 +14,16 @@ namespace ITCC.HTTP.Server
     /// </summary>
     internal static class ResponseFactory
     {
+        private static readonly Dictionary<AuthorizationStatus, HttpStatusCode> AuthResultDictionary = new Dictionary<AuthorizationStatus, HttpStatusCode>
+        {
+            {AuthorizationStatus.NotRequired, HttpStatusCode.OK },
+            {AuthorizationStatus.Ok, HttpStatusCode.OK },
+            {AuthorizationStatus.Unauthorized, HttpStatusCode.Unauthorized },
+            {AuthorizationStatus.Forbidden, HttpStatusCode.Forbidden },
+            {AuthorizationStatus.TooManyRequests, (HttpStatusCode)429 },
+            {AuthorizationStatus.InternalError, HttpStatusCode.OK }
+        }; 
+
         /// <summary>
         ///     Status code -> reason phrase map
         /// </summary>
@@ -63,17 +75,43 @@ namespace ITCC.HTTP.Server
             _bodyEncoding = encoding;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="code"></param>
-        /// <param name="body"></param>
-        /// <returns></returns>
-        public static HttpResponse CreateResponse(HttpStatusCode code, object body, bool alreadyEncoded = false)
+        public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult)
+            where TAccount : class 
+        {
+            if (authorizationResult == null)
+                throw new ArgumentNullException(nameof(authorizationResult));
+
+            var httpStatusCode = AuthResultDictionary.ContainsKey(authorizationResult.Status)
+                ? AuthResultDictionary[authorizationResult.Status]
+                : HttpStatusCode.InternalServerError;
+
+            return CreateResponse(httpStatusCode,
+                (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
+                authorizationResult.AdditionalHeaders);
+        }
+
+        public static HttpResponse CreateResponse(HandlerResult handlerResult, bool alreadyEncoded = false)
+        {
+            if (handlerResult == null)
+                throw new ArgumentNullException(nameof(handlerResult));
+
+            return CreateResponse(handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded);
+        }
+
+        public static HttpResponse CreateResponse(HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
         {
             var httpResponse = new HttpResponse(code, SelectReasonPhrase(code), "HTTP/1.1");
             if (_commonHeaders != null)
             {
                 foreach (var header in _commonHeaders)
+                {
+                    httpResponse.AddHeader(header.Key, header.Value);
+                }
+            }
+
+            if (additionalHeaders != null)
+            {
+                foreach (var header in additionalHeaders)
                 {
                     httpResponse.AddHeader(header.Key, header.Value);
                 }

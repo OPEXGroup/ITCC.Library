@@ -226,7 +226,6 @@ namespace ITCC.HTTP.Server
             try
             {
                 _statistics?.AddRequest(request);
-                
                 HttpResponse response;
                 LogMessage(LogLevel.Debug,
                     $"Request from {channel.RemoteEndpoint}. Method: {request.HttpMethod}, URI: {request.Uri.LocalPath}");
@@ -235,7 +234,7 @@ namespace ITCC.HTTP.Server
                 {
                     if (checker.Invoke(request))
                     {
-                        await ServiceHandlers[checker].Invoke(channel, request, stopWatch);
+                        await ServiceHandlers[checker].Invoke(channel, request, stopWatch).ConfigureAwait(false);
                         return;
                     }
                 }
@@ -281,8 +280,8 @@ namespace ITCC.HTTP.Server
                         }
                         else
                         {
-                            var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request);
-                            response = ResponseFactory.CreateResponse(handleResult.Status, handleResult.Body);
+                            var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                            response = ResponseFactory.CreateResponse(handleResult);
                             if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
                             {
                                 var savedBody = response.Body;
@@ -291,18 +290,8 @@ namespace ITCC.HTTP.Server
                             }
                         }
                         break;
-                    case AuthorizationStatus.Unauthorized:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.Unauthorized, null);
-                        break;
-                    case AuthorizationStatus.Forbidden:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
-                        break;
-                    case AuthorizationStatus.TooManyRequests:
-                        response = ResponseFactory.CreateResponse((HttpStatusCode)429, null);
-                        response.AddHeader("Retry-After", authResult.Userdata.ToString());
-                        break;
                     default:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
+                        response = ResponseFactory.CreateResponse(authResult);
                         break;
                 }
                 OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
@@ -359,7 +348,7 @@ namespace ITCC.HTTP.Server
                     $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
 #endif
                 requestStopwatch.Stop();
-                var elapsedMilliseconds = requestStopwatch.ElapsedTicks*1000.0/Stopwatch.Frequency;
+                var elapsedMilliseconds = requestStopwatch.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
                 _statistics?.AddResponse(response, uri, elapsedMilliseconds);
                 if (_requestMaxServeTime > 0 && _requestMaxServeTime < elapsedMilliseconds)
                 {
@@ -401,7 +390,7 @@ namespace ITCC.HTTP.Server
             { IsFilesRequest, HandleFileRequest },
             { IsFaviconRequest, HandleFavicon }
         };
-        
+
         private static readonly List<string> ServiceUris = new List<string>();
 
         #endregion
@@ -431,7 +420,7 @@ namespace ITCC.HTTP.Server
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
             var response = ResponseFactory.CreateResponse(authResult.Status, authResult.AccountView);
-            if (authResult.Status == (HttpStatusCode) 429)
+            if (authResult.Status == (HttpStatusCode)429)
             {
                 response.AddHeader("Retry-After", authResult.Userdata.ToString());
             }
@@ -463,7 +452,7 @@ namespace ITCC.HTTP.Server
             var converter = new PingJsonConverter();
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
-            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
+            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
             OnResponseReady(channel, response, "/ping", requestStopwatch);
             return Task.CompletedTask;
         }
@@ -495,7 +484,7 @@ namespace ITCC.HTTP.Server
                 if (await _statisticsAuthorizer.Invoke(request))
                 {
                     var responseBody = _statistics?.Serialize();
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
                     response.ContentType = "text/plain";
                 }
                 else
@@ -506,7 +495,7 @@ namespace ITCC.HTTP.Server
             else
             {
                 var responseBody = _statistics?.Serialize();
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, true);
+                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
                 response.ContentType = "text/plain";
             }
 
@@ -545,7 +534,7 @@ namespace ITCC.HTTP.Server
                 allowValues.Add("GET");
                 allowValues.Add("HEAD");
             }
-            
+
 
             HttpResponse response;
             if (allowValues.Any())
@@ -557,7 +546,7 @@ namespace ITCC.HTTP.Server
             {
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
             }
-            
+
             OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
             return Task.CompletedTask;
         }
@@ -610,7 +599,7 @@ namespace ITCC.HTTP.Server
 
         public static bool FilesNeedAuthorization { get; private set; }
 
-        public static List<FileSection> FileSections { get; private set; } 
+        public static List<FileSection> FileSections { get; private set; }
 
         private static bool IsFilesRequest(HttpRequest request)
         {
@@ -639,7 +628,7 @@ namespace ITCC.HTTP.Server
                 AuthorizationResult<TAccount> authResult;
                 if (FilesNeedAuthorization)
                 {
-                    authResult = await _fileAuthorizer.Invoke(request, section, filename);
+                    authResult = await _fileAuthorizer.Invoke(request, section, filename).ConfigureAwait(false);
                 }
                 else
                 {
@@ -654,7 +643,7 @@ namespace ITCC.HTTP.Server
                             response = HandleFileGetRequest(channel, request, filePath);
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
-                            response = await HandleFilePostRequest(channel, request, filePath);
+                            response = await HandleFilePostRequest(channel, request, filePath).ConfigureAwait(false);
                         }
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
                         {
@@ -665,18 +654,8 @@ namespace ITCC.HTTP.Server
                             response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
                         }
                         break;
-                    case AuthorizationStatus.Unauthorized:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.Unauthorized, null);
-                        break;
-                    case AuthorizationStatus.Forbidden:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
-                        break;
-                    case AuthorizationStatus.TooManyRequests:
-                        response = ResponseFactory.CreateResponse((HttpStatusCode)429, null);
-                        response.AddHeader("Retry-After", authResult.Userdata.ToString());
-                        break;
                     default:
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
+                        response = ResponseFactory.CreateResponse(authResult);
                         break;
                 }
                 OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
@@ -686,7 +665,7 @@ namespace ITCC.HTTP.Server
                 LogException(LogLevel.Warning, exception);
                 response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
                 OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
-            }    
+            }
         }
 
         private static HttpResponse HandleFileGetRequest(ITcpChannel channel, HttpRequest request, string filePath)
@@ -718,7 +697,7 @@ namespace ITCC.HTTP.Server
             var fileContent = request.Body;
             using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
-                await fileContent.CopyToAsync(file);
+                await fileContent.CopyToAsync(file).ConfigureAwait(false);
                 file.Flush();
                 file.Close();
             }
@@ -729,14 +708,14 @@ namespace ITCC.HTTP.Server
             LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
             LogMessage(LogLevel.Debug, $"File {filePath} created");
             response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
-            
+
             return response;
         }
 
         private static HttpResponse HandleFileDeleteRequest(ITcpChannel channel, HttpRequest request, string filePath)
         {
             HttpResponse response;
-            if (! File.Exists(filePath))
+            if (!File.Exists(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);

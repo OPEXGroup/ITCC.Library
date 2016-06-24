@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server
@@ -8,14 +10,14 @@ namespace ITCC.HTTP.Server
     /// </summary>
     public class AuthorizationResult<TAccount>
     {
-        public AuthorizationResult(TAccount account, AuthorizationStatus status, object userdata = null)
+        public AuthorizationResult(TAccount account, AuthorizationStatus status, IDictionary<string, string> additionalHeaders = null)
         {
             Account = account;
             Status = status;
-            Userdata = userdata;
+            AdditionalHeaders = additionalHeaders;
         }
 
-        public AuthorizationResult(TAccount account, AuthorizationStatus status, string errorDescription, object userdata = null)
+        public AuthorizationResult(TAccount account, AuthorizationStatus status, string errorDescription, IDictionary<string, string> additionalHeaders = null)
         {
             // For internal checks
             if (status == AuthorizationStatus.Ok)
@@ -24,7 +26,7 @@ namespace ITCC.HTTP.Server
             Account = account;
             Status = status;
             ErrorDescription = errorDescription;
-            Userdata = userdata;
+            AdditionalHeaders = additionalHeaders;
         }
 
         /// <summary>
@@ -43,8 +45,8 @@ namespace ITCC.HTTP.Server
         public string ErrorDescription { get; set; }
 
         /// <summary>
-        ///     Custom additional data
+        ///     Custom additional headers
         /// </summary>
-        public object Userdata { get; set; }
+        public IDictionary<string, string> AdditionalHeaders { get; set; }
     }
 }
