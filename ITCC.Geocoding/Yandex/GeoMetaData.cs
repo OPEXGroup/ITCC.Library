@@ -1,8 +1,10 @@
-﻿namespace ITCC.Geocoding.Yandex
+﻿using ITCC.Geocoding.Yandex.Enums;
+
+namespace ITCC.Geocoding.Yandex
 {
     public class GeoMetaData
     {
-        public KindType Kind = KindType.locality;
+        public KindType Kind = KindType.Locality;
         public string Text = string.Empty;
         //ToDo:
         //AddressDetails
@@ -22,16 +24,16 @@
             Kind = kind;
         }
 
-        public static KindType ParseKind(string kind)
+        private static KindType ParseKind(string kind)
         {
             switch (kind)
             {
-                case "district": return KindType.district;
-                case "house": return KindType.house;
-                case "locality": return KindType.locality;
-                case "metro": return KindType.metro;
-                case "street": return KindType.street;
-                default: return KindType.locality;
+                case "district": return KindType.District;
+                case "house": return KindType.House;
+                case "locality": return KindType.Locality;
+                case "metro": return KindType.Metro;
+                case "street": return KindType.Street;
+                default: return KindType.Locality;
             }
         }
 

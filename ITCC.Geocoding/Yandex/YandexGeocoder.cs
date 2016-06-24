@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using ITCC.Geocoding.Yandex.Enums;
 using ITCC.Logging;
 
 namespace ITCC.Geocoding.Yandex

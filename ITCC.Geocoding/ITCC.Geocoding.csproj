@@ -40,8 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Yandex\Enums\KindType.cs" />
+    <Compile Include="Yandex\Enums\LangType.cs" />
     <Compile Include="Yandex\GeoBound.cs" />
-    <Compile Include="Yandex\GeocodeEnums.cs" />
     <Compile Include="Yandex\GeoMetaData.cs" />
     <Compile Include="Yandex\GeoObject.cs" />
     <Compile Include="Yandex\GeoObjectCollection.cs" />
