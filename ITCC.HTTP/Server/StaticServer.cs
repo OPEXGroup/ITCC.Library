@@ -97,7 +97,6 @@ namespace ITCC.HTTP.Server
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
                 FilesLocation = configuration.FilesLocation;
-                MaxFileSize = configuration.MaxFileSize;
                 FileSections = configuration.FileSections;
 
                 if (FilesEnabled && !IOHelper.HasWriteAccessToDirectory(FilesLocation))
@@ -596,8 +595,6 @@ namespace ITCC.HTTP.Server
 
         public static string FilesLocation { get; private set; }
 
-        public static long MaxFileSize { get; private set; }
-
         public static string FilesBaseUri { get; private set; }
 
         public static bool FilesNeedAuthorization { get; private set; }
@@ -688,7 +685,7 @@ namespace ITCC.HTTP.Server
             return response;
         }
 
-        private static async Task<HttpResponse> HandleFilePostRequest(ITcpChannel channel, HttpRequest request, string filePath)
+        private static async Task<HttpResponse> HandleFilePostRequest(ITcpChannel channel, HttpRequest request, FileSection section, string filePath)
         {
             HttpResponse response;
             if (File.Exists(filePath))
@@ -698,9 +695,9 @@ namespace ITCC.HTTP.Server
                 return response;
             }
             var fileContent = request.Body;
-            if (MaxFileSize > 0 && fileContent.Length > MaxFileSize)
+            if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
             {
-                LogMessage(LogLevel.Debug, $"Trying to create {filePath} of size {fileContent.Length}. Max allowed size is {MaxFileSize}");
+                LogMessage(LogLevel.Debug, $"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
                 response = ResponseFactory.CreateResponse(HttpStatusCode.RequestEntityTooLarge, null);
                 return response;
             }

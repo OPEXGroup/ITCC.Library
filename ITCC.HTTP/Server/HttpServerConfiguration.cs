@@ -44,10 +44,6 @@ namespace ITCC.HTTP.Server
         /// </summary>
         public string FilesLocation { get; set; }
         /// <summary>
-        ///     Max file size allowed to be posted
-        /// </summary>
-        public long MaxFileSize { get; set; } = -1;
-        /// <summary>
         ///     All files can be found at SubjectName:Port/FilesBaseUri/Filename
         /// </summary>
         public string FilesBaseUri { get; set; }
