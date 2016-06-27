@@ -39,6 +39,7 @@
     <Compile Include="Enums\EmailLoggerFlushReason.cs" />
     <Compile Include="Interfaces\IFlushableLogReceiver.cs" />
     <Compile Include="Loggers\BufferedFileLogger.cs" />
+    <Compile Include="Loggers\BufferedRotatingFileLogger.cs" />
     <Compile Include="Loggers\ColouredConsoleLogger.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
     <Compile Include="Loggers\EmailLogger.cs" />

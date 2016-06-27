@@ -31,7 +31,7 @@ namespace ITCC.Logging.Loggers
         #region public
         public const double DefaultFrequency = 10000;
 
-        public BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount, long maxFileSize, double frequency = DefaultFrequency)
+        public BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = DefaultFrequency)
         {
             if (filenamePrefix == null)
                 throw new ArgumentNullException(nameof(filenamePrefix));
@@ -43,7 +43,7 @@ namespace ITCC.Logging.Loggers
                 throw new ArgumentOutOfRangeException(nameof(maxFileSize), "maxFileSize < 1");
 
             if (frequency < 1)
-                throw new ArgumentOutOfRangeException(nameof(frequency), "maxFileSize < 1");
+                throw new ArgumentOutOfRangeException(nameof(frequency), "frequency < 1");
 
             FilenamePrefix = filenamePrefix;
             Level = level;
@@ -125,7 +125,7 @@ namespace ITCC.Logging.Loggers
             var lastFileName = MakeFilename(FilesCount - 1);
             if (File.Exists(lastFileName))
                 File.Delete(lastFileName);
-            for (var i = 0; i < FilesCount - 1; ++i)
+            for (var i = FilesCount - 2; i >= 0; --i)
             {
                 var name = MakeFilename(i);
                 if (File.Exists(name))

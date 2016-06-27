@@ -37,24 +37,31 @@ namespace ITCC.Library.Testing
 
             //StartServer();
 
-            var requestList = new List<string>
-            {
-                "Большой Симоновский переулок, 11"
-            };
+            //var requestList = new List<string>
+            //{
+            //    "Большой Симоновский переулок, 11"
+            //};
 
-            try
+            //try
+            //{
+            //    foreach (var request in requestList)
+            //    {
+            //        var result = await YandexGeocoder.GeocodeAsync(request, 10, LangType.ru_RU);
+            //        Logger.LogEntry("TEST", LogLevel.Debug, $"Got {result.Count} result");
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logger.LogException("TEST", LogLevel.Warning, ex);    
+            //}
+
+            for (var i = 0; i < 20; ++i)
             {
-                foreach (var request in requestList)
-                {
-                    var result = await YandexGeocoder.GeocodeAsync(request, 10, LangType.ru_RU);
-                    Logger.LogEntry("TEST", LogLevel.Debug, $"Got {result.Count} result");
-                }
+                for (var j = 0; j < 100000; ++j)
+                    Logger.LogEntry("Test", LogLevel.Trace, $"TEST MESSAGE {i * 100000 + j}");
+                Thread.Sleep(500);
             }
-            catch (Exception ex)
-            {
-                Logger.LogException("TEST", LogLevel.Warning, ex);    
-            }
-            
+                
 
             Console.ReadLine();
 
@@ -65,7 +72,7 @@ namespace ITCC.Library.Testing
         private static bool InitializeLoggers()
         {
             Logger.Level = LogLevel.Trace;
-            Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
+            //Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             if (!Directory.Exists("Log"))
             {
@@ -80,7 +87,7 @@ namespace ITCC.Library.Testing
                 }
             }
             Logger.RegisterReceiver(
-                new BufferedFileLogger($"Log\\Test_{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}.txt"), true);
+                new BufferedRotatingFileLogger($"Log\\TestLog", LogLevel.Trace, 10, 1024 * 1024, 500), true);
 
             var emailLogger = new EmailLogger(LogLevel.Error, new EmailLoggerConfiguration
             {
