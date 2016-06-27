@@ -9,6 +9,8 @@ using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Geocoding;
+using Geocoding.Google;
 using ITCC.Geocoding.Yandex;
 using ITCC.Geocoding.Yandex.Enums;
 using ITCC.HTTP.Client;
@@ -52,16 +54,12 @@ namespace ITCC.Library.Testing
             //}
             //catch (Exception ex)
             //{
-            //    Logger.LogException("TEST", LogLevel.Warning, ex);    
+            //    Logger.LogException("TEST", LogLevel.Warning, ex);
             //}
-
-            for (var i = 0; i < 20; ++i)
-            {
-                for (var j = 0; j < 100000; ++j)
-                    Logger.LogEntry("Test", LogLevel.Trace, $"TEST MESSAGE {i * 100000 + j}");
-                Thread.Sleep(500);
-            }
-                
+            IGeocoder geocoder = new GoogleGeocoder() { };
+            IEnumerable<Address> addresses = geocoder.Geocode("Большой Симоновский переулок, 11");
+            Console.WriteLine("Formatted: " + addresses.First().FormattedAddress); //Formatted: 1600 Pennslyvania Avenue Northwest, Presiden'ts Park, Washington, DC 20500, USA
+            Console.WriteLine("Coordinates: " + addresses.First().Coordinates.Latitude + ", " + addresses.First().Coordinates.Longitude); //Coordinates: 38.8978378, -77.0365123
 
             Console.ReadLine();
 
@@ -72,7 +70,7 @@ namespace ITCC.Library.Testing
         private static bool InitializeLoggers()
         {
             Logger.Level = LogLevel.Trace;
-            //Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
+            Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             if (!Directory.Exists("Log"))
             {
@@ -87,7 +85,7 @@ namespace ITCC.Library.Testing
                 }
             }
             Logger.RegisterReceiver(
-                new BufferedRotatingFileLogger($"Log\\TestLog", LogLevel.Trace, 10, 1024 * 1024, 500), true);
+                new BufferedRotatingFileLogger($"Log\\TestLog", LogLevel.Trace, 10, 1024 * 1024, 10000), true);
 
             var emailLogger = new EmailLogger(LogLevel.Error, new EmailLoggerConfiguration
             {

@@ -23,6 +23,39 @@
 
 ### ITCC.Geocoding
 
+#### Корневые
+
+##### `static class Geocoder`
+
+Геокодер для работы с различными провайдерами данных. Ключевые методы:
+
+```
+async Task<Point> GeocodeAsync(string location, GeocodingApi apiType);
+void SetApiKey(string key, GeocodingApi apiType);
+```
+
+
+#### Enums
+
+Перечисления
+
+##### `enum GeocodingApi`
+
+Провайдер данных
+
+#### Utils
+
+Служебные классы
+
+##### `class Point`
+
+Простое представление точки на проскости. Основные свойства:
+
+```
+double Latitude { get; set; }
+double Longitude { get; set; }
+```
+
 #### Yandex
 
 Работа с API Яндекса

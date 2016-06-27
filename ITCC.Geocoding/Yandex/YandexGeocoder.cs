@@ -24,6 +24,8 @@ namespace ITCC.Geocoding.Yandex
             var requestUrl = BuildCommonUrlPart(location, results, lang) + KeyQueryParam;
             Logger.LogEntry("GEO RAW", LogLevel.Trace, $"Requesting:\n{requestUrl}");
             var response = await DownloadStringAsync(requestUrl);
+            if (response == null)
+                return null;
             Logger.LogEntry("GEO RAW", LogLevel.Trace, $"Raw response:\n{response}");
             return new GeoObjectCollection(response);
         }
@@ -35,6 +37,8 @@ namespace ITCC.Geocoding.Yandex
                 KeyQueryParam;
             Logger.LogEntry("GEO RAW", LogLevel.Trace, $"Requesting:\n{requestUrl}");
             var response = await DownloadStringAsync(requestUrl);
+            if (response == null)
+                return null;
             Logger.LogEntry("GEO RAW", LogLevel.Trace, $"Raw response:\n{response}");
             return new GeoObjectCollection(response);
         }

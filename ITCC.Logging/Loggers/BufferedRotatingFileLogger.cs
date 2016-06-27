@@ -74,7 +74,6 @@ namespace ITCC.Logging.Loggers
         public double Frequency { get; }
         #endregion
 
-
         #region private
         private void InitTimer()
         {
