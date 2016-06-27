@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using ITCC.Logging.Interfaces;
 
 namespace ITCC.Logging.Loggers
 {

@@ -1,4 +1,5 @@
 ﻿using ITCC.Logging;
+using ITCC.Logging.Interfaces;
 using ITCC.UI.Utils;
 using ITCC.UI.ViewModels;
 using static ITCC.UI.Common.Delegates;

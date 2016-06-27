@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ITCC.Logging.Interfaces;
 
 namespace ITCC.Logging.Loggers
 {

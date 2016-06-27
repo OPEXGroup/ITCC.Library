@@ -54,7 +54,7 @@ namespace ITCC.Logging.Loggers
             _queueTimer.Enabled = false;
         }
 
-        public bool FlushBuffer()
+        private bool FlushBuffer()
         {
             try
             {
