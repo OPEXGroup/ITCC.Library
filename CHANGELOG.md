@@ -1,3 +1,7 @@
+## 0.12.1 (2016-06-27)
+
+* **Fix**:  Google geocoder fix  
+
 ## 0.12.0 (2016-06-27)
 
 * **New**:  Google maps API support  
