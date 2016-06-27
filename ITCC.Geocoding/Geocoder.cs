@@ -8,6 +8,7 @@ using Geocoding.Google;
 using ITCC.Geocoding.Enums;
 using ITCC.Geocoding.Utils;
 using ITCC.Geocoding.Yandex;
+using ITCC.Logging;
 
 namespace ITCC.Geocoding
 {
@@ -17,7 +18,7 @@ namespace ITCC.Geocoding
 
         public static async Task<Point> GeocodeAsync(string location, GeocodingApi apiType)
         {
-            Point result = null;
+            Point result;
             switch (apiType)
             {
                 case GeocodingApi.Yandex:
@@ -38,10 +39,25 @@ namespace ITCC.Geocoding
                         if (!string.IsNullOrEmpty(_googleApiKey))
                             geocoder.ApiKey = _googleApiKey;
                     }
-                    var addresses = await geocoder.GeocodeAsync(location);
+                    IEnumerable<GoogleAddress> addresses;
+                    try
+                    {
+                        addresses = await geocoder.GeocodeAsync(location);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException("GOOGLE GEO", LogLevel.Debug, ex);
+                        return null;
+                    }
+                    
                     var firstAddress = addresses?.FirstOrDefault();
                     if (firstAddress == null)
                         return null;
+                    result = new Point
+                    {
+                        Latitude = firstAddress.Coordinates.Latitude,
+                        Longitude = firstAddress.Coordinates.Longitude
+                    };
 
                     break;
                 default:

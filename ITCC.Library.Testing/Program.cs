@@ -11,6 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Geocoding;
 using Geocoding.Google;
+using ITCC.Geocoding;
+using ITCC.Geocoding.Enums;
 using ITCC.Geocoding.Yandex;
 using ITCC.Geocoding.Yandex.Enums;
 using ITCC.HTTP.Client;
@@ -56,10 +58,8 @@ namespace ITCC.Library.Testing
             //{
             //    Logger.LogException("TEST", LogLevel.Warning, ex);
             //}
-            IGeocoder geocoder = new GoogleGeocoder() { };
-            IEnumerable<Address> addresses = geocoder.Geocode("Большой Симоновский переулок, 11");
-            Console.WriteLine("Formatted: " + addresses.First().FormattedAddress); //Formatted: 1600 Pennslyvania Avenue Northwest, Presiden'ts Park, Washington, DC 20500, USA
-            Console.WriteLine("Coordinates: " + addresses.First().Coordinates.Latitude + ", " + addresses.First().Coordinates.Longitude); //Coordinates: 38.8978378, -77.0365123
+            var point = await Geocoder.GeocodeAsync("Большой Симоновский переулок, 11", GeocodingApi.Google);
+            Logger.LogEntry("TEST", LogLevel.Debug, $"{point.Latitude} {point.Longitude}");
 
             Console.ReadLine();
 
