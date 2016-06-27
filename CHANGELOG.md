@@ -1,3 +1,10 @@
+## 0.11.0 (2016-06-24)
+
+* **New**:  `IFlushableLogReceiver` interface added  
+* **New**:  `Logger::FlushAll(void)` method added  
+* **New**:  `BufferedRotatingFileLogger` added  
+* **New**:  `EmailLogger` new implements `IFlushableLogReceiver`  
+
 ## 0.10.0 (2016-06-24)
 
 * **New**:  `ITCC.Geocoding` project added  
