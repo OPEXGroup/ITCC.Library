@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Interfaces;
+using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers
 {
@@ -58,24 +59,7 @@ namespace ITCC.Logging.Loggers
         {
             try
             {
-                using (var fileStream = new FileStream(Filename, FileMode.Append, FileAccess.Write))
-                {
-                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
-                    {
-                        var stringBuilder = new StringBuilder();
-                        while (!_messageQueue.IsEmpty)
-                        {
-                            LogEntryEventArgs message;
-                            if (_messageQueue.TryDequeue(out message))
-                                stringBuilder.AppendLine(message.ToString());
-                        }
-                        var resultingString = stringBuilder.ToString();
-                        if (string.IsNullOrWhiteSpace(resultingString))
-                            return true;
-                        streamWriter.WriteLine(stringBuilder.ToString());
-                        streamWriter.Flush();
-                    }
-                }
+                FileUtils.FlushLogQueue(Filename, _messageQueue);
                 return true;
             }
             catch (Exception ex)

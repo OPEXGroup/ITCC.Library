@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Interfaces;
+using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers
 {
@@ -93,24 +94,7 @@ namespace ITCC.Logging.Loggers
                     if (new FileInfo(currentFileName).Length > MaxFileSize)
                         Rotate();
                 }
-                using (var fileStream = new FileStream(currentFileName, FileMode.Append, FileAccess.Write))
-                {
-                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
-                    {
-                        var stringBuilder = new StringBuilder();
-                        while (!_messageQueue.IsEmpty)
-                        {
-                            LogEntryEventArgs message;
-                            if (_messageQueue.TryDequeue(out message))
-                                stringBuilder.AppendLine(message.ToString());
-                        }
-                        var resultingString = stringBuilder.ToString();
-                        if (string.IsNullOrWhiteSpace(resultingString))
-                            return true;
-                        streamWriter.WriteLine(stringBuilder.ToString());
-                        streamWriter.Flush();
-                    }
-                }
+                FileUtils.FlushLogQueue(currentFileName, _messageQueue);
                 return true;
             }
             catch (Exception ex)
