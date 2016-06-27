@@ -1,4 +1,8 @@
-## 0.11.0 (2016-06-24)
+## 0.11.1 (2016-06-27)
+
+* **Fix**:  `Logger` made static  
+
+## 0.11.0 (2016-06-27)
 
 * **New**:  `IFlushableLogReceiver` interface added  
 * **New**:  `Logger::FlushAll(void)` method added  
