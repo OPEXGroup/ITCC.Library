@@ -4,11 +4,29 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using ITCC.Logging.Interfaces;
 
 namespace ITCC.Logging.Loggers
 {
-    public class BufferedFileLogger : FileLogger
+    public class BufferedFileLogger : FileLogger, IFlushableLogReceiver
     {
+        #region IFlushableLogReceiver
+        public override void WriteEntry(object sender, LogEntryEventArgs args)
+        {
+            if (args.Level > Level)
+                return;
+            _messageQueue.Enqueue(args);
+        }
+
+        public Task Flush()
+        {
+            FlushBuffer();
+            return Task.CompletedTask;
+        }
+
+        #endregion
+
+        #region public
         /// <summary>
         ///     Default logger frequency in milliseconds
         /// </summary>
@@ -34,32 +52,6 @@ namespace ITCC.Logging.Loggers
         public void Stop()
         {
             _queueTimer.Enabled = false;
-        }
-
-        private void InitTimer(double frequency)
-        {
-            Frequency = frequency;
-            _queueTimer = new Timer(frequency);
-            _queueTimer.Elapsed += QueueTimerOnElapsed;
-            _queueTimer.AutoReset = true;
-            _queueTimer.Enabled = true;
-        }
-
-        /// <summary>
-        ///     Flushes the whole queue into the file
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="elapsedEventArgs"></param>
-        private void QueueTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
-        {
-            Task.Run(() => FlushBuffer());
-        }
-
-        public override void WriteEntry(object sender, LogEntryEventArgs args)
-        {
-            if (args.Level > Level)
-                return;
-            _messageQueue.Enqueue(args);
         }
 
         public bool FlushBuffer()
@@ -94,9 +86,26 @@ namespace ITCC.Logging.Loggers
         }
 
         public double Frequency { get; private set; }
+        #endregion
+
+        #region private
+        private void InitTimer(double frequency)
+        {
+            Frequency = frequency;
+            _queueTimer = new Timer(frequency);
+            _queueTimer.Elapsed += QueueTimerOnElapsed;
+            _queueTimer.AutoReset = true;
+            _queueTimer.Enabled = true;
+        }
+
+        private void QueueTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            Task.Run(() => FlushBuffer());
+        }
 
         private Timer _queueTimer;
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _messageQueue = new ConcurrentQueue<LogEntryEventArgs>();
+        #endregion
     }
 }

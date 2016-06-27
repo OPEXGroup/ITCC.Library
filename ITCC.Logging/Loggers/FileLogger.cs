@@ -6,6 +6,30 @@ namespace ITCC.Logging.Loggers
 {
     public class FileLogger : ILogReceiver
     {
+        #region ILogReceiver
+        public virtual void WriteEntry(object sender, LogEntryEventArgs args)
+        {
+            if (args.Level > Level)
+                return;
+
+            lock (LockObject)
+            {
+                using (var fileStream = new FileStream(Filename, FileMode.Append, FileAccess.Write))
+                {
+                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                    {
+                        var stringBuilder = new StringBuilder();
+                        stringBuilder.Append(DateTime.Now);
+                        stringBuilder.Append(" ");
+                        stringBuilder.Append(args);
+                        streamWriter.WriteLine(stringBuilder.ToString());
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region public
         public FileLogger(string filename, bool clearFile = false)
         {
             Filename = filename;
@@ -32,28 +56,10 @@ namespace ITCC.Logging.Loggers
 
         public string Filename { get; }
 
-        public virtual void WriteEntry(object sender, LogEntryEventArgs args)
-        {
-            if (args.Level > Level)
-                return;
+        #endregion
 
-            lock (LockObject)
-            {
-                using (var fileStream = new FileStream(Filename, FileMode.Append, FileAccess.Write))
-                {
-                    using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
-                    {
-                        var stringBuilder = new StringBuilder();
-                        stringBuilder.Append(DateTime.Now);
-                        stringBuilder.Append(" ");
-                        stringBuilder.Append(args);
-                        streamWriter.WriteLine(stringBuilder.ToString());
-                    }
-                }
-            }
-            
-        }
-
+        #region protected
         protected readonly object LockObject = new object();
+        #endregion
     }
 }

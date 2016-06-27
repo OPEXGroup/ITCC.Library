@@ -5,6 +5,7 @@
         LoggerStarted,
         RegularPeriodical,
         ImportantMessage,
-        QueueFull
+        QueueFull,
+        ForceFlush
     }
 }

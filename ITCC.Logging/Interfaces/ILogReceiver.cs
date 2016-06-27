@@ -1,4 +1,4 @@
-﻿namespace ITCC.Logging
+﻿namespace ITCC.Logging.Interfaces
 {
     /// <summary>
     ///     Interface for objects which can write logs

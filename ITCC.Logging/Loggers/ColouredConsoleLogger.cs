@@ -4,11 +4,7 @@ namespace ITCC.Logging.Loggers
 {
     public class ColouredConsoleLogger : ConsoleLogger
     {
-        public ColouredConsoleLogger()
-        { }
-
-        public ColouredConsoleLogger(LogLevel level) : base(level) { }
-
+        #region ILogReceiver
         public override void WriteEntry(object sender, LogEntryEventArgs args)
         {
             if (args.Level > Level)
@@ -37,7 +33,17 @@ namespace ITCC.Logging.Loggers
                 Console.ResetColor();
             }
         }
+        #endregion
 
+        #region public
+        public ColouredConsoleLogger()
+        { }
+
+        public ColouredConsoleLogger(LogLevel level) : base(level) { }
+        #endregion
+
+        #region private
         private readonly object _lockObject = new object();
+        #endregion
     }
 }

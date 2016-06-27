@@ -6,17 +6,14 @@ namespace ITCC.Logging.Loggers
 {
     public class SystemEventLogger : ILogReceiver, IDisposable
     {
-        private readonly EventLog _eventLog;
-
-        private LogLevel _level;
-
-        private readonly Dictionary<LogLevel, EventLogEntryType> _typeConverter = new Dictionary<LogLevel, EventLogEntryType>
+        #region ILogReceiver
+        public void WriteEntry(object sender, LogEntryEventArgs args)
         {
-            {LogLevel.Info, EventLogEntryType.Information },
-            {LogLevel.Warning, EventLogEntryType.Warning },
-            {LogLevel.Error, EventLogEntryType.Error },
-            {LogLevel.Critical, EventLogEntryType.Error }
-        };
+            if (args.Level > _level)
+                return;
+
+            _eventLog.WriteEntry(args.ToString(), _typeConverter[args.Level]);
+        }
 
         public LogLevel Level
         {
@@ -33,15 +30,16 @@ namespace ITCC.Logging.Loggers
                 _level = value;
             }
         }
+        #endregion
 
-        public void WriteEntry(object sender, LogEntryEventArgs args)
+        #region IDisposable
+        public void Dispose()
         {
-            if (args.Level > _level)
-                return;
-            
-            _eventLog.WriteEntry(args.ToString(), _typeConverter[args.Level]);
+            _eventLog.Dispose();
         }
+        #endregion
 
+        #region public
         public SystemEventLogger(string source, LogLevel level)
         {
             Level = level;
@@ -53,10 +51,20 @@ namespace ITCC.Logging.Loggers
             }
             _eventLog.Source = source;
         }
+        #endregion
 
-        public void Dispose()
+        #region private
+        private readonly EventLog _eventLog;
+
+        private LogLevel _level;
+
+        private readonly Dictionary<LogLevel, EventLogEntryType> _typeConverter = new Dictionary<LogLevel, EventLogEntryType>
         {
-            _eventLog.Dispose();
-        }
+            {LogLevel.Info, EventLogEntryType.Information },
+            {LogLevel.Warning, EventLogEntryType.Warning },
+            {LogLevel.Error, EventLogEntryType.Error },
+            {LogLevel.Critical, EventLogEntryType.Error }
+        };
+        #endregion
     }
 }

@@ -110,15 +110,6 @@ async Task<GeoObjectCollection> GeocodeAsync(string location, short results, Lan
 
 #### Корневые
 
-##### `interface ILogReceiver`
-
-Интерфейс подписчика на события лога. Сигнатура:
-
-```
-LogLevel Level { get; set; }
-void WriteEntry(object sender, LogEntryEventArgs args);
-```
-
 ##### `enum Loglevel`
 
 Возможные уровни лога (серьезности сообщений)
@@ -136,12 +127,32 @@ void LogEntry(object scope, LogLevel level, string message);                 // 
 void LogException(object scope, LogLevel level, Exception exception);        // записать в лог исключение
 bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false);  // подписать получателя на события лога
 bool UnregisterReceiver(ILogReceiver receiver);                              // отписать получателя
+void FlushAll();                                                             // сброс очередей всех логгеров типа IFlushableLogReceiver
 ```
 
 Ключевые свойства
 
 ```
 LogLevel Level { get; set; } // уровень лога
+```
+
+#### Interfaces
+
+##### `interface ILogReceiver`
+
+Интерфейс подписчика на события лога. Сигнатура:
+
+```
+LogLevel Level { get; set; }
+void WriteEntry(object sender, LogEntryEventArgs args);
+```
+
+##### `interface IFlushableLogReceiver : ILogReceiver`
+
+Интерфейс логгера с немгновенным сбросом очереди сообщений. Сигнатура:
+
+```
+Task Flush();
 ```
 
 #### Loggers

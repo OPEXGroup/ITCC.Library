@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ITCC.Logging
 {
@@ -11,15 +12,11 @@ namespace ITCC.Logging
     /// </summary>
     public class Logger
     {
-        static Logger()
-        {
-            _logLevel = LogLevel.Info;
-        }
-
+        #region public
         /// <summary>
         ///     Actual logging event
         /// </summary>
-        public static event EventHandler<LogEntryEventArgs> LogEntryEvent;
+        private static event EventHandler<LogEntryEventArgs> LogEntryEvent;
 
         /// <summary>
         ///     Registers receivers for log notifications
@@ -36,6 +33,7 @@ namespace ITCC.Logging
                 LogEntryEvent += receiver.WriteEntry;
                 if (mutableReceiver)
                     MutableReceivers.Add(receiver);
+                Receivers.Add(receiver);
             }
 
             return true;
@@ -56,6 +54,7 @@ namespace ITCC.Logging
                 lock (LockObject)
                 {
                     LogEntryEvent -= receiver.WriteEntry;
+                    Receivers.Remove(receiver);
                 }
                 return true;
             }
@@ -63,22 +62,6 @@ namespace ITCC.Logging
             {
                 return false;
             }
-        }
-
-        /// <summary>
-        ///     Registers handler for log notifications
-        /// </summary>
-        /// <param name="logEventHandler">Log handler (method)</param>
-        /// <returns>Operation status</returns>
-        public static bool RegisterHandler(EventHandler<LogEntryEventArgs> logEventHandler)
-        {
-            if (logEventHandler == null)
-                return false;
-            lock (LockObject)
-            {
-                LogEntryEvent += logEventHandler;
-            }
-            return true;
         }
 
         public static bool AddBannedScope(object scope)
@@ -146,6 +129,15 @@ namespace ITCC.Logging
             LogEntryEvent?.Invoke(scope, eventArgs);
         }
 
+        public void FlushAll()
+        {
+            lock (LockObject)
+            {
+                var flushTasks = Receivers.OfType<IFlushableLogReceiver>().Select(r => r.Flush()).ToArray();
+                Task.WaitAll(flushTasks);
+            }
+        }
+
         /// <summary>
         ///     Logging level
         /// </summary>
@@ -167,10 +159,21 @@ namespace ITCC.Logging
        
         public static List<string> BannedScopes { get; } = new List<string>();
 
+        #endregion
+
+        #region private
+        static Logger()
+        {
+            _logLevel = LogLevel.Info;
+        }
+
+        private static readonly List<ILogReceiver> Receivers = new List<ILogReceiver>();
+
         private static LogLevel _logLevel;
 
         private static readonly List<ILogReceiver> MutableReceivers = new List<ILogReceiver>(); 
 
         private static readonly object LockObject = new object();
+        #endregion
     }
 }

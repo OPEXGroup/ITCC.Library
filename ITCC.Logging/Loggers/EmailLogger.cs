@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Enums;
+using ITCC.Logging.Interfaces;
 using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers
 {
-    public class EmailLogger : ILogReceiver
+    public class EmailLogger : IFlushableLogReceiver
     {
         #region ILogReceiver
         public LogLevel Level { get; set; }
@@ -23,17 +24,16 @@ namespace ITCC.Logging.Loggers
             _messageQueue.Enqueue(args);
             if (args.Level <= FlushLevel)
             {
-                _updateTimer.Stop();
-                await Flush(EmailLoggerFlushReason.ImportantMessage);
-                _updateTimer.Start();
+                await FlushAndRestartTimer(EmailLoggerFlushReason.ImportantMessage);
             }
             else if (_messageQueue.Count >= MaxQueueSize)
             {
-                _updateTimer.Stop();
-                await Flush(EmailLoggerFlushReason.QueueFull);
-                _updateTimer.Start();
+                await FlushAndRestartTimer(EmailLoggerFlushReason.QueueFull);
             }
         }
+
+        public async Task Flush() => await FlushAndRestartTimer(EmailLoggerFlushReason.ForceFlush);
+
         #endregion
 
         #region public
@@ -110,6 +110,13 @@ namespace ITCC.Logging.Loggers
             await Flush(EmailLoggerFlushReason.RegularPeriodical);
         }
 
+        private async Task FlushAndRestartTimer(EmailLoggerFlushReason reason)
+        {
+            _updateTimer.Stop();
+            await Flush(reason);
+            _updateTimer.Start();
+        }
+
         private async Task Flush(EmailLoggerFlushReason reason)
         {
             if (_flushInProgress)
@@ -158,6 +165,9 @@ namespace ITCC.Logging.Loggers
                         break;
                     case EmailLoggerFlushReason.QueueFull:
                         alarmStr = ", ALARM QUEUE FULL";
+                        break;
+                    case EmailLoggerFlushReason.ForceFlush:
+                        alarmStr = ", FORCE FLUSH";
                         break;
                 }
                 priority = reason == EmailLoggerFlushReason.RegularPeriodical ? MailPriority.Normal : MailPriority.High;
