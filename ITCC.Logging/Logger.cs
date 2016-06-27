@@ -11,7 +11,7 @@ namespace ITCC.Logging
     /// <summary>
     ///     Logger based on events and subscribers
     /// </summary>
-    public class Logger
+    public static class Logger
     {
         #region public
         /// <summary>
@@ -130,7 +130,7 @@ namespace ITCC.Logging
             LogEntryEvent?.Invoke(scope, eventArgs);
         }
 
-        public void FlushAll()
+        public static void FlushAll()
         {
             lock (LockObject)
             {
