@@ -1,3 +1,7 @@
+## 0.12.0 (2016-06-27)
+
+* **New**:  Google maps API support  
+
 ## 0.11.1 (2016-06-27)
 
 * **Fix**:  `Logger` made static  
