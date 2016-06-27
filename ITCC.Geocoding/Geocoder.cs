@@ -32,10 +32,11 @@ namespace ITCC.Geocoding
                     };
                     break;
                 case GeocodingApi.Google:
-                    GoogleGeocoder geocoder;
+                    var geocoder = new GoogleGeocoder();
                     lock (KeyLock)
                     {
-                        geocoder = new GoogleGeocoder {ApiKey = _googleApiKey};
+                        if (!string.IsNullOrEmpty(_googleApiKey))
+                            geocoder.ApiKey = _googleApiKey;
                     }
                     var addresses = await geocoder.GeocodeAsync(location);
                     var firstAddress = addresses?.FirstOrDefault();
@@ -51,6 +52,8 @@ namespace ITCC.Geocoding
 
         public static void SetApiKey(string key, GeocodingApi apiType)
         {
+            if (string.IsNullOrEmpty(key))
+                return;
             switch (apiType)
             {
                 case GeocodingApi.Yandex:
