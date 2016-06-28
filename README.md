@@ -635,6 +635,14 @@ HttpMethod HttpMethodToEnum(string methodName);
 
 Классы используемых атрибутов
 
+##### `class DataGridColumnStyleAttribute`
+
+Используется `DataGridHelper` для задания размера и стиля колонки. Используется при создании `ViewModel`'ов. Конструктор:
+
+```
+DatagridColumnStyleAttribute(bool wrappedText = false, double columnPreferredWidth = -1, DataGridLengthUnitType columnWidthUnitType = DataGridLengthUnitType.Auto);
+```
+
 ##### `class DataGridIgnoreAttribute`
 
 Используется `DataGridHelper` для опционального игнорирования столбца:
@@ -738,9 +746,9 @@ string ErrorMessage { get; } // null тогда и только тогда, ко
 ```
 /*
   Используется для генерации заголовков. Следует вызывать в обработчиках AutoGeneratingColumn.
-  Использует атрибуты DisplayName и HeaderTooltip у содержимого Grid'а
+  Использует атрибуты DisplayName, HeaderTooltip, DataGridIgnore и DatagridColumnStyle у содержимого Grid'а
 */
-static void HandleAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e, string lastColumnName = null)
+static void HandleAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
 ```
 
 ##### `class ScrollViewerExtensions`
