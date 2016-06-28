@@ -1,3 +1,8 @@
+## 0.12.2 (2016-06-28)
+
+* **Edit**: `DataGridHelper::HandleAutogeneratinColumn` does not use `lastColumnName`
+* **New**:  `DataGridColumnStyleAttribute` added
+
 ## 0.12.1 (2016-06-27)
 
 * **Fix**:  Google geocoder fix  
