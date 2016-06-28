@@ -8,8 +8,7 @@ namespace ITCC.UI.Utils
 {
     public class DataGridHelper : FrameworkElement
     {
-        public static void HandleAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e,
-            string lastColumnName = null)
+        public static void HandleAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
             var dataGridIgnore = PropertyHelper.GetPropertyAttribute<DataGridIgnoreAttribute>(e.PropertyDescriptor);
             if (dataGridIgnore != null && dataGridIgnore.IgnoreColumn)
@@ -25,19 +24,6 @@ namespace ITCC.UI.Utils
                 Logger.LogEntry("GENERATOR", LogLevel.Trace, $"Generating column {displayName}");
 
                 e.Column.Header = displayName;
-                if (displayName == lastColumnName)
-                {
-                    e.Column.Width = new DataGridLength(420, DataGridLengthUnitType.Star);
-
-                    var col = e.Column as DataGridTextColumn;
-
-                    var style = new Style(typeof(TextBlock));
-                    style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
-                    style.Setters.Add(new Setter(VerticalAlignmentProperty, VerticalAlignment.Center));
-
-                    if (col != null)
-                        col.ElementStyle = style;
-                }
             }
 
             var headerTooltip = PropertyHelper.GetPropertyAttribute<HeaderTooltipAttribute>(e.PropertyDescriptor);
@@ -61,7 +47,28 @@ namespace ITCC.UI.Utils
                 var style = new Style(typeof(DataGridColumnHeader), (Style)Application.Current.TryFindResource("DataGridColumnHeaderStyle"));
                 style.Triggers.Add(trigger);
                 e.Column.HeaderStyle = style;
+            }
 
+            var styleAttribute = PropertyHelper.GetPropertyAttribute<DatagridColumnStyleAttribute>(e.PropertyDescriptor);
+            if (styleAttribute != null)
+            {
+                var col = e.Column as DataGridTextColumn;
+                Style style = null;
+                
+                if (styleAttribute.WrappedText)
+                {
+                    style = new Style(typeof (TextBlock), col?.ElementStyle);
+                    style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
+                    style.Setters.Add(new Setter(VerticalAlignmentProperty, VerticalAlignment.Center));
+                }
+
+                if (styleAttribute.ColumnPreferredWidth > 0)
+                {
+                    e.Column.Width = new DataGridLength(styleAttribute.ColumnPreferredWidth, DataGridLengthUnitType.Star);
+                }
+
+                if (col != null && style != null)
+                    col.ElementStyle = style;
             }
         }
     }

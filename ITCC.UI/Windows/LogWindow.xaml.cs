@@ -27,7 +27,7 @@ namespace ITCC.UI.Windows
 
         private void LogDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            DataGridHelper.HandleAutoGeneratingColumn(sender, e, "Сообщение");
+            DataGridHelper.HandleAutoGeneratingColumn(sender, e);
         }
 
         private void LogDataGrid_OnLoadingRow(object sender, DataGridRowEventArgs e)

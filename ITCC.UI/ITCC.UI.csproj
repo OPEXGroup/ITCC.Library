@@ -46,6 +46,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DatagridColumnStyleAttribute.cs" />
     <Compile Include="Attributes\DataGridIgnoreAttribute.cs" />
     <Compile Include="Attributes\HeaderTooltipAttribute.cs" />
     <Compile Include="Common\Delegates.cs" />

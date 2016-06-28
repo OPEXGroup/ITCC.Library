@@ -2,6 +2,7 @@
 
 namespace ITCC.UI.Attributes
 {
+    [AttributeUsage(AttributeTargets.Property)]
     public class HeaderTooltipAttribute : Attribute
     {
         public HeaderTooltipAttribute(string tooltipContent, bool isLongTooltip = false)
