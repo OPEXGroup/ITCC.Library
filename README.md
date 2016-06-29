@@ -503,19 +503,19 @@ X509Certificate2 GetCertificate(string subjectName, bool allowSelfSigned)
 
 Представляет результат аутентификации на сервера (получения токена авторизации). Отправляется сервером в ответ на запрос `Login`. Ключевые свойства:
 ```
-object AccountView { get; set; }             // Представление аккаунта
-HttpStatusCode Status { get; set; }          // Код ответа
-object Userdata { get; set; }                // Дополнительные данные (например, значение заголовка Retry-After)
+object AccountView { get; set; }							// Представление аккаунта
+HttpStatusCode Status { get; set; }							// Код ответа
+IDictionary<string, string> AdditionalHeaders { get; set; } // Дополнительные заголовки ответа
 ```
 
 ##### `class AuthorizationResult<TAccount>`
 
 Представляет результат авторизации на сервере. Ключевые свойства:
 ```
-TAccount Account { get; set; }                  // аккаунт пользователя
-AuthorizationStatus Status { get; set; }        // статус авторизации
-string ErrorDescription { get; set; }           // описание ошибки (при ее наличии)
-IDictionary<string, string> additionalHeaders;  // Дополнительные заголовки ответа
+TAccount Account { get; set; }								// аккаунт пользователя
+AuthorizationStatus Status { get; set; }					// статус авторизации
+string ErrorDescription { get; set; }						// описание ошибки (при ее наличии)
+IDictionary<string, string> AdditionalHeaders { get; set; } // Дополнительные заголовки ответа
 ```
 
 ##### `class FileSection`

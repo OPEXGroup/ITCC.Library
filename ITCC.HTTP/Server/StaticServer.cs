@@ -419,11 +419,7 @@ namespace ITCC.HTTP.Server
                 authResult = new AuthentificationResult(null, HttpStatusCode.NotFound);
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
-            var response = ResponseFactory.CreateResponse(authResult.Status, authResult.AccountView);
-            if (authResult.Status == (HttpStatusCode)429)
-            {
-                response.AddHeader("Retry-After", authResult.Userdata.ToString());
-            }
+            var response = ResponseFactory.CreateResponse(authResult);
             OnResponseReady(channel, response, "/login", requestStopwatch);
         }
 

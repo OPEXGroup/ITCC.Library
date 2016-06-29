@@ -27,7 +27,7 @@ namespace ITCC.HTTP.Server
         public HttpStatusCode Status { get; set; }
 
         /// <summary>
-        ///     
+        ///     Custom additional headers. User SHOULD provide Retry-After header in case of Status == 429
         /// </summary>
         public IDictionary<string, string> AdditionalHeaders { get; set; }
     }

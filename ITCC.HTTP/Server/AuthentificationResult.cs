@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 
 namespace ITCC.HTTP.Server
 {
@@ -7,11 +8,11 @@ namespace ITCC.HTTP.Server
     /// </summary>
     public class AuthentificationResult
     {
-        public AuthentificationResult(object accountView, HttpStatusCode status, object userdata = null)
+        public AuthentificationResult(object accountView, HttpStatusCode status, object userdata = null, IDictionary<string, string> additionalHeaders = null)
         {
             AccountView = accountView;
             Status = status;
-            Userdata = userdata;
+            AdditionalHeaders = additionalHeaders;
         }
 
         /// <summary>
@@ -25,8 +26,8 @@ namespace ITCC.HTTP.Server
         public HttpStatusCode Status { get; set; }
 
         /// <summary>
-        ///     Custom user data
+        ///     Custom additional headers. User SHOULD provide Retry-After header in case of Status == 429
         /// </summary>
-        public object Userdata { get; set; }
+        public IDictionary<string, string> AdditionalHeaders { get; set; }
     }
 }

@@ -75,6 +75,14 @@ namespace ITCC.HTTP.Server
             _bodyEncoding = encoding;
         }
 
+        public static HttpResponse CreateResponse(AuthentificationResult authentificationResult)
+        {
+            if (authentificationResult == null)
+                throw new ArgumentNullException(nameof(authentificationResult));
+
+            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders);
+        }
+
         public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult)
             where TAccount : class 
         {
