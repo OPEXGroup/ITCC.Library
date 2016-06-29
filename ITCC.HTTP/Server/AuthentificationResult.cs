@@ -8,7 +8,7 @@ namespace ITCC.HTTP.Server
     /// </summary>
     public class AuthentificationResult
     {
-        public AuthentificationResult(object accountView, HttpStatusCode status, object userdata = null, IDictionary<string, string> additionalHeaders = null)
+        public AuthentificationResult(object accountView, HttpStatusCode status, IDictionary<string, string> additionalHeaders = null)
         {
             AccountView = accountView;
             Status = status;
