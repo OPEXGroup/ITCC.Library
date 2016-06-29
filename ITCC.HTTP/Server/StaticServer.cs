@@ -843,19 +843,6 @@ namespace ITCC.HTTP.Server
         private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
         {
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
-            foreach (var requestProcessor in RequestProcessors)
-            {
-                if (requestProcessor.LegacyName != null
-                    && request.QueryString[requestProcessor.LegacyName] != null
-                    && requestMethod == requestProcessor.Method)
-                {
-                    return new RequestProcessorSelectionResult<TAccount>
-                    {
-                        RequestProcessor = requestProcessor,
-                        MethodMatches = true
-                    };
-                }
-            }
 
             var processorsForUri = RequestProcessors.Where(requestProcessor => request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri.Trim('/')).ToList();
             if (processorsForUri.Count == 0)

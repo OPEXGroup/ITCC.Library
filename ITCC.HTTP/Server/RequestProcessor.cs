@@ -17,12 +17,6 @@ namespace ITCC.HTTP.Server
         public Delegates.RequestHandler<TAccount> Handler;
 
         /// <summary>
-        ///     Isengard 1.0 API method name (null if not present in 1.0)
-        /// </summary>
-        [Obsolete]
-        public string LegacyName;
-
-        /// <summary>
         ///     Request method
         /// </summary>
         public HttpMethod Method;
