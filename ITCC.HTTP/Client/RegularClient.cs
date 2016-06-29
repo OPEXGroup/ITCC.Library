@@ -66,6 +66,7 @@ namespace ITCC.HTTP.Client
         /// <param name="requestBodySerializer">Method to serialize request body</param>
         /// <param name="responseBodyDeserializer">Method to deserialize response body</param>
         /// <param name="authentificationProvider">Method to add authentification data</param>
+        /// <param name="outputStream">If not null, response body will be copied to this stream</param>
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,6 +79,7 @@ namespace ITCC.HTTP.Client
             Delegates.BodySerializer requestBodySerializer = null,
             Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
+            Stream outputStream = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
             var fullUri = UriHelper.BuildFullUri(_serverAddress, partialUri, parameters);
@@ -140,17 +142,36 @@ namespace ITCC.HTTP.Client
 #endif
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
-                            var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                             var responseHeaders = response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key, httpResponseHeader => string.Join(";", httpResponseHeader.Value));
-#if TRACE
-                            LogMessage(LogLevel.Trace,
-                                $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
-#endif
 
                             var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
                                 ? ServerResponseStatusDictionary[response.StatusCode]
                                 : ServerResponseStatus.IncompehensibleResponse;
 
+                            if (outputStream != null)
+                            {
+                                var result = new RequestResult<TResult>(null, status, responseHeaders);
+                                try
+                                {
+                                    if (response.Content != null)
+                                        await response.Content.CopyToAsync(outputStream);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogException(LogLevel.Warning, ex);
+                                    result.Status = ServerResponseStatus.ClientError;
+                                    result.Exception = ex;
+                                }
+
+                                return result;
+                            }
+
+                            var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            
+#if TRACE
+                            LogMessage(LogLevel.Trace,
+                                $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
+#endif
                             if (responseBodyDeserializer != null)
                             {
                                 try
@@ -227,6 +248,7 @@ namespace ITCC.HTTP.Client
                 null,
                 null,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
         }
@@ -259,6 +281,7 @@ namespace ITCC.HTTP.Client
                 null,
                 bodyDeserializer,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
         }
@@ -289,8 +312,68 @@ namespace ITCC.HTTP.Client
                 null,
                 JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
+        }
+
+        /// <summary>
+        ///     Downloads file by uri into specified location
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="fileName">Target file location. If null, then uri part after last slash will be used</param>
+        /// <param name="allowRewrite">If false, ClientError will be returned if file exists</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns></returns>
+        public async Task<RequestResult<string>> GetFileAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string fileName = null,
+            bool allowRewrite = true,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                string realFileName;
+                if (fileName == null)
+                {
+                    if (!partialUri.Contains("/"))
+                        realFileName = partialUri;
+                    else
+                    {
+                        var lastSlashIndex = partialUri.LastIndexOf("/", StringComparison.Ordinal);
+                        realFileName = partialUri.Remove(0, lastSlashIndex + 1);
+                    }
+                }
+                else
+                {
+                    realFileName = fileName;
+                }
+
+                using (var fileStream = new FileStream(realFileName, allowRewrite ? FileMode.Create : FileMode.CreateNew))
+                {
+                    return await PerformRequestAsync<string, string>(HttpMethod.Get,
+                        partialUri,
+                        parameters,
+                        headers,
+                        null,
+                        null,
+                        null,
+                        authentificationProvider,
+                        fileStream,
+                        cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return new RequestResult<string>(null, ServerResponseStatus.ClientError, ex);
+            }
         }
 
         #endregion
@@ -324,6 +407,7 @@ namespace ITCC.HTTP.Client
                 null,
                 null,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
         }
@@ -357,10 +441,21 @@ namespace ITCC.HTTP.Client
                 JsonConvert.SerializeObject,
                 JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
         }
 
+        /// <summary>
+        ///     Posts file's content to specified uri
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="filePath">File to post</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns></returns>
         public async Task<RequestResult<string>> PostFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
@@ -370,18 +465,20 @@ namespace ITCC.HTTP.Client
         {
             try
             {
-                var fileStream = new FileStream(filePath, FileMode.Open);
-                return await PerformRequestAsync<FileStream, string>(
-                    HttpMethod.Post,
-                    partialUri,
-                    parameters,
-                    headers,
-                    fileStream,
-                    null,
-                    null,
-                    authentificationProvider,
-                    cancellationToken
-                );
+                using (var fileStream = new FileStream(filePath, FileMode.Open))
+                {
+                    return await PerformRequestAsync<FileStream, string>(
+                        HttpMethod.Post,
+                        partialUri,
+                        parameters,
+                        headers,
+                        fileStream,
+                        null,
+                        null,
+                        authentificationProvider,
+                        null,
+                        cancellationToken);
+                }
             }
             catch (Exception ex)
             {
@@ -425,8 +522,53 @@ namespace ITCC.HTTP.Client
                 null,
                 null,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
+        }
+
+        /// <summary>
+        ///     Puts file's content to specified uri
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="filePath">File to post</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        public async Task<RequestResult<string>> PutFileAsync(string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string filePath = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Open))
+                {
+                    return await PerformRequestAsync<FileStream, string>(
+                        HttpMethod.Put,
+                        partialUri,
+                        parameters,
+                        headers,
+                        fileStream,
+                        null,
+                        null,
+                        authentificationProvider,
+                        null,
+                        cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return new RequestResult<string>
+                {
+                    Status = ServerResponseStatus.ClientError,
+                    Result = null
+                };
+            }
         }
 
         #endregion
@@ -460,6 +602,7 @@ namespace ITCC.HTTP.Client
                 null,
                 null,
                 authentificationProvider,
+                null,
                 cancellationToken
                 );
         }
@@ -504,6 +647,7 @@ namespace ITCC.HTTP.Client
         ///     FOR DEBUG ONLY
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="requestBody"></param>
         /// <returns></returns>
         private string SerializeHttpRequestMessage(HttpRequestMessage request, string requestBody)
         {

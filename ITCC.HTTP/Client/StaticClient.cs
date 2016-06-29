@@ -40,6 +40,7 @@ namespace ITCC.HTTP.Client
         /// <param name="requestBodySerializer">Method to serialize request body</param>
         /// <param name="responseBodyDeserializer">Method to deserialize response body</param>
         /// <param name="authentificationProvider">Method to add authentification data</param>
+        /// <param name="outputStream">If not null, response body will be copied to this stream</param>
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,10 +53,11 @@ namespace ITCC.HTTP.Client
             Delegates.BodySerializer requestBodySerializer = null,
             Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
+            Stream outputStream = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
             return RegularClient.PerformRequestAsync(method, partialUri, parameters, headers, bodyArg,
-                requestBodySerializer, responseBodyDeserializer, authentificationProvider, cancellationToken);
+                requestBodySerializer, responseBodyDeserializer, authentificationProvider, outputStream, cancellationToken);
         }
 
         #endregion
@@ -78,17 +80,11 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Get,
-                partialUri,
+            return RegularClient.GetRawAsync(partialUri,
                 parameters,
                 headers,
-                null,
-                null,
-                null,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
         /// <summary>
@@ -110,17 +106,12 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
-            return PerformRequestAsync<string, TResult>(
-                HttpMethod.Get,
-                partialUri,
+            return RegularClient.GetDeserializedAsync(partialUri,
                 parameters,
                 headers,
-                null,
-                null,
                 bodyDeserializer,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
         /// <summary>
@@ -140,33 +131,56 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
-            return PerformRequestAsync<string, TResult>(
-                HttpMethod.Get,
-                partialUri,
+            return RegularClient.GetAsync<TResult>(partialUri,
                 parameters,
                 headers,
-                null,
-                null,
-                JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
-        #endregion
-
-        #region post
-
         /// <summary>
-        ///     Basic POST method: posts data and returns status and body
+        ///     Downloads file by uri into specified location
         /// </summary>
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
-        /// <param name="data">Raw request body</param>
+        /// <param name="fileName">Target file location. If null, then uri part after last slash will be used</param>
+        /// <param name="allowRewrite">If false, ClientError will be returned if file exists</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Request status and raw response body</returns>
+        /// <returns></returns>
+        public static Task<RequestResult<string>> GetFileAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string fileName = null,
+            bool allowRewrite = true,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return RegularClient.GetFileAsync(partialUri,
+                parameters,
+                headers,
+                fileName,
+                allowRewrite,
+                authentificationProvider,
+                cancellationToken);
+        }
+
+        #endregion
+
+            #region post
+
+            /// <summary>
+            ///     Basic POST method: posts data and returns status and body
+            /// </summary>
+            /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+            /// <param name="parameters">Request parameters after `?`</param>
+            /// <param name="headers">Request headers</param>
+            /// <param name="data">Raw request body</param>
+            /// <param name="authentificationProvider">Authentification provider</param>
+            /// <param name="cancellationToken">Task cancellation token</param>
+            /// <returns>Request status and raw response body</returns>
         public static Task<RequestResult<string>> PostRawAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -175,17 +189,12 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Post,
-                partialUri,
+            return PostRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
-                null,
-                null,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
         /// <summary>
@@ -208,50 +217,37 @@ namespace ITCC.HTTP.Client
             CancellationToken cancellationToken = default(CancellationToken))
             where TResult : class
         {
-            return PerformRequestAsync(
-                HttpMethod.Post,
-                partialUri,
+            return RegularClient.PostAsync<TResult>(partialUri,
                 parameters,
                 headers,
                 data,
-                JsonConvert.SerializeObject,
-                JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
-        public static async Task<RequestResult<object>> PostFileAsync(string partialUri,
+        /// <summary>
+        ///     Posts file's content to specified uri
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="filePath">File to post</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns></returns>
+        public static Task<RequestResult<string>> PostFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            try
-            {
-                var fileStream = new FileStream(filePath, FileMode.Open);
-                return await PerformRequestAsync<FileStream, object>(
-                    HttpMethod.Post,
-                    partialUri,
-                    parameters,
-                    headers,
-                    fileStream,
-                    null,
-                    null,
-                    authentificationProvider,
-                    cancellationToken
-                );
-            }
-            catch (Exception ex)
-            {
-                LogException(LogLevel.Warning, ex);
-                return new RequestResult<object>
-                {
-                    Status = ServerResponseStatus.ClientError,
-                    Result = null
-                };
-            }
+            return RegularClient.PostFileAsync(partialUri,
+                parameters,
+                headers,
+                filePath,
+                authentificationProvider,
+                cancellationToken);
         }
 
         #endregion
@@ -276,33 +272,52 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Put,
-                partialUri,
+            return RegularClient.PutRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
-                null,
-                null,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
-        #endregion
-
-        #region delete
-
         /// <summary>
-        ///     Basic DELETE method: sends data and returns status and body
+        ///     Puts file's content to specified uri
         /// </summary>
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
-        /// <param name="data">Raw request body</param>
+        /// <param name="filePath">File to post</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Request status and raw response body</returns>
+        public static Task<RequestResult<string>> PutFileAsync(string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string filePath = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return RegularClient.PutFileAsync(partialUri,
+                parameters,
+                headers,
+                filePath,
+                authentificationProvider,
+                cancellationToken);
+        }
+
+        #endregion
+
+            #region delete
+
+            /// <summary>
+            ///     Basic DELETE method: sends data and returns status and body
+            /// </summary>
+            /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+            /// <param name="parameters">Request parameters after `?`</param>
+            /// <param name="headers">Request headers</param>
+            /// <param name="data">Raw request body</param>
+            /// <param name="authentificationProvider">Authentification provider</param>
+            /// <param name="cancellationToken">Task cancellation token</param>
+            /// <returns>Request status and raw response body</returns>
         public static Task<RequestResult<string>> DeleteRawAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -311,17 +326,12 @@ namespace ITCC.HTTP.Client
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Delete,
-                partialUri,
+            return RegularClient.DeleteRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
-                null,
-                null,
                 authentificationProvider,
-                cancellationToken
-                );
+                cancellationToken);
         }
 
         #endregion
@@ -331,29 +341,12 @@ namespace ITCC.HTTP.Client
         /// <summary>
         ///     Allows connections to servers using invalid TLS certificates
         /// </summary>
-        public static void AllowUntrustedServerCertificates()
-        {
-            ServicePointManager.ServerCertificateValidationCallback =
-                CertificateController.MockCertificateValidationCallBack;
-        }
+        public static void AllowUntrustedServerCertificates() => RegularClient.AllowUntrustedServerCertificates();
 
         /// <summary>
         ///     Perform some real checks
         /// </summary>
-        public static void DisallowUntrustedServerCertificates()
-        {
-            ServicePointManager.ServerCertificateValidationCallback =
-                CertificateController.RealCertificateValidationCallBack;
-        }
-
-        #endregion
-
-        #region log
-
-        private static void LogException(LogLevel level, Exception exception)
-        {
-            Logger.LogException("HTTP CLIENT", level, exception);
-        }
+        public static void DisallowUntrustedServerCertificates() => RegularClient.DisallowUntrustedServerCertificates();
 
         #endregion
 

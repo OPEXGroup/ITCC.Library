@@ -330,6 +330,17 @@ Task<RequestResult<TResult>> GetAsync<TResult>(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
 ```
+* Сохранение тела ответа на `GET`-запрос в файл
+```
+public async Task<RequestResult<string>> GetFileAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string fileName = null,
+            bool allowRewrite = true,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
 * Получение ответа на `POST`-запрос в виде простой строки тела
 ```
 Task<RequestResult<string>> PostRawAsync(
@@ -351,7 +362,7 @@ Task<RequestResult<TResult>> PostAsync<TResult>(
             CancellationToken cancellationToken = default(CancellationToken))
             where TResult : class
 ```
-* Загрузка файла на сервер
+* Загрузка файла на сервер методом POST
 ```
 Task<RequestResult<object>> PostFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
@@ -367,6 +378,15 @@ Task<RequestResult<string>> PutRawAsync(
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             string data = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+* Загрузка файла на сервер методом PUT
+```
+Task<RequestResult<object>> PutFileAsync(string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
