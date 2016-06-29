@@ -24,8 +24,6 @@ namespace ITCC.HTTP.Server
 
         private readonly ConcurrentDictionary<string, double> _requestFailTimeCounters = new ConcurrentDictionary<string, double>();
 
-        private readonly ConcurrentDictionary<string, int> _legacyRequestCounter = new ConcurrentDictionary<string, int>();
-
         private readonly ConcurrentDictionary<SslProtocols, int> _sslProtocolCounter = new ConcurrentDictionary<SslProtocols, int>(); 
 
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
@@ -58,12 +56,6 @@ namespace ITCC.HTTP.Server
             var builder = new StringBuilder();
 
             builder.AppendLine($"Server started at {_startTime.ToString("s")} ({DateTime.Now.Subtract(_startTime)} ago)");
-            builder.AppendLine();
-
-            builder.AppendLine("Legacy request code statistics:");
-            var legacyKeys = _legacyRequestCounter.Keys.ToList();
-            legacyKeys.Sort();
-            legacyKeys.ForEach(k => builder.AppendLine($"\t{k}: {_legacyRequestCounter[k]}"));
             builder.AppendLine();
 
             builder.AppendLine("Response code statistics:");
@@ -186,14 +178,6 @@ namespace ITCC.HTTP.Server
                     _requestMethodCounters[uri].AddOrUpdate(request.HttpMethod, 1, (key, value) => value + 1);
                 }
             }
-        }
-
-        public void AddRequestProcessor(RequestProcessor<TAccount> requestProcessor)
-        {
-            var legacyMethod = requestProcessor.LegacyName;
-            if (legacyMethod == null)
-                return;
-            _legacyRequestCounter.AddOrUpdate(legacyMethod, 1, (key, value) => value + 1);
         }
 
         public void AddAuthResult(AuthorizationResult<TAccount> authResult)

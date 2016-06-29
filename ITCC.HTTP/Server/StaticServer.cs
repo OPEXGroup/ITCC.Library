@@ -255,7 +255,6 @@ namespace ITCC.HTTP.Server
                 }
 
                 var requestProcessor = requestProcessorSelectionResult.RequestProcessor;
-                _statistics?.AddRequestProcessor(requestProcessor);
 
                 AuthorizationResult<TAccount> authResult;
                 if (requestProcessor.AuthorizationRequired && _authorizer != null)
