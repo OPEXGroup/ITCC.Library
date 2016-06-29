@@ -1,3 +1,7 @@
+## 0.12.3 (2016-06-29)
+
+* **Edit**: `AuthentificationResult` now has `AdditionalHeaders` instead of `Userdata`  
+
 ## 0.12.2 (2016-06-28)
 
 * **Edit**: `DataGridHelper::HandleAutogeneratinColumn` does not use `lastColumnName`
