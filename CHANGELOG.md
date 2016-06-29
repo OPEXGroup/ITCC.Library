@@ -1,3 +1,8 @@
+## 0.14.0 (2016-06-29)
+
+* **New**: `GetFileAsync` and `PutFileAsync` added for `StaticClient` and `RegularClient`  
+* **New**: `outputStream` param added for `RegularClient::PerformRequestAsync`  
+
 ## 0.13.0 (2016-06-29)
 
 * **Edit**: `RequestProcessor::LegacyName` removed  
