@@ -1,3 +1,7 @@
+## 0.13.0 (2016-06-29)
+
+* **Edit**: `RequestProcessor::LegacyName` removed  
+
 ## 0.12.3 (2016-06-29)
 
 * **Fix**:  `AuthentificationResult` constructor fix  
