@@ -355,7 +355,7 @@ namespace ITCC.HTTP.Client
                     realFileName = fileName;
                 }
 
-                using (var fileStream = new FileStream(realFileName, allowRewrite ? FileMode.Create : FileMode.CreateNew))
+                using (var fileStream = new FileStream(realFileName, allowRewrite ? FileMode.Create : FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     return await PerformRequestAsync<string, string>(HttpMethod.Get,
                         partialUri,
@@ -465,7 +465,7 @@ namespace ITCC.HTTP.Client
         {
             try
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Open))
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     return await PerformRequestAsync<FileStream, string>(
                         HttpMethod.Post,
@@ -545,7 +545,7 @@ namespace ITCC.HTTP.Client
         {
             try
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Open))
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     return await PerformRequestAsync<FileStream, string>(
                         HttpMethod.Put,
