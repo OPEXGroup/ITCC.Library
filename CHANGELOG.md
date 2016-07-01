@@ -1,3 +1,7 @@
+## 0.14.1 (2016-07-01)
+
+* **Fix**: `GetFileAsync`, `PutFileAsync` and `PostFileAsync` file sharing fix for `StaticClient` and `RegularClient`  
+
 ## 0.14.0 (2016-06-29)
 
 * **New**: `GetFileAsync` and `PutFileAsync` added for `StaticClient` and `RegularClient`  
