@@ -765,7 +765,7 @@ namespace ITCC.HTTP.Client
             }
         }
 
-        private DecompressionMethods _decompressionMethods = DecompressionMethods.None;
+        private DecompressionMethods _decompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
         #endregion
     }

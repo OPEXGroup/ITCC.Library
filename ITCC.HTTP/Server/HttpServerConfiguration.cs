@@ -82,7 +82,7 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     If true, all requests that contain Accept-Encoding: gzip will be served with gzipped responses
         /// </summary>
-        public bool AutoGzipCompression { get; set; } = false;
+        public bool AutoGzipCompression { get; set; } = true;
 
         /// <summary>
         ///     If true, server will write response bodies into trace logs
