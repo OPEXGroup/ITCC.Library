@@ -39,70 +39,16 @@ namespace ITCC.Library.Testing
 
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            //StartServer();
-
-            //var requestList = new List<string>
-            //{
-            //    "Большой Симоновский переулок, 11"
-            //};
-
-            //try
-            //{
-            //    foreach (var request in requestList)
-            //    {
-            //        var result = await YandexGeocoder.GeocodeAsync(request, 10, LangType.ru_RU);
-            //        Logger.LogEntry("TEST", LogLevel.Debug, $"Got {result.Count} result");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Logger.LogException("TEST", LogLevel.Warning, ex);
-            //}
-            var point = await Geocoder.GeocodeAsync("Большой Симоновский переулок, 11", GeocodingApi.Google);
-            Logger.LogEntry("TEST", LogLevel.Debug, $"{point.Latitude} {point.Longitude}");
+            StartServer();
 
             Console.ReadLine();
-
-            //await Task.Delay(100000);
-            //Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
+            Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
         private static bool InitializeLoggers()
         {
             Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
-
-            if (!Directory.Exists("Log"))
-            {
-                try
-                {
-                    Directory.CreateDirectory("Log");
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("CONFIG", LogLevel.Critical, ex);
-                    return false;
-                }
-            }
-            Logger.RegisterReceiver(
-                new BufferedRotatingFileLogger($"Log\\TestLog", LogLevel.Trace, 10, 1024 * 1024, 10000), true);
-
-            var emailLogger = new EmailLogger(LogLevel.Error, new EmailLoggerConfiguration
-            {
-                FlushLevel = LogLevel.Critical,
-                Login = "yobalawson@outlook.com",
-                Password = "PASSWORD",
-                Receivers = new List<string> { "b0-0b@yandex.ru" },
-                ReportPeriod = 60,
-                Sender = "ISENGARD@itcc.company",
-                SmtpHost = "smtp-mail.outlook.com",
-                SmptPort = 587,
-                Subject = "ISENGARD",
-                SendEmptyReports = true,
-                MaxQueueSize = 50
-            });
-            // emailLogger.Start();
-            // Logger.RegisterReceiver(emailLogger);
 
             return true;
         }
