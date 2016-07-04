@@ -410,6 +410,7 @@ void DisallowUntrustedServerCertificates();
 ```
 string ServerAddress {get; set;}
 Protocol ServerProtocol { get; private set; } = Protocol.Http;
+bool AllowGzipEncoding {get; set;}
 ```
 
 ##### `class RegularClient`
@@ -589,6 +590,7 @@ Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }               
 
 Delegates.BodySerializer BodySerializer { get; set; }                             // Метод для сериализации тел ответов
 System.Text.Encoding BodyEncoding { get; set; } = Encoding.UTF8;                  // Кодировка ответов
+bool AutoGzipCompression { get; set; } = false;                                   // Используется ли клиентский заголовок Accept-Encoding: gzip
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
 int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого значения. Отрицательное значение - нет ограничения

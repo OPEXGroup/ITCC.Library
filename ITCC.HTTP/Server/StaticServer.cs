@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Griffin.Net.Channels;
 using Griffin.Net.Protocols;
@@ -109,6 +110,8 @@ namespace ITCC.HTTP.Server
                 _faviconPath = configuration.FaviconPath;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
+
+                _autoGzipCompression = configuration.AutoGzipCompression;
 
                 if (configuration.ServerName != null)
                 {
@@ -228,7 +231,7 @@ namespace ITCC.HTTP.Server
                 _statistics?.AddRequest(request);
                 HttpResponse response;
                 LogMessage(LogLevel.Debug,
-                    $"Request from {channel.RemoteEndpoint}. Method: {request.HttpMethod}, URI: {request.Uri.LocalPath}");
+                    $"Request from {channel.RemoteEndpoint}.\n{SerializeHttpRequest(request)}");
 
                 foreach (var checker in ServiceHandlers.Keys)
                 {
@@ -280,7 +283,7 @@ namespace ITCC.HTTP.Server
                         else
                         {
                             var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                            response = ResponseFactory.CreateResponse(handleResult);
+                            response = ResponseFactory.CreateResponse(handleResult, false, RequestEnablesGzip(request));
                             if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
                             {
                                 var savedBody = response.Body;
@@ -290,7 +293,7 @@ namespace ITCC.HTTP.Server
                         }
                         break;
                     default:
-                        response = ResponseFactory.CreateResponse(authResult);
+                        response = ResponseFactory.CreateResponse(authResult, RequestEnablesGzip(request));
                         break;
                 }
                 OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
@@ -418,7 +421,7 @@ namespace ITCC.HTTP.Server
                 authResult = new AuthentificationResult(null, HttpStatusCode.NotFound);
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
-            var response = ResponseFactory.CreateResponse(authResult);
+            var response = ResponseFactory.CreateResponse(authResult, RequestEnablesGzip(request));
             OnResponseReady(channel, response, "/login", requestStopwatch);
         }
 
@@ -447,7 +450,7 @@ namespace ITCC.HTTP.Server
             var converter = new PingJsonConverter();
             var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
             responseBody = responseBody.Replace(@"\", "");
-            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
+            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(request));
             OnResponseReady(channel, response, "/ping", requestStopwatch);
             return Task.CompletedTask;
         }
@@ -490,7 +493,7 @@ namespace ITCC.HTTP.Server
             else
             {
                 var responseBody = _statistics?.Serialize();
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
+                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(request));
                 response.ContentType = "text/plain";
             }
 
@@ -534,7 +537,7 @@ namespace ITCC.HTTP.Server
             HttpResponse response;
             if (allowValues.Any())
             {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
+                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
                 response.AddHeader("Allow", string.Join(", ", allowValues));
             }
             else
@@ -854,8 +857,46 @@ namespace ITCC.HTTP.Server
             };
         }
 
+        private static bool RequestEnablesGzip(IHttpMessage request)
+        {
+            if (!_autoGzipCompression)
+                return false;
+            if (request == null)
+                return false;
+            if (!request.Headers.Contains("Accept-Encoding"))
+                return false;
+            var parts = request.Headers["Accept-Encoding"].Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
+            return parts.Any(p => p == "gzip");
+        }
+
+        private static string SerializeHttpRequest(IHttpMessage request)
+        {
+            if (request == null)
+                return null;
+
+            var builder = new StringBuilder();
+            builder.AppendLine($"{request.StatusLine}");
+            foreach (var header in request.Headers)
+            {
+                builder.AppendLine($"{header.Key}: {header.Value}");
+            }
+#if TRACE
+            if (request.Body == null)
+                return builder.ToString();
+            using (var reader = new StreamReader(request.Body))
+            {
+                builder.AppendLine(reader.ReadToEnd());
+            }
+            request.Body.Position = 0;
+#endif
+
+            return builder.ToString();
+        }
+
         public static readonly List<RequestProcessor<TAccount>> RequestProcessors =
             new List<RequestProcessor<TAccount>>();
+
+        private static bool _autoGzipCompression;
 
         #endregion
     }

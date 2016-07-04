@@ -41,6 +41,9 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
+            StaticClient.ServerAddress = "http://localhost:8888";
+            var result = await StaticClient.GetRawAsync("/delay");
+            Console.WriteLine(result.Result);
             Console.ReadLine();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
@@ -64,6 +67,7 @@ namespace ITCC.Library.Testing
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
+                AutoGzipCompression = true
             });
 
             StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>

@@ -402,6 +402,27 @@ namespace ITCC.HTTP.Client
         /// </summary>
         public static Protocol ServerProtocol => RegularClient.ServerProtocol;
 
+        /// <summary>
+        ///     If true, client will send Accept-Encoding and decompress responses automatically
+        /// </summary>
+        public static bool AllowGzipEncoding
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.AllowGzipEncoding;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.AllowGzipEncoding = value;
+                }
+            }
+        }
+
         private static readonly object ClientLock = new object();
 
         #endregion

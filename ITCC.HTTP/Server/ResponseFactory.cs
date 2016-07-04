@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using Griffin.Net.Protocols.Http;
@@ -22,7 +23,7 @@ namespace ITCC.HTTP.Server
             {AuthorizationStatus.Forbidden, HttpStatusCode.Forbidden },
             {AuthorizationStatus.TooManyRequests, (HttpStatusCode)429 },
             {AuthorizationStatus.InternalError, HttpStatusCode.OK }
-        }; 
+        };
 
         /// <summary>
         ///     Status code -> reason phrase map
@@ -75,16 +76,16 @@ namespace ITCC.HTTP.Server
             _bodyEncoding = encoding;
         }
 
-        public static HttpResponse CreateResponse(AuthentificationResult authentificationResult)
+        public static HttpResponse CreateResponse(AuthentificationResult authentificationResult, bool gzipResponse = false)
         {
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders);
+            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, gzipResponse);
         }
 
-        public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult)
-            where TAccount : class 
+        public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
+            where TAccount : class
         {
             if (authorizationResult == null)
                 throw new ArgumentNullException(nameof(authorizationResult));
@@ -95,18 +96,19 @@ namespace ITCC.HTTP.Server
 
             return CreateResponse(httpStatusCode,
                 (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
-                authorizationResult.AdditionalHeaders);
+                authorizationResult.AdditionalHeaders,
+                gzipResponse);
         }
 
-        public static HttpResponse CreateResponse(HandlerResult handlerResult, bool alreadyEncoded = false)
+        public static HttpResponse CreateResponse(HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             if (handlerResult == null)
                 throw new ArgumentNullException(nameof(handlerResult));
 
-            return CreateResponse(handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded);
+            return CreateResponse(handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
         }
 
-        public static HttpResponse CreateResponse(HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
+        public static HttpResponse CreateResponse(HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             var httpResponse = new HttpResponse(code, SelectReasonPhrase(code), "HTTP/1.1");
             if (_commonHeaders != null)
@@ -125,22 +127,39 @@ namespace ITCC.HTTP.Server
                 }
             }
 
-            if (body != null)
-            {
-                string bodyString;
-                if (! alreadyEncoded)
-                    bodyString = _bodySerializer == null ? body.ToString() : _bodySerializer(body);
-                else
-                {
-                    bodyString = body as string;
-                }
+            if (body == null)
+                return httpResponse;
 
-                var encoding = _bodyEncoding;
-                httpResponse.Body = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty));
-                httpResponse.ContentType = "application/json";
-                httpResponse.ContentCharset = encoding;
+            string bodyString;
+            if (!alreadyEncoded)
+                bodyString = _bodySerializer == null ? body.ToString() : _bodySerializer(body);
+            else
+            {
+                bodyString = body as string;
             }
 
+            var encoding = _bodyEncoding;
+            if (gzipResponse)
+            {
+                using (var uncompressedStream = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty)))
+                {
+                    httpResponse.Body = new MemoryStream(512);
+                    using (var gzipStream = new GZipStream(httpResponse.Body, CompressionMode.Compress, true))
+                    {
+                        uncompressedStream.CopyTo(gzipStream);
+                    }
+                    httpResponse.Body.Position = 0;
+                    httpResponse.ContentLength = (int)httpResponse.Body.Length;
+                }
+                httpResponse.AddHeader("Content-Encoding", "gzip");
+            }
+            else
+            {
+                httpResponse.Body = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty));
+            }
+
+            httpResponse.ContentType = "application/json";
+            httpResponse.ContentCharset = encoding;
             return httpResponse;
         }
 
@@ -169,21 +188,30 @@ namespace ITCC.HTTP.Server
 
             if (response.Body is FileStream)
             {
-                builder.AppendLine($"<File {((FileStream) response.Body).Name} content>");
+                builder.AppendLine($"<File {((FileStream)response.Body).Name} content>");
             }
             else
             {
-                var reader = new StreamReader(response.Body);
-                if (ResponseBodyLogLimit < 1 || response.Body.Length <= ResponseBodyLogLimit)
-                    builder.AppendLine(reader.ReadToEnd());
-                else
+                try
                 {
-                    var buffer = new byte[ResponseBodyLogLimit];
-                    response.Body.Read(buffer, 0, ResponseBodyLogLimit);
-                    builder.AppendLine(_bodyEncoding.GetString(buffer));
-                    builder.AppendLine($"[And {response.Body.Length - ResponseBodyLogLimit} more bytes...]");
+                    var reader = new StreamReader(response.Body);
+
+                    if (ResponseBodyLogLimit < 1 || response.Body.Length <= ResponseBodyLogLimit)
+                        builder.AppendLine(reader.ReadToEnd());
+                    else
+                    {
+                        var buffer = new byte[ResponseBodyLogLimit];
+                        response.Body.Read(buffer, 0, ResponseBodyLogLimit);
+                        builder.AppendLine(_bodyEncoding.GetString(buffer));
+                        builder.AppendLine($"[And {response.Body.Length - ResponseBodyLogLimit} more bytes...]");
+                    }
+
+                    response.Body.Position = 0;
                 }
-                response.Body.Position = 0;
+                catch (Exception)
+                {
+                    return builder.ToString();
+                }
             }
 
             return builder.ToString();

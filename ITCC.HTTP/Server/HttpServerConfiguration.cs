@@ -80,6 +80,11 @@ namespace ITCC.HTTP.Server
         public Encoding BodyEncoding { get; set; } = Encoding.UTF8;
 
         /// <summary>
+        ///     If true, all requests that contain Accept-Encoding: gzip will be served with gzipped responses
+        /// </summary>
+        public bool AutoGzipCompression { get; set; } = false;
+
+        /// <summary>
         ///     If true, server will write response bodies into trace logs
         /// </summary>
         public bool LogResponseBodies { get; set; } = true;

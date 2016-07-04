@@ -91,7 +91,7 @@ namespace ITCC.HTTP.Client
 
             try
             {
-                using (var client = new HttpClient())
+                using (var client = new HttpClient(new HttpClientHandler {AutomaticDecompression = DecompressionMethods.None}))
                 {
                     if (RequestTimeout > 0)
                         client.Timeout = TimeSpan.FromSeconds(RequestTimeout);
@@ -747,6 +747,25 @@ namespace ITCC.HTTP.Client
         ///     Does the client use SSL/TLS?
         /// </summary>
         public Protocol ServerProtocol { get; private set; } = Protocol.Http;
+
+        /// <summary>
+        ///     If true, client will send Accept-Encoding and decompress responses automatically
+        /// </summary>
+        public bool AllowGzipEncoding
+        {
+            get { return _decompressionMethods != DecompressionMethods.None; }
+            set
+            {
+                if (value)
+                    _decompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                else
+                {
+                    _decompressionMethods = DecompressionMethods.None;
+                }
+            }
+        }
+
+        private DecompressionMethods _decompressionMethods = DecompressionMethods.None;
 
         #endregion
     }
