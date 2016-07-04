@@ -44,7 +44,7 @@ namespace ITCC.HTTP.Client
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
+        internal static Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
             HttpMethod method,
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -57,7 +57,7 @@ namespace ITCC.HTTP.Client
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
             return RegularClient.PerformRequestAsync(method, partialUri, parameters, headers, bodyArg,
-                requestBodySerializer, responseBodyDeserializer, authentificationProvider, outputStream, cancellationToken);
+                requestBodySerializer, responseBodyDeserializer, authentificationProvider, outputStream, RegularClient.AllowedRedirectCount, cancellationToken);
         }
 
         #endregion
@@ -419,6 +419,49 @@ namespace ITCC.HTTP.Client
                 lock (ClientLock)
                 {
                     RegularClient.AllowGzipEncoding = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     How many times client is allowed to follow Location: headers in case of 3xx responses. Defaults to 1.
+        ///     Note: client will NEVER follow redirects if methods is not GET or HEAD. Redirect will be returned explicitely
+        /// </summary>
+        public static int AllowedRedirectCount
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.AllowedRedirectCount;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.AllowedRedirectCount = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     If true, the same authorization procedure will be used for every redirect.
+        /// </summary>
+        public static bool PreserveAuthorizationOnRedirect
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.PreserveAuthorizationOnRedirect;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.PreserveAuthorizationOnRedirect = value;
                 }
             }
         }

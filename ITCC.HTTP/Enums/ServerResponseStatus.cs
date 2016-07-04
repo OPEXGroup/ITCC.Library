@@ -16,6 +16,11 @@
         NothingToDo,
 
         /// <summary>
+        ///     Request has been redirected (3xx)
+        /// </summary>
+        Redirect,
+
+        /// <summary>
         ///     Client-side error
         /// </summary>
         ClientError,
@@ -58,6 +63,6 @@
         /// <summary>
         ///     No response (some network problems)
         /// </summary>
-        ConnectionError
+        ConnectionError,
     }
 }

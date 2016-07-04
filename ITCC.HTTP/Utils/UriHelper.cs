@@ -10,15 +10,7 @@ namespace ITCC.HTTP.Utils
     /// </summary>
     internal static class UriHelper
     {
-        /// <summary>
-        ///     Builds uri that can be passed to HttpClient
-        /// </summary>
-        /// <param name="fullServerAddress">Server address with post-address uri</param>
-        /// <param name="partialUri">Uri part after address and port</param>
-        /// <param name="parameters">Params going after ?</param>
-        /// <param name="maxSize">Maximum result address length</param>
-        /// <returns>URI or null in case of error</returns>
-        public static string BuildFullUri(string fullServerAddress, string partialUri,
+        public static string BuildFullUri(string fullServerAddress, string uri,
             IDictionary<string, string> parameters, int maxSize = 4096)
         {
             if (fullServerAddress == null || maxSize < 5)
@@ -28,12 +20,13 @@ namespace ITCC.HTTP.Utils
 
             var builder = new StringBuilder(maxSize);
 
-            builder.Append(fullServerAddress);
-            if (!fullServerAddress.EndsWith("/") && !partialUri.StartsWith("/"))
-                builder.Append("/");
-            if (partialUri != null)
-                builder.Append(partialUri);
-
+            if (!IsAbsoluteUrl(uri))
+            {
+                builder.Append(fullServerAddress);
+                if (!fullServerAddress.EndsWith("/") && !uri.StartsWith("/"))
+                    builder.Append("/");
+            }
+            builder.Append(uri ?? "");
             if (parameters == null || parameters.Count <= 0)
                 return Uri.EscapeUriString(builder.ToString());
 
@@ -48,26 +41,18 @@ namespace ITCC.HTTP.Utils
             return Uri.EscapeUriString(builder.ToString().TrimEnd('&'));
         }
 
-        /// <summary>
-        ///     Builds uri that can be passed to HttpClient
-        /// </summary>
-        /// <param name="protocol">Connection protocol</param>
-        /// <param name="serverIp">Server IPv4 address</param>
-        /// <param name="serverPort">Server listening port</param>
-        /// <param name="partialUri">URI part after port</param>
-        /// <param name="parameters">Params going after ?</param>
-        /// <param name="maxSize">Maximum result address length</param>
-        /// <returns>URI or null in case of error</returns>
-        public static string BuildFullUri(Protocol protocol, string serverIp, string serverPort, string partialUri,
-            IDictionary<string, string> parameters, int maxSize = 4096)
+        public static bool IsAbsoluteUrl(string url)
         {
-            if (serverIp == null)
+            Uri result;
+            return Uri.TryCreate(url, UriKind.Absolute, out result);
+        }
+
+        public static string ExtractRelativeUri(string url)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                 return null;
-            var fullserverAddress = "http"
-                                    + (protocol == Protocol.Https ? "s" : string.Empty)
-                                    + serverIp
-                                    + (serverPort != null ? ":" + serverPort : string.Empty) + "/";
-            return BuildFullUri(fullserverAddress, partialUri, parameters, maxSize);
+            return uri.LocalPath;
         }
     }
 }

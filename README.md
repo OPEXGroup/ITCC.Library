@@ -288,20 +288,6 @@ Exception Exception { get; set;}                    // Исключение, в�
 
 `HTTP`-клиент. Ключевые методы: 
 
-* Базовый метод. Осуществляет `HTTP`-запрос. Реально почти никогда не используется.
-```
-async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
-            HttpMethod method,
-            string partialUri,
-            IDictionary<string, string> parameters = null,
-            IDictionary<string, string> headers = null,
-            TBody bodyArg = default(TBody),
-            Delegates.BodySerializer requestBodySerializer = null,
-            Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
-            Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-```
-
 * Получение ответа на `GET`-запрос в виде простой строки тела
 ```
 Task<RequestResult<string>> GetRawAsync(
@@ -408,9 +394,15 @@ void DisallowUntrustedServerCertificates();
 
 Ключевые свойства:
 ```
-string ServerAddress {get; set;}
-Protocol ServerProtocol { get; private set; } = Protocol.Http;
-bool AllowGzipEncoding {get; set;}
+string ServerAddress {get; set;}                             // Полный адрес сервера (<proto>://<fqdn>:<port>)
+Protocol ServerProtocol { get; }                             // Протокол общения с сервером (определяется на основе адреса)
+bool AllowGzipEncoding {get; set;}                           // Отправляет ли клиент заголовки Accept-Encoding: gzip, deflate
+/*
+    Перенаправления НИКОГДА не делаются автоматически для запросов, отличных от GET и HEAD
+*/
+int AllowedRedirectCount { get; set; } = 1;                  // Максимальное количество автоматически обрабатываемых перенаправлений
+bool AllowRedirectHostChange { get; set; } = false;          // Могут ли перенаправления вести на посторонние хосты
+bool PreserveAuthorizationOnRedirect { get; set; } = true;   // Используется ли авторизационный метод после перенаправления
 ```
 
 ##### `class RegularClient`
@@ -484,6 +476,7 @@ Https   // С шифрованием данных
 ```
 Ok,                        // Все хорошо (200, 201)
 NothingToDo,               // Данных нет (204)
+Redirect,                  // Перенаправление (301, 302)  
 ClientError,               // Ошибка в клиентском запросе (400, 404, 405, 409, 413)
 ServerError,               // Ошибка на сервере (500, 501)
 Unauthorized,              // Данные авторизации неверны или недостаточны (401)

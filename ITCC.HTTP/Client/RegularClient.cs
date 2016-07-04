@@ -46,7 +46,9 @@ namespace ITCC.HTTP.Client
             {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
             {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
             {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError },
-            {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError }
+            {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError },
+            {HttpStatusCode.MovedPermanently, ServerResponseStatus.Redirect },
+            {HttpStatusCode.Found, ServerResponseStatus.Redirect }
         };
 
         #endregion
@@ -67,10 +69,11 @@ namespace ITCC.HTTP.Client
         /// <param name="responseBodyDeserializer">Method to deserialize response body</param>
         /// <param name="authentificationProvider">Method to add authentification data</param>
         /// <param name="outputStream">If not null, response body will be copied to this stream</param>
+        /// <param name="redirectsLeft">How many times client is allowed to follow redirects</param>
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
+        internal async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
             HttpMethod method,
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -80,6 +83,7 @@ namespace ITCC.HTTP.Client
             Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
+            int redirectsLeft = 0,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
         {
             var fullUri = UriHelper.BuildFullUri(_serverAddress, partialUri, parameters);
@@ -91,7 +95,11 @@ namespace ITCC.HTTP.Client
 
             try
             {
-                using (var client = new HttpClient(new HttpClientHandler {AutomaticDecompression = _decompressionMethods }))
+                using (var client = new HttpClient(new HttpClientHandler
+                {
+                    AutomaticDecompression = _decompressionMethods,
+                    AllowAutoRedirect = false
+                }))
                 {
                     if (RequestTimeout > 0)
                         client.Timeout = TimeSpan.FromSeconds(RequestTimeout);
@@ -147,6 +155,45 @@ namespace ITCC.HTTP.Client
                             var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
                                 ? ServerResponseStatusDictionary[response.StatusCode]
                                 : ServerResponseStatus.IncompehensibleResponse;
+
+                            if (status == ServerResponseStatus.Redirect)
+                            {
+                                if (redirectsLeft <= 0)
+                                {
+                                    return new RequestResult<TResult>(null, ServerResponseStatus.Redirect, responseHeaders);
+                                }
+                                if (method == HttpMethod.Head || method == HttpMethod.Get)
+                                {
+                                    if (!responseHeaders.ContainsKey("Location"))
+                                    {
+                                        return new RequestResult<TResult>(null,
+                                            ServerResponseStatus.IncompehensibleResponse, responseHeaders);
+                                    }
+                                    var redirectLocation = responseHeaders["Location"];
+                                    if (!redirectLocation.StartsWith(_serverAddress) && !AllowRedirectHostChange)
+                                    {
+                                        return new RequestResult<TResult>(null,
+                                            ServerResponseStatus.Redirect, responseHeaders);
+                                    }
+
+                                    Delegates.AuthentificationDataAdder redirectAuthProvider = null;
+                                    if (PreserveAuthorizationOnRedirect)
+                                        redirectAuthProvider = authentificationProvider;
+
+                                    return await PerformRequestAsync(method,
+                                        redirectLocation,
+                                        parameters,
+                                        headers,
+                                        bodyArg,
+                                        requestBodySerializer,
+                                        responseBodyDeserializer,
+                                        redirectAuthProvider,
+                                        outputStream,
+                                        redirectsLeft - 1,
+                                        cancellationToken);
+                                }
+                                return new RequestResult<TResult>(null, ServerResponseStatus.Redirect, responseHeaders);
+                            }
 
                             if (outputStream != null)
                             {
@@ -249,6 +296,7 @@ namespace ITCC.HTTP.Client
                 null,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -282,6 +330,7 @@ namespace ITCC.HTTP.Client
                 bodyDeserializer,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -313,6 +362,7 @@ namespace ITCC.HTTP.Client
                 JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -366,6 +416,7 @@ namespace ITCC.HTTP.Client
                         null,
                         authentificationProvider,
                         fileStream,
+                        AllowedRedirectCount,
                         cancellationToken);
                 }
             }
@@ -408,6 +459,7 @@ namespace ITCC.HTTP.Client
                 null,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -442,6 +494,7 @@ namespace ITCC.HTTP.Client
                 JsonConvert.DeserializeObject<TResult>,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -477,6 +530,7 @@ namespace ITCC.HTTP.Client
                         null,
                         authentificationProvider,
                         null,
+                        AllowedRedirectCount,
                         cancellationToken);
                 }
             }
@@ -523,6 +577,7 @@ namespace ITCC.HTTP.Client
                 null,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -557,6 +612,7 @@ namespace ITCC.HTTP.Client
                         null,
                         authentificationProvider,
                         null,
+                        AllowedRedirectCount,
                         cancellationToken);
                 }
             }
@@ -603,6 +659,7 @@ namespace ITCC.HTTP.Client
                 null,
                 authentificationProvider,
                 null,
+                AllowedRedirectCount,
                 cancellationToken
                 );
         }
@@ -764,6 +821,22 @@ namespace ITCC.HTTP.Client
                 }
             }
         }
+
+        /// <summary>
+        ///     How many times client is allowed to follow Location: headers in case of 3xx responses. Defaults to 1.
+        ///     Note: client will NEVER follow redirects if methods is not GET or HEAD. Redirect will be returned explicitely
+        /// </summary>
+        public int AllowedRedirectCount { get; set; } = 1;
+
+        /// <summary>
+        ///     If true, 3xx codes may cause sudden host change
+        /// </summary>
+        public bool AllowRedirectHostChange { get; set; } = false;
+
+        /// <summary>
+        ///     If true, the same authorization procedure will be used for every redirect.
+        /// </summary>
+        public bool PreserveAuthorizationOnRedirect { get; set; } = true;
 
         private DecompressionMethods _decompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
