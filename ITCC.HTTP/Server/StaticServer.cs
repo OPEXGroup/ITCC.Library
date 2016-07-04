@@ -122,6 +122,8 @@ namespace ITCC.HTTP.Server
                 }
                 _listener.Start(IPAddress.Any, configuration.Port);
                 _started = true;
+                var protocolString = configuration.Protocol == Protocol.Https ? "https" : "http";
+                _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
                 ServiceUris.AddRange(configuration.GetReservedUris());
                 LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
                 if (ServiceUris.Any())
@@ -194,6 +196,7 @@ namespace ITCC.HTTP.Server
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
+        private static string _serverAddress = null;
 
         #endregion
 
