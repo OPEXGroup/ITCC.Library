@@ -690,12 +690,12 @@ namespace ITCC.HTTP.Client
 
         #region log
 
-        public void LogMessage(LogLevel level, string message)
+        private void LogMessage(LogLevel level, string message)
         {
             Logger.LogEntry("HTTP CLIENT", level, message);
         }
 
-        public void LogException(LogLevel level, Exception exception)
+        private void LogException(LogLevel level, Exception exception)
         {
             Logger.LogException("HTTP CLIENT", level, exception);
         }
