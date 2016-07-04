@@ -91,7 +91,7 @@ namespace ITCC.HTTP.Client
 
             try
             {
-                using (var client = new HttpClient(new HttpClientHandler {AutomaticDecompression = DecompressionMethods.None}))
+                using (var client = new HttpClient(new HttpClientHandler {AutomaticDecompression = _decompressionMethods }))
                 {
                     if (RequestTimeout > 0)
                         client.Timeout = TimeSpan.FromSeconds(RequestTimeout);
