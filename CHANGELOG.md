@@ -1,3 +1,7 @@
+## 0.15.1 (2016-07-04)
+
+* **Fix**:  Decompression method selection fixed
+
 ## 0.15.0 (2016-07-04)
 
 * **New**:  GZip compression is implemented and enabled by default in `StaticServer`, `StaticClient` and `RegularClient`  
