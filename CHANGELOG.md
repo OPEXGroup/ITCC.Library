@@ -1,3 +1,7 @@
+## 0.15.0 (2016-07-04)
+
+* **New**:  GZip compression is implemented and enabled by default in `StaticServer`, `StaticClient` and `RegularClient`  
+
 ## 0.14.1 (2016-07-01)
 
 * **Fix**: `GetFileAsync`, `PutFileAsync` and `PostFileAsync` file sharing fix for `StaticClient` and `RegularClient`  
