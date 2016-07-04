@@ -1,3 +1,7 @@
+## 0.16.0 (2016-07-04)
+
+* **New**:  Full redirect (301, 302) support added in `StaticServer`, `StaticClient` and `RegularClient`  
+
 ## 0.15.1 (2016-07-04)
 
 * **Fix**:  Decompression method selection fixed
