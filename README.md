@@ -627,6 +627,8 @@ ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration);       
 void Stop();                                                                              // Синхронная остановка сервера (с очисткой списка обработчиков)
 bool AddRequestProcessor(RequestProcessor<TAccount> requestProcessor);                    // Добавление обработчика запросов
 bool AddRequestProcessorRange(IEnumerable<RequestProcessor<TAccount>> requestProcessors); // Добавление нескольких обработчиков запросов
+bool AddStaticRedirect(string fromUri, string toUri);                                     // Добавление статичного (302) перенаправления
+bool AddStaticRedirectRange(IDictionary<string, string> uriTable);                        // Добавление нескольких статичных (302) перенаправлений
 ```
 
 #### Utils

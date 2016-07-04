@@ -100,6 +100,8 @@ namespace ITCC.Library.Testing
                 Method = HttpMethod.Get,
                 SubUri = "delay"
             });
+
+            StaticServer<object>.AddStaticRedirect("test", "delay");
         }
 
         private static void StopServer()

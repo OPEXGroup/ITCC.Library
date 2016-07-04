@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -187,7 +188,7 @@ namespace ITCC.HTTP.Server
 
         private static void CleanUp()
         {
-            RequestProcessors.Clear();
+            InnerRequestProcessors.Clear();
             _listener = null;
             ServiceUris.Clear();
         }
@@ -249,6 +250,15 @@ namespace ITCC.HTTP.Server
                 if (requestProcessorSelectionResult == null)
                 {
                     response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
+                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
+                    return;
+                }
+
+                if (requestProcessorSelectionResult.IsRedirect)
+                {
+                    var redirectLocation = $"{_serverAddress}{requestProcessorSelectionResult.RequestProcessor.SubUri}";
+                    response = ResponseFactory.CreateResponse(HttpStatusCode.Found, null,
+                        new Dictionary<string, string> {{"Location", redirectLocation}});
                     OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
                     return;
                 }
@@ -520,7 +530,7 @@ namespace ITCC.HTTP.Server
             var allowValues = new List<string>();
             if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
             {
-                foreach (var requestProcessor in RequestProcessors)
+                foreach (var requestProcessor in InnerRequestProcessors)
                 {
                     if (request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri)
                     {
@@ -807,11 +817,11 @@ namespace ITCC.HTTP.Server
                 return false;
 
             requestProcessor.SubUri = requestProcessor.SubUri.Trim('/');
-            var duplicate = RequestProcessors.FirstOrDefault(rp => RequestProcessorDuplicates(rp, requestProcessor));
+            var duplicate = InnerRequestProcessors.FirstOrDefault(rp => RequestProcessorDuplicates(rp, requestProcessor));
             if (duplicate != null)
-                RequestProcessors.Remove(duplicate);
+                InnerRequestProcessors.Remove(duplicate);
 
-            RequestProcessors.Add(requestProcessor);
+            InnerRequestProcessors.Add(requestProcessor);
             return true;
         }
 
@@ -822,6 +832,19 @@ namespace ITCC.HTTP.Server
                 return true;
 
             return requestProcessors.All(AddRequestProcessor);
+        }
+
+        public static bool AddStaticRedirect(string fromUri, string toUri)
+        {
+            var preprocessed = PreprocessRedirect(fromUri, toUri);
+            if (!preprocessed.Item3)
+                return false;
+            return InnerStaticRedirectionTable.TryAdd(preprocessed.Item1, preprocessed.Item2);
+        }
+
+        public static bool AddStaticRedirectRange(IDictionary<string, string> uriTable)
+        {
+            return uriTable.All(up => AddStaticRedirect(up.Key, up.Value));
         }
 
         private static bool CheckRequestProcessor(RequestProcessor<TAccount> requestProcessor)
@@ -845,18 +868,50 @@ namespace ITCC.HTTP.Server
             return true;
         }
 
+        private static Tuple<string, string, bool> PreprocessRedirect(string fromUri, string toUri)
+        {
+            if (fromUri == null || toUri == null)
+                return new Tuple<string, string, bool>(null, null, false);
+
+            if (InnerStaticRedirectionTable.ContainsKey(fromUri))
+                return new Tuple<string, string, bool>(null, null, false);
+
+            return new Tuple<string, string, bool>(fromUri.Trim('/'), toUri.Trim('/'), true); ;
+        }
+
         private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
         {
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
+            var localUri = request.Uri.LocalPath.Trim('/');
+            if (requestMethod == HttpMethod.Get || requestMethod == HttpMethod.Head)
+            {
+                string redirectionTarget;
+                if (InnerStaticRedirectionTable.TryGetValue(localUri, out redirectionTarget))
+                {
+                    var correspondedProcessor =
+                        InnerRequestProcessors.FirstOrDefault(
+                            rp => rp.Method == HttpMethod.Get && rp.SubUri.Trim('/') == redirectionTarget);
+                    if (correspondedProcessor != null)
+                    {
+                        return new RequestProcessorSelectionResult<TAccount>
+                        {
+                            RequestProcessor = correspondedProcessor,
+                            MethodMatches = true,
+                            IsRedirect = true
+                        };
+                    }
+                }
+            }
 
-            var processorsForUri = RequestProcessors.Where(requestProcessor => request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri.Trim('/')).ToList();
+            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => localUri == requestProcessor.SubUri.Trim('/')).ToList();
             if (processorsForUri.Count == 0)
                 return null;
             var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
             return new RequestProcessorSelectionResult<TAccount>
             {
                 RequestProcessor = suitableProcessor,
-                MethodMatches = suitableProcessor != null
+                MethodMatches = suitableProcessor != null,
+                IsRedirect = false
             };
         }
 
@@ -896,9 +951,12 @@ namespace ITCC.HTTP.Server
             return builder.ToString();
         }
 
-        public static readonly List<RequestProcessor<TAccount>> RequestProcessors =
-            new List<RequestProcessor<TAccount>>();
+        public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable); 
+        public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
 
+        private static readonly List<RequestProcessor<TAccount>> InnerRequestProcessors =
+            new List<RequestProcessor<TAccount>>();
+        private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>(); 
         private static bool _autoGzipCompression;
 
         #endregion
