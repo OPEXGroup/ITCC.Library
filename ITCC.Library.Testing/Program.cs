@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -35,8 +36,8 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
-            AsynchronousClient.StartClient();
-            //StaticClient.ServerAddress = "http://localhost:8888";
+            //AsynchronousClient.StartClient();
+            StaticClient.ServerAddress = "http://localhost:8888";
             //using (var client = new HttpClient())
             //{
             //    var firstTask = client.GetAsync(new Uri("http://127.0.0.1:8888/bigdata"), HttpCompletionOption.ResponseHeadersRead);
@@ -48,13 +49,16 @@ namespace ITCC.Library.Testing
 
             //    Console.WriteLine("done");
             //}
+            await StaticClient.GetFileAsync("/bigdata", null, null, "2.avi");
+            Logger.LogEntry("MAIN", LogLevel.Info, "Downloaded");
+
             Console.ReadLine();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Debug;
+            Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -71,7 +75,20 @@ namespace ITCC.Library.Testing
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
-                AutoGzipCompression = true
+                AutoGzipCompression = true,
+                FilesEnabled = true,
+                FilesNeedAuthorization = false,
+                FilesBaseUri = "files",
+                FileSections = new List<FileSection>
+                {
+                    new FileSection
+                    {
+                        Folder = "temp",
+                        MaxFileSize = -1,
+                        Name = "temp"
+                    }
+                },
+                FilesLocation = "."
             });
 
             StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
