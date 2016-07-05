@@ -1,33 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Authentication;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Geocoding;
-using Geocoding.Google;
-using ITCC.Geocoding;
-using ITCC.Geocoding.Enums;
-using ITCC.Geocoding.Yandex;
-using ITCC.Geocoding.Yandex.Enums;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
+using ITCC.Library.Testing.Networking;
 using ITCC.Logging;
 using ITCC.Logging.Loggers;
-using ITCC.Logging.Utils;
 using Newtonsoft.Json;
 
 namespace ITCC.Library.Testing
 {
-    class Program
+    
+
+   
+
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             MainAsync().GetAwaiter().GetResult();
         }
@@ -41,16 +35,26 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "http://localhost:8888";
-            var result = await StaticClient.GetRawAsync("/delay");
-            Console.WriteLine(result.Result);
+            AsynchronousClient.StartClient();
+            //StaticClient.ServerAddress = "http://localhost:8888";
+            //using (var client = new HttpClient())
+            //{
+            //    var firstTask = client.GetAsync(new Uri("http://127.0.0.1:8888/bigdata"), HttpCompletionOption.ResponseHeadersRead);
+            //    var secondTask = client.GetAsync(new Uri("http://127.0.0.1:8888/bigdata"), HttpCompletionOption.ResponseHeadersRead);
+            //    var firstResponse = await firstTask;
+            //    var secondResponse = await secondTask;
+            //    await firstResponse.Content.ReadAsStringAsync();
+            //    await secondResponse.Content.ReadAsStreamAsync();
+
+            //    Console.WriteLine("done");
+            //}
             Console.ReadLine();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Debug;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -99,6 +103,25 @@ namespace ITCC.Library.Testing
                 },
                 Method = HttpMethod.Get,
                 SubUri = "delay"
+            });
+
+            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            {
+                AuthorizationRequired = false,
+                Method = HttpMethod.Get,
+                SubUri = "bigdata",
+                Handler = (account, request) =>
+                {
+                    var builder = new StringBuilder(64 * 1024 * 1024);
+                    for (var i = 0; i < 1024; ++i)
+                    {
+                        var str = string.Empty;
+                        for (var j = 0; j < 1024; ++j)
+                            str += "12345678901234567890123456789012";
+                        builder.Append(str);
+                    }
+                    return Task.FromResult(new HandlerResult(HttpStatusCode.OK, builder.ToString()));
+                }
             });
 
             StaticServer<object>.AddStaticRedirect("test", "delay");
