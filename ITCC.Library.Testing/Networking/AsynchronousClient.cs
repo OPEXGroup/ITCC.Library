@@ -29,14 +29,16 @@ namespace ITCC.Library.Testing.Networking
                 client.BeginConnect(remoteEp, ConnectCallback, client);
                 ConnectDone.WaitOne();
 
-                const string request = "GET http://127.0.0.1:8888/bigdata HTTP/1.1\r\nName: Value\r\n\r\n";
+                const string request = "GET 127.0.0.1:8888/bigdata HTTP/1.1\r\nName: Value\r\n\r\n";
                 Send(client, request);
                 SendDone.WaitOne();
+                Receive(client);
+                Thread.Sleep(4000);
                 Send(client, request);
                 SendDone.WaitOne();
                 
 
-                Receive(client);
+                
                 ReceiveDone.WaitOne();
 
                 LogMessage($"Response received : {_response}");
@@ -89,9 +91,11 @@ namespace ITCC.Library.Testing.Networking
 
                 if (bytesRead > 0)
                 {
+                    state.TotalReceived += bytesRead;
+                    var kb = bytesRead/1024;
                     state.Sb.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
-                    client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0,
-                        ReceiveCallback, state);
+                    LogMessage($"Got {kb} kbytes ({state.TotalReceived / 1024} total)");
+                    client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0, ReceiveCallback, state);
                 }
                 else
                 {

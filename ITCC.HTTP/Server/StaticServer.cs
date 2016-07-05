@@ -370,7 +370,7 @@ namespace ITCC.HTTP.Server
                     LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {elapsedMilliseconds} milliseconds to process!");
                 }
                 channel.Send(response);
-                LogMessage(LogLevel.Trace, $"Response for {channel.RemoteEndpoint} sent ({elapsedMilliseconds} milliseconds)");
+                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} sent ({elapsedMilliseconds} milliseconds)");
             }
             catch (SocketException)
             {
