@@ -29,16 +29,14 @@ namespace ITCC.Library.Testing.Networking
                 client.BeginConnect(remoteEp, ConnectCallback, client);
                 ConnectDone.WaitOne();
 
-                const string request = "GET http://127.0.0.1:8888/bigdata HTTP/1.1\r\n";
+                const string request = "GET http://127.0.0.1:8888/bigdata HTTP/1.1\r\nName: Value\r\n\r\n";
                 Send(client, request);
+                SendDone.WaitOne();
                 Send(client, request);
                 SendDone.WaitOne();
                 
-                SendDone.WaitOne();
 
                 Receive(client);
-                Receive(client);
-                ReceiveDone.WaitOne();
                 ReceiveDone.WaitOne();
 
                 LogMessage($"Response received : {_response}");
@@ -73,8 +71,7 @@ namespace ITCC.Library.Testing.Networking
             try
             {
                 var state = new StateObject { WorkSocket = client };
-                client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0,
-                    ReceiveCallback, state);
+                client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0, ReceiveCallback, state);
             }
             catch (Exception e)
             {
