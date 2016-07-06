@@ -49,7 +49,7 @@ namespace ITCC.Library.Testing
 
             //    Console.WriteLine("done");
             //}
-            await StaticClient.GetFileAsync("/bigdata", null, null, "2.avi");
+            await StaticClient.GetRawAsync("/bigdata?a=b");
             Logger.LogEntry("MAIN", LogLevel.Info, "Downloaded");
 
             Console.ReadLine();

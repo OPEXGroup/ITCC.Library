@@ -197,7 +197,7 @@ namespace ITCC.HTTP.Server
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
-        private static string _serverAddress = null;
+        private static string _serverAddress;
 
         #endregion
 
@@ -258,7 +258,7 @@ namespace ITCC.HTTP.Server
                 {
                     var redirectLocation = $"{_serverAddress}{requestProcessorSelectionResult.RequestProcessor.SubUri}";
                     response = ResponseFactory.CreateResponse(HttpStatusCode.Found, null,
-                        new Dictionary<string, string> {{"Location", redirectLocation}});
+                        new Dictionary<string, string> { { "Location", redirectLocation } });
                     OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
                     return;
                 }
@@ -651,14 +651,14 @@ namespace ITCC.HTTP.Server
                     case AuthorizationStatus.NotRequired:
                     case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
-                            response = HandleFileGetRequest(channel, request, filePath);
+                            response = HandleFileGetRequest(filePath);
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
-                            response = await HandleFilePostRequest(channel, request, section, filePath).ConfigureAwait(false);
+                            response = await HandleFilePostRequest(request, section, filePath).ConfigureAwait(false);
                         }
                         else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
                         {
-                            response = HandleFileDeleteRequest(channel, request, filePath);
+                            response = HandleFileDeleteRequest(filePath);
                         }
                         else
                         {
@@ -679,7 +679,7 @@ namespace ITCC.HTTP.Server
             }
         }
 
-        private static HttpResponse HandleFileGetRequest(ITcpChannel channel, HttpRequest request, string filePath)
+        private static HttpResponse HandleFileGetRequest(string filePath)
         {
             HttpResponse response;
             if (!File.Exists(filePath))
@@ -696,7 +696,7 @@ namespace ITCC.HTTP.Server
             return response;
         }
 
-        private static async Task<HttpResponse> HandleFilePostRequest(ITcpChannel channel, HttpRequest request, FileSection section, string filePath)
+        private static async Task<HttpResponse> HandleFilePostRequest(HttpRequest request, FileSection section, string filePath)
         {
             HttpResponse response;
             if (File.Exists(filePath))
@@ -729,7 +729,7 @@ namespace ITCC.HTTP.Server
             return response;
         }
 
-        private static HttpResponse HandleFileDeleteRequest(ITcpChannel channel, HttpRequest request, string filePath)
+        private static HttpResponse HandleFileDeleteRequest(string filePath)
         {
             HttpResponse response;
             if (!File.Exists(filePath))
@@ -876,7 +876,7 @@ namespace ITCC.HTTP.Server
             if (InnerStaticRedirectionTable.ContainsKey(fromUri))
                 return new Tuple<string, string, bool>(null, null, false);
 
-            return new Tuple<string, string, bool>(fromUri.Trim('/'), toUri.Trim('/'), true); ;
+            return new Tuple<string, string, bool>(fromUri.Trim('/'), toUri.Trim('/'), true);
         }
 
         private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
@@ -923,17 +923,18 @@ namespace ITCC.HTTP.Server
                 return false;
             if (!request.Headers.Contains("Accept-Encoding"))
                 return false;
-            var parts = request.Headers["Accept-Encoding"].Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
+            var parts = request.Headers["Accept-Encoding"].Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
             return parts.Any(p => p == "gzip");
         }
 
-        private static string SerializeHttpRequest(IHttpMessage request)
+        private static string SerializeHttpRequest(HttpRequest request)
         {
             if (request == null)
                 return null;
 
             var builder = new StringBuilder();
             builder.AppendLine($"{request.StatusLine}");
+
             foreach (var header in request.Headers)
             {
                 builder.AppendLine($"{header.Key}: {header.Value}");
@@ -951,12 +952,12 @@ namespace ITCC.HTTP.Server
             return builder.ToString();
         }
 
-        public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable); 
+        public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);
         public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
 
         private static readonly List<RequestProcessor<TAccount>> InnerRequestProcessors =
             new List<RequestProcessor<TAccount>>();
-        private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>(); 
+        private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>();
         private static bool _autoGzipCompression;
 
         #endregion
