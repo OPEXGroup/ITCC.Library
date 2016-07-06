@@ -358,10 +358,7 @@ namespace ITCC.HTTP.Server
         {
             try
             {
-#if TRACE
-                LogMessage(LogLevel.Trace,
-                    $"Response for {channel.RemoteEndpoint} ready. \n{ResponseFactory.SerializeResponse(response)}");
-#endif
+                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} ready.");
                 requestStopwatch.Stop();
                 var elapsedMilliseconds = requestStopwatch.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
                 _statistics?.AddResponse(response, uri, elapsedMilliseconds);
@@ -370,7 +367,7 @@ namespace ITCC.HTTP.Server
                     LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {elapsedMilliseconds} milliseconds to process!");
                 }
                 channel.Send(response);
-                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} sent ({elapsedMilliseconds} milliseconds)");
+                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} queued ({elapsedMilliseconds} milliseconds)");
             }
             catch (SocketException)
             {

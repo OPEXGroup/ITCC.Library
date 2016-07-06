@@ -7,6 +7,7 @@ using System.Text;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
+using ITCC.Logging;
 
 namespace ITCC.HTTP.Server
 {
@@ -163,6 +164,10 @@ namespace ITCC.HTTP.Server
 
             httpResponse.ContentType = "application/json";
             httpResponse.ContentCharset = encoding;
+
+#if TRACE
+            Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
+#endif
             return httpResponse;
         }
 
@@ -170,8 +175,9 @@ namespace ITCC.HTTP.Server
         ///     Makes string from http response
         /// </summary>
         /// <param name="response">Response</param>
+        /// <param name="bodyString">Body string. we do not use response.Body because of gzip encoding</param>
         /// <returns>String representation</returns>
-        public static string SerializeResponse(HttpResponse response)
+        public static string SerializeResponse(HttpResponse response, string bodyString)
         {
             if (response == null)
                 return string.Empty;
@@ -197,19 +203,14 @@ namespace ITCC.HTTP.Server
             {
                 try
                 {
-                    var reader = new StreamReader(response.Body);
 
-                    if (ResponseBodyLogLimit < 1 || response.Body.Length <= ResponseBodyLogLimit)
-                        builder.AppendLine(reader.ReadToEnd());
+                    if (ResponseBodyLogLimit < 1 || bodyString.Length <= ResponseBodyLogLimit)
+                        builder.AppendLine(bodyString);
                     else
                     {
-                        var buffer = new byte[ResponseBodyLogLimit];
-                        response.Body.Read(buffer, 0, ResponseBodyLogLimit);
-                        builder.AppendLine(_bodyEncoding.GetString(buffer));
-                        builder.AppendLine($"[And {response.Body.Length - ResponseBodyLogLimit} more bytes...]");
+                        builder.AppendLine(bodyString.Substring(0, ResponseBodyLogLimit));
+                        builder.AppendLine($"[And {bodyString.Length - ResponseBodyLogLimit} more bytes...]");
                     }
-
-                    response.Body.Position = 0;
                 }
                 catch (Exception)
                 {
