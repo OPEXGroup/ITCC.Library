@@ -95,6 +95,7 @@ namespace ITCC.HTTP.Server
                 ResponseFactory.SetBodyEncoding(configuration.BodyEncoding);
                 ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
                 ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
+                _requestEncoding = configuration.BodyEncoding;
 
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
@@ -939,10 +940,12 @@ namespace ITCC.HTTP.Server
 #if TRACE
             if (request.Body == null)
                 return builder.ToString();
-            using (var reader = new StreamReader(request.Body))
+
+            using (var reader = new StreamReader(request.Body, _requestEncoding, true, 4096, true))
             {
                 builder.AppendLine(reader.ReadToEnd());
             }
+                
             request.Body.Position = 0;
 #endif
 
@@ -956,7 +959,7 @@ namespace ITCC.HTTP.Server
             new List<RequestProcessor<TAccount>>();
         private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>();
         private static bool _autoGzipCompression;
-
+        private static Encoding _requestEncoding = Encoding.UTF8;
         #endregion
     }
 }
