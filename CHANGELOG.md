@@ -1,3 +1,7 @@
+## 0.16.2 (2016-07-06)
+
+* **Fix**:  Request logging fix in `StaticServer`  
+
 ## 0.16.1 (2016-07-06)
 
 * **Edit**: Better log for servers with gzip enabled  
