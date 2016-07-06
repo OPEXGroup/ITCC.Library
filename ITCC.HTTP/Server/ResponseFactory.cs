@@ -84,7 +84,7 @@ namespace ITCC.HTTP.Server
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, gzipResponse);
+            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
         }
 
         public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
