@@ -1,3 +1,8 @@
+## 0.16.1 (2016-07-06)
+
+* **Edit**: Better log for servers with gzip enabled  
+* **Fix**:  Authentification fix for servers with gzip enabled
+
 ## 0.16.0 (2016-07-04)
 
 * **New**:  Full redirect (301, 302) support added in `StaticServer`, `StaticClient` and `RegularClient`  
