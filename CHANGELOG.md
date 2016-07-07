@@ -1,3 +1,7 @@
+## 0.16.3 (2016-07-07)
+
+* **Fix**:  Response logging fix in `StaticServer` 
+
 ## 0.16.2 (2016-07-06)
 
 * **Fix**:  Request logging fix in `StaticServer`  
