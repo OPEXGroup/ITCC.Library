@@ -134,7 +134,7 @@ namespace ITCC.HTTP.Server
             if (body == null)
             {
 #if TRACE
-                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
 #endif
                 return httpResponse;
             }
