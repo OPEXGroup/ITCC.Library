@@ -132,7 +132,13 @@ namespace ITCC.HTTP.Server
             }
 
             if (body == null)
+            {
+#if TRACE
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
+#endif
                 return httpResponse;
+            }
+            
 
             string bodyString;
             if (!alreadyEncoded)
