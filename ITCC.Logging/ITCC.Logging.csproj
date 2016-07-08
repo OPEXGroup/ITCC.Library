@@ -42,6 +42,7 @@
     <Compile Include="Loggers\BufferedRotatingFileLogger.cs" />
     <Compile Include="Loggers\ColouredConsoleLogger.cs" />
     <Compile Include="Loggers\ConsoleLogger.cs" />
+    <Compile Include="Loggers\DebugLogger.cs" />
     <Compile Include="Loggers\EmailLogger.cs" />
     <Compile Include="Loggers\FileLogger.cs" />
     <Compile Include="Interfaces\ILogReceiver.cs" />

@@ -199,6 +199,13 @@ Task Flush();
 ConsoleLogger(LogLevel level);
 ```
 
+##### `class DebugLogger : ILogReceiver`
+
+Выводит лог в дебаггер (System.Diagnostics.Debug). Основной конструктор 
+```
+DebugLogger(LogLevel level);
+```
+
 ##### `class ColouredConsoleLogger : ConsoleLogger`
 
 Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор

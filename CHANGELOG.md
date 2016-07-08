@@ -1,3 +1,7 @@
+## 0.16.4 (2016-07-07)
+
+* **Fix**:  Fix in `ResponseFactory` 
+
 ## 0.16.3 (2016-07-07)
 
 * **Fix**:  Response logging fix in `StaticServer` 
