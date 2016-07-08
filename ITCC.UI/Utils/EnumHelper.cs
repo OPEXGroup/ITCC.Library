@@ -19,15 +19,10 @@ namespace ITCC.UI.Utils
             {LogLevel.Trace, "Трассировка" }
         };
 
-        public static string LogLevelName(LogLevel logLevel)
-        {
-            return LogLevelDictionary.ContainsKey(logLevel) ? LogLevelDictionary[logLevel] : "НЕТ";
-        }
+        public static string LogLevelName(LogLevel logLevel) => LogLevelDictionary.ContainsKey(logLevel) ? LogLevelDictionary[logLevel] : "НЕТ";
 
-        public static LogLevel LogLevelByName(string name)
-        {
-            return LogLevelDictionary.Where(item => item.Value == name).Select(item => item.Key).FirstOrDefault();
-        }
+        public static LogLevel LogLevelByName(string name) => LogLevelDictionary.Where(item => item.Value == name).Select(item => item.Key).FirstOrDefault();
+
         #endregion
     }
 }

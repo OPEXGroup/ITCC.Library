@@ -8,9 +8,46 @@
         Title="Application log" Height="480" Width="800"
         SizeChanged="LogWindow_OnSizeChanged"
         StateChanged="LogWindow_OnStateChanged">
-    <ScrollViewer VerticalScrollBarVisibility="Visible"
-                  utils:ScrollViewerExtensions.AlwaysScrollToEnd="True">
-        <DataGrid x:Name="LogDataGrid"
+    <Grid Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Column="1"
+                       Content="Уровень лога: "
+                       VerticalAlignment="Center"></Label>
+
+            <ComboBox Name="LocalLogLevelComboBox"
+                          Grid.Column="2"
+                          MinWidth="100"
+                          Margin="10,10,10,10"
+                          ToolTip="Текущий уровень логгирования на клиенте"
+                          VerticalAlignment="Center"></ComboBox>
+
+            <Button x:Name="ChangeLocalLogLevelButton"
+                    Grid.Column="3"
+                    Content="Изменить"
+                    Margin="10"
+                    MinWidth="80"
+                    ToolTip="Изменение уровня логгирования на сервере"
+                    Click="ChangeLogLevelButton_OnClick" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Visible"
+                      utils:ScrollViewerExtensions.AlwaysScrollToEnd="True">
+            <DataGrid x:Name="LogDataGrid"
                   HorizontalAlignment="Left"
                   Margin="0,0,0,0"
                   VerticalAlignment="Top"
@@ -20,6 +57,6 @@
                   SizeChanged="LogDataGrid_OnSizeChanged"
                   VerticalScrollBarVisibility="Visible"
                   IsReadOnly="True"/>
-    </ScrollViewer>
-
+        </ScrollViewer>
+    </Grid>
 </Window>
