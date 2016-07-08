@@ -1,3 +1,7 @@
+## 0.16.6 (2016-07-08)
+
+* **Edit**: Changing log level in `LogWindow` does not need confirmation  
+
 ## 0.16.5 (2016-07-08)
 
 * **New**:  `DebugLogger` added to `ITCC.Logging`  
