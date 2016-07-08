@@ -1,3 +1,8 @@
+## 0.16.5 (2016-07-08)
+
+* **New**:  `DebugLogger` added to `ITCC.Logging`  
+* **New**:  `Logger::Level` 
+
 ## 0.16.4 (2016-07-07)
 
 * **Fix**:  Fix in `ResponseFactory` 
