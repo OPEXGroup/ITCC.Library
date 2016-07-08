@@ -16,7 +16,6 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -27,19 +26,13 @@
                        VerticalAlignment="Center"></Label>
 
             <ComboBox Name="LocalLogLevelComboBox"
-                          Grid.Column="2"
-                          MinWidth="100"
-                          Margin="10,10,10,10"
-                          ToolTip="Текущий уровень логгирования на клиенте"
-                          VerticalAlignment="Center"></ComboBox>
+                      Grid.Column="2"
+                      MinWidth="100"
+                      Margin="10,10,10,10"
+                      ToolTip="Текущий уровень логгирования на клиенте"
+                      VerticalAlignment="Center"
+                      SelectionChanged="LocalLogLevelComboBox_OnSelectionChanged"></ComboBox>
 
-            <Button x:Name="ChangeLocalLogLevelButton"
-                    Grid.Column="3"
-                    Content="Изменить"
-                    Margin="10"
-                    MinWidth="80"
-                    ToolTip="Изменение уровня логгирования на сервере"
-                    Click="ChangeLogLevelButton_OnClick" />
         </Grid>
 
         <ScrollViewer Grid.Row="1"

@@ -49,7 +49,7 @@ namespace ITCC.UI.Windows
             row.Background = ColorDict[viewModel.Subject.Level];
         }
 
-        private void ChangeLogLevelButton_OnClick(object sender, RoutedEventArgs e)
+        private void LocalLogLevelComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (LocalLogLevelComboBox.SelectedValue == null)
                 return;
