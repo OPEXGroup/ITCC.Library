@@ -8,6 +8,19 @@ namespace ITCC.UI.Loggers
 {
     public class ObservableLogger : ILogReceiver
     {
+        #region ILogReceiver
+        public LogLevel Level { get; set; }
+
+        public void WriteEntry(object sender, LogEntryEventArgs args)
+        {
+            if (args.Level > Level)
+                return;
+            _uiThreadRunner.Invoke(() => { LogEntryCollection.Add(new LogEntryEventArgsViewModel(args)); });
+
+        }
+        #endregion
+
+        #region public
         public ObservableLogger(int capacity, UiThreadRunner uiThreadRunner)
         {
             Level = Logger.Level;
@@ -23,15 +36,11 @@ namespace ITCC.UI.Loggers
         }
 
         public BoundedObservableCollection<LogEntryEventArgsViewModel> LogEntryCollection { get; }
-        public LogLevel Level { get; set; }
 
-        public void WriteEntry(object sender, LogEntryEventArgs args)
-        {
-            if (args.Level > Level)
-                return;
-            _uiThreadRunner.Invoke(() => { LogEntryCollection.Add(new LogEntryEventArgsViewModel(args)); });
-        }
+        #endregion
 
+        #region private
         private readonly UiThreadRunner _uiThreadRunner;
+        #endregion
     }
 }

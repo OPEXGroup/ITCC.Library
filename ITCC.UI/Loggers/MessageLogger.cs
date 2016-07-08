@@ -2,11 +2,24 @@
 using System.Windows;
 using ITCC.Logging;
 using ITCC.Logging.Interfaces;
+using ITCC.UI.Utils;
 
 namespace ITCC.UI.Loggers
 {
     public class MessageLogger : ILogReceiver
     {
+        #region ILogReceiver
+        public LogLevel Level { get; set; }
+
+        public void WriteEntry(object sender, LogEntryEventArgs args)
+        {
+            if (args.Level > Level)
+                return;
+            MessageBox.Show(args.Message, EnumHelper.LogLevelName(args.Level), MessageBoxButton.OK, MessageBoxImages[args.Level]);
+        }
+        #endregion
+
+        #region public
         public MessageLogger()
         {
             Level = Logger.Level;
@@ -16,16 +29,9 @@ namespace ITCC.UI.Loggers
         {
             Level = level;
         }
+        #endregion
 
-        public LogLevel Level { get; set; }
-
-        public void WriteEntry(object sender, LogEntryEventArgs args)
-        {
-            if (args.Level > Level)
-                return;
-            MessageBox.Show(args.Message, args.Level.ToString(), MessageBoxButton.OK, MessageBoxImages[args.Level]);
-        }
-
+        #region private
         private static readonly Dictionary<LogLevel, MessageBoxImage> MessageBoxImages = new Dictionary
             <LogLevel, MessageBoxImage>
         {
@@ -36,5 +42,6 @@ namespace ITCC.UI.Loggers
             {LogLevel.Error, MessageBoxImage.Error},
             {LogLevel.Critical, MessageBoxImage.Stop}
         };
+        #endregion
     }
 }

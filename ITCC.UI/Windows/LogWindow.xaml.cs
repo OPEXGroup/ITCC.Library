@@ -49,12 +49,6 @@ namespace ITCC.UI.Windows
             row.Background = ColorDict[viewModel.Subject.Level];
         }
 
-        private void LogWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) => LogDataGrid.Width = ActualWidth;
-
-        private void LogWindow_OnStateChanged(object sender, EventArgs e) => LogDataGrid.Width = ActualWidth;
-
-        private void LogDataGrid_OnSizeChanged(object sender, SizeChangedEventArgs e) => LogDataGrid.Columns.Last().Width = new DataGridLength(1, DataGridLengthUnitType.Star);
-
         private void ChangeLogLevelButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (LocalLogLevelComboBox.SelectedValue == null)

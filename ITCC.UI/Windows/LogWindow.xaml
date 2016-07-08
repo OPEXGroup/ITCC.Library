@@ -5,9 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:utils="clr-namespace:ITCC.UI.Utils"
         mc:Ignorable="d"
-        Title="Application log" Height="480" Width="800"
-        SizeChanged="LogWindow_OnSizeChanged"
-        StateChanged="LogWindow_OnStateChanged">
+        Title="Application log">
     <Grid Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -54,7 +52,6 @@
                   AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"
                   LoadingRow="LogDataGrid_OnLoadingRow"
                   HorizontalContentAlignment="Stretch"
-                  SizeChanged="LogDataGrid_OnSizeChanged"
                   VerticalScrollBarVisibility="Visible"
                   IsReadOnly="True"/>
         </ScrollViewer>
