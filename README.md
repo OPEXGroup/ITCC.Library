@@ -820,7 +820,7 @@ public string Message { get; }
 
 ##### `partial class LogWindow : Window`
 
-Окно для отобрражения лога. Основной конструктор:
+Окно для отобрражения и настройки лога. Основной конструктор:
 
 ```
 LogWindow(ObservableLogger logger)
