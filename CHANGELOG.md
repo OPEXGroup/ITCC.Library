@@ -1,3 +1,7 @@
+## 0.16.7 (2016-07-13)
+
+* **Fix**:  Do not log binary files' data on receiving
+
 ## 0.16.6 (2016-07-08)
 
 * **Edit**: Changing log level in `LogWindow` does not need confirmation  
@@ -5,7 +9,7 @@
 ## 0.16.5 (2016-07-08)
 
 * **New**:  `DebugLogger` added to `ITCC.Logging`  
-* **New**:  `Logger::Level` 
+* **New**:  `Logger::Level` can be changed in `LogWindow` GUI 
 
 ## 0.16.4 (2016-07-07)
 
