@@ -941,14 +941,19 @@ namespace ITCC.HTTP.Server
             if (request.Body == null)
                 return builder.ToString();
 
-            using (var reader = new StreamReader(request.Body, _requestEncoding, true, 4096, true))
+            if (!IsFilesRequest(request))
             {
-                builder.AppendLine(reader.ReadToEnd());
+                using (var reader = new StreamReader(request.Body, _requestEncoding, true, 4096, true))
+                {
+                    builder.AppendLine(reader.ReadToEnd());
+                }
+                request.Body.Position = 0;
             }
-                
-            request.Body.Position = 0;
+            else
+            {
+                builder.AppendLine("<Binary content>");
+            }
 #endif
-
             return builder.ToString();
         }
 
