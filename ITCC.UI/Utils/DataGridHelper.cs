@@ -59,7 +59,7 @@ namespace ITCC.UI.Utils
                 {
                     style = new Style(typeof (TextBlock), col?.ElementStyle);
                     style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
-                    style.Setters.Add(new Setter(VerticalAlignmentProperty, VerticalAlignment.Center));
+                    style.Setters.Add(new Setter(VerticalAlignmentProperty, VerticalAlignment.Top));
                 }
 
                 if (styleAttribute.ColumnPreferredWidth > 0)
