@@ -1,3 +1,8 @@
+## 0.16.8 (2016-07-21)
+
+* **Edit**: `Newtonsoft.Json` updated to 9.0.1  
+* **Edit**: Set vertical text alignment to `Top` for text-wrapped DataGrid cells  
+
 ## 0.16.7 (2016-07-13)
 
 * **Fix**:  Do not log binary files' data on receiving
