@@ -296,6 +296,7 @@ Exception Exception { get; set;}                    // Исключение, в�
 `HTTP`-клиент. Ключевые методы: 
 
 * Получение ответа на `GET`-запрос в виде простой строки тела
+
 ```
 Task<RequestResult<string>> GetRawAsync(
             string partialUri,
@@ -305,6 +306,7 @@ Task<RequestResult<string>> GetRawAsync(
             CancellationToken cancellationToken = default(CancellationToken))
 ```
 * Получения ответа на `GET`-запрос в десериализованном виде (десериализатор передается в явном виде)
+
 ```
 Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(
             string partialUri,
@@ -314,7 +316,9 @@ Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
 ```
+
 * Получение ответа на `GET`-запрос в десериализованном из `JSON` виде
+
 ```
 Task<RequestResult<TResult>> GetAsync<TResult>(
             string partialUri,
@@ -324,6 +328,7 @@ Task<RequestResult<TResult>> GetAsync<TResult>(
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
 ```
 * Сохранение тела ответа на `GET`-запрос в файл
+
 ```
 public async Task<RequestResult<string>> GetFileAsync(
             string partialUri,
@@ -334,7 +339,9 @@ public async Task<RequestResult<string>> GetFileAsync(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
+
 * Получение ответа на `POST`-запрос в виде простой строки тела
+
 ```
 Task<RequestResult<string>> PostRawAsync(
             string partialUri,
@@ -344,7 +351,9 @@ Task<RequestResult<string>> PostRawAsync(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
+
 * Отправка объекта, сериализованного в `JSON` и десериализация ответа из `JSON`
+
 ```
 Task<RequestResult<TResult>> PostAsync<TResult>(
             string partialUri,
@@ -355,7 +364,9 @@ Task<RequestResult<TResult>> PostAsync<TResult>(
             CancellationToken cancellationToken = default(CancellationToken))
             where TResult : class
 ```
+
 * Загрузка файла на сервер методом POST
+
 ```
 Task<RequestResult<object>> PostFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
@@ -365,6 +376,7 @@ Task<RequestResult<object>> PostFileAsync(string partialUri,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
 * Получение ответа на `PUT`-запрос в виде простой строки тела
+
 ```
 Task<RequestResult<string>> PutRawAsync(
             string partialUri,
@@ -374,7 +386,9 @@ Task<RequestResult<string>> PutRawAsync(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
+
 * Загрузка файла на сервер методом PUT
+
 ```
 Task<RequestResult<object>> PutFileAsync(string partialUri,
             IDictionary<string, string> parameters = null,
@@ -383,7 +397,9 @@ Task<RequestResult<object>> PutFileAsync(string partialUri,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
+
 * Получение ответа на `DELETE`-запрос в виде простой строки тела
+
 ```
 Task<RequestResult<string>> DeleteRawAsync(
             string partialUri,
@@ -393,7 +409,9 @@ Task<RequestResult<string>> DeleteRawAsync(
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```
+
 * Разрешить/запретить соединение с сервером с недоверенным сертификатом
+
 ```
 void AllowUntrustedServerCertificates();
 void DisallowUntrustedServerCertificates();
@@ -714,6 +732,20 @@ MessageLogger(LogLevel level);
 Предоставляет `ObservableCollection` для отображения в интерфейсе. Используется с `LogWindow`.  Основной конструктор
 ```
 ObservableLogger(LogLevel level, int capacity, UiThreadRunner uiThreadRunner)
+```
+
+**ВАЖНО**: `uiThreadRunner`, при неправильной реализации, потенциально может вызвать deadlock. Далее примеры для WPF
+
+Рекомендуемая реализация:
+
+```
+void RunOnUiThread(Action action) => Current.Dispatcher.BeginInvoke(action);
+```
+
+**Нерекомендуемая реализация**:
+
+```
+void RunOnUiThread(Action action) => Current.Dispatcher.Invoke(action);
 ```
 
 #### Utils
