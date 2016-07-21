@@ -15,8 +15,8 @@ namespace ITCC.UI.Loggers
         {
             if (args.Level > Level)
                 return;
+            
             _uiThreadRunner.Invoke(() => { LogEntryCollection.Add(new LogEntryEventArgsViewModel(args)); });
-
         }
         #endregion
 

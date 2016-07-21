@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ITCC.UI.Testing"
         mc:Ignorable="d"
-        Title="Тестирование" Height="350" Width="525">
+        Title="Тестирование" Height="300" Width="300">
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Padding" Value="2"></Setter>
@@ -15,15 +15,13 @@
     
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         
         <Button Name="LogWindowButton"
@@ -31,7 +29,11 @@
                 Grid.Column="0"
                 Content="Open log window"
                 Click="LogWindowButton_OnClick"></Button>
-        
-        
+
+        <Button Name="DeadlockTestButton"
+                Grid.Row="1"
+                Grid.Column="0"
+                Content="Deadlock test"
+                Click="DeadlockTestButton_OnClick"></Button>
     </Grid>
 </Window>

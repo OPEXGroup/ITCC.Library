@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using ITCC.Logging;
 using ITCC.UI.Loggers;
 using ITCC.UI.Windows;
@@ -24,9 +26,16 @@ namespace ITCC.UI.Testing
         private void LogWindowButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (_logWindow == null)
+            {
                 _logWindow = new LogWindow(_observableLogger);
-
-            _logWindow.Show();
+                _logWindow.Show();
+                Activate();
+            }
+            else
+            {
+                _logWindow.Activate();
+            }
+            
             Logger.LogEntry("Test", LogLevel.Info, "Opened");
 
             for (var i = 0; i < 50; ++i)
@@ -37,5 +46,14 @@ namespace ITCC.UI.Testing
 
         private LogWindow _logWindow;
         private readonly ObservableLogger _observableLogger;
+
+        private void DeadlockTestButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Parallel.For(0, 6, i =>
+            {
+                for (var j = 0; j < 50; ++j)
+                    Logger.LogEntry("TEST", LogLevel.Trace, $"Maybe thread #{i} (Actually {Thread.CurrentThread.ManagedThreadId})");
+            });
+        }
     }
 }
