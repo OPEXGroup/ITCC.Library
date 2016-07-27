@@ -12,7 +12,6 @@ namespace ITCC.HTTP.Server.Files.Preprocess
     internal class ImagePreprocessTask : BaseFilePreprocessTask
     {
         #region static
-
         
         #endregion
 

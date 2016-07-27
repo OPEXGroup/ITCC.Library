@@ -601,6 +601,7 @@ string FilesBaseUri { get; set; }                                               
 bool FilesNeedAuthorization { get; set; }                                         // Требуется ли авторизация для доступа к файлам
 bool FilesPreprocessingEnabled { get; set; }                                      // Включен ли препроцессинг файлов (изменение размеров)
 int FilesPreprocessorThreads { get; set; }                                        // Количество потоков, используемых для препроцессинга файлов. Отрицательные значения - использовать все ядра
+double ExistingFilesPreprocessingFrequency { get; set; } = 60;                    // Как часто обрабатываются существующие файлы. Отрицательные значения - никогда
 /* Секции файлов, используемые на сервере. Если список пуст, на любой файловый запрос сервер будет отвечать 400 Bad Request */
 List<FileSection> FileSections { get; set; } = new List<FileSection>();           
 

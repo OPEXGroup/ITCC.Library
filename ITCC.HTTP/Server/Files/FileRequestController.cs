@@ -42,10 +42,13 @@ namespace ITCC.HTTP.Server.Files
             if (FilesPreprocessingEnabled)
             {
                 FilePreprocessController.Start(configuration.FilesPreprocessorThreads);
-                PreprocessExistingFiles();
-                _preprocessTimer = new Timer(1000 * ExistingFilesPreprocessingFrequency);
-                _preprocessTimer.Elapsed += (sender, args) => PreprocessExistingFiles();
-                _preprocessTimer.Start();
+                if (ExistingFilesPreprocessingFrequency > 0)
+                {
+                    PreprocessExistingFiles();
+                    _preprocessTimer = new Timer(1000 * ExistingFilesPreprocessingFrequency);
+                    _preprocessTimer.Elapsed += (sender, args) => PreprocessExistingFiles();
+                    _preprocessTimer.Start();
+                }
             }
 
             _started = true;

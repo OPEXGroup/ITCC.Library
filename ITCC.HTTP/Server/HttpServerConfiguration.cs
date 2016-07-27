@@ -60,7 +60,7 @@ namespace ITCC.HTTP.Server
         /// </summary>
         public int FilesPreprocessorThreads { get; set; } = -1;
         /// <summary>
-        ///     How often do we preprocess existing files
+        ///     How often do we preprocess existing files. Negative means never
         /// </summary>
         public double ExistingFilesPreprocessingFrequency { get; set; } = 60; 
         /// <summary>
@@ -188,12 +188,6 @@ namespace ITCC.HTTP.Server
             if (FilesPreprocessingEnabled && FilesPreprocessorThreads == 0)
             {
                 LogMessage(LogLevel.Warning, "Cannot use zero threads for files preprocessing");
-                return false;
-            }
-
-            if (FilesPreprocessingEnabled && ExistingFilesPreprocessingFrequency < 0)
-            {
-                LogMessage(LogLevel.Warning, "Negative files preprocessing frequency");
                 return false;
             }
 
