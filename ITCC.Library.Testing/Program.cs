@@ -29,6 +29,7 @@ namespace ITCC.Library.Testing
 
         private static async Task MainAsync()
         {
+            Thread.CurrentThread.Name = "MAIN";
             if (!InitializeLoggers())
                 return;
 
