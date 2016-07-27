@@ -10,6 +10,7 @@ using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server.Files.Preprocess;
+using ITCC.HTTP.Server.Files.Requests;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
 
@@ -83,7 +84,7 @@ namespace ITCC.HTTP.Server.Files
             {
                 var filename = ExtractFileName(request.Uri.LocalPath);
                 var section = ExtractFileSection(request.Uri.LocalPath);
-                if (filename == null || section == null)
+                if (filename == null || section == null || filename.Contains("_CHANGED_"))
                 {
                     return ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
                 }
@@ -105,7 +106,7 @@ namespace ITCC.HTTP.Server.Files
                     case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
                         {
-                            return HandleFileGetRequest(filePath);
+                            return await HandleFileGetRequest(request, filePath);
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
@@ -143,21 +144,24 @@ namespace ITCC.HTTP.Server.Files
             return response;
         }
 
-        private static HttpResponse HandleFileGetRequest(string filePath)
+        private static async Task<HttpResponse> HandleFileGetRequest(HttpRequest request, string filePath)
         {
             HttpResponse response;
-            if (!File.Exists(filePath))
+            if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
-                LogMessage(LogLevel.Debug, $"File {filePath} was requested but not found");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
+                LogMessage(LogLevel.Debug, $"File {filePath} was requested but is in progress");
+                response = ResponseFactory.CreateResponse(HttpStatusCode.ServiceUnavailable, null);
                 return response;
             }
-            response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
-                FileShare.ReadWrite);
-            response.ContentType = DetermineContentType(filePath);
-            response.Body = fileStream;
-            return response;
+
+            var fileRequest = FileRequestFactory.BuildRequest(filePath, request);
+            if (fileRequest == null) 
+            {
+                LogMessage(LogLevel.Debug, $"Failed to build file requst for {filePath}");
+                response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
+                return response;
+            }
+            return await fileRequest.BuildResponse();
         }
 
         private static async Task<HttpResponse> HandleFilePostRequest(HttpRequest request, FileSection section, string filePath)
@@ -258,17 +262,7 @@ namespace ITCC.HTTP.Server.Files
                 return null;
             }
         }
-
-        private static string DetermineContentType(string filename)
-        {
-            var extension = IoHelper.GetExtension(filename);
-            if (extension == null)
-                return "x-application/unknown";
-
-            return MimeTypes.GetTypeByExtenstion(extension);
-        }
-
-        
+   
         #endregion
 
         #region log

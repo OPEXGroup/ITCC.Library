@@ -12,7 +12,7 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public override RequestRange Range { get; protected set; }
 
-        public override bool Build(string fileName, HttpRequest request)
+        public override bool BuildRequest(string fileName, HttpRequest request)
         {
             FileName = fileName;
 

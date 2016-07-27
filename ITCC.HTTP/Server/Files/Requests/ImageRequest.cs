@@ -1,5 +1,10 @@
-﻿using Griffin.Net.Protocols.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
+using ITCC.Logging;
 
 namespace ITCC.HTTP.Server.Files.Requests
 {
@@ -12,7 +17,7 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public override RequestRange Range { get; protected set; }
 
-        public override bool Build(string fileName, HttpRequest request)
+        public override bool BuildRequest(string fileName, HttpRequest request)
         {
             FileName = fileName;
 
@@ -29,8 +34,34 @@ namespace ITCC.HTTP.Server.Files.Requests
                 return false;
 
             return true;
-
         }
+
+        public override async Task<HttpResponse> BuildResponse()
+        {
+            var availableFiles = IoHelper.LoadAllChanged(FileName);
+            if (availableFiles == null || availableFiles.Count == 0)
+            {
+                LogMessage(LogLevel.Debug, $"No preprocessed images found for {FileName}");
+                return await base.BuildResponse();
+            }
+
+            var resolutionDict = new Dictionary<Tuple<int, int>, string>();
+            foreach (var file in availableFiles)
+            {
+                var resolution = GetFileResolution(file);
+                if (Equals(resolution, InvalidResolutionTuple()))
+                    continue; 
+                resolutionDict.Add(resolution, file);
+            }
+            if (!resolutionDict.Any())
+            {
+                LogMessage(LogLevel.Debug, $"No additional resolutions found for image {FileName}");
+                return await base.BuildResponse();
+            }
+
+            return await base.BuildResponse();
+        }
+
         #endregion
 
         #region public

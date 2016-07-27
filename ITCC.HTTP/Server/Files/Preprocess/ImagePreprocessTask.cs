@@ -12,7 +12,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
     {
         #region static
 
-        public static readonly int[] Diagonals = {100, 150, 200, 300, 400, 500, 750, 1000, 2000};
+        
         #endregion
 
         #region BaseFilePreprocessTask
@@ -26,7 +26,6 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                 var img = Image.FromFile(FileName);
                 float originalWidth = img.Width;
                 float originalHeight = img.Height;
-                var originalDiagonal = Math.Sqrt(originalWidth*originalWidth + originalHeight*originalHeight);
                 LogMessage(LogLevel.Debug, $"Processing image {FileName}. Original resolution {(int)originalWidth}x{(int)originalHeight}");
 
                 ImageFormat format;
@@ -38,18 +37,15 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     LogMessage(LogLevel.Warning, $"Unknown image format: {extension}");
                     return false;
                 }
-                foreach (var diagonal in Diagonals)
+                foreach (var multiplier in Constants.ResolutionMultipliers)
                 {
-                    var multiplier = diagonal/originalDiagonal;
-                    if (multiplier >= 1)
-                        continue;
                     var newWidth = (int)(multiplier * originalWidth);
                     var newHeight = (int)(multiplier *originalHeight);
                     using (var bitmap = (Bitmap)Image.FromFile(FileName))
                     {
                         using (var newBitmap = new Bitmap(bitmap, newWidth, newHeight))
                         {
-                            var newFileName = IoHelper.AddBeforeExtension(FileName, $"_CHANGED_{newWidth}x{newHeight}");
+                            var newFileName = IoHelper.AddBeforeExtension(FileName, $"{Constants.ChangedString}{newWidth}x{newHeight}");
                             LogMessage(LogLevel.Trace, $"Creating image {newFileName}");
                             newBitmap.Save(newFileName, format);
                         }

@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
+using ITCC.Logging;
 
 namespace ITCC.HTTP.Server.Files.Requests
 {
@@ -13,10 +19,90 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public abstract RequestRange Range { get; protected set; }
 
-        public abstract bool Build(string fileName, HttpRequest request);
+        public abstract bool BuildRequest(string fileName, HttpRequest request);
+
+        public virtual Task<HttpResponse> BuildResponse()
+        {
+            return Task.FromResult(BuildRangeResponse(FileName));
+        }
         #endregion
 
         #region protected
+
+        protected HttpResponse BuildRangeResponse(string fileName)
+        {
+            HttpResponse response;
+            if (!File.Exists(fileName))
+            {
+                LogMessage(LogLevel.Debug, $"File {FileName} was requested but not found");
+                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
+                return response;
+            }
+            if (Range == null)
+            {
+                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
+                var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite);
+                response.Body = fileStream;
+            }
+            else
+            {
+                var fileInfo = new FileInfo(fileName);
+                long startPosition = 0;
+                long endPosition = fileInfo.Length;
+                if (Range.RangeEnd != null)
+                {
+                    var rangeEnd = Range.RangeEnd.Value;
+                    if (rangeEnd < 0)
+                    {
+                        if (fileInfo.Length < -rangeEnd)
+                        {
+                            response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                                new Dictionary<string, string>
+                                {
+                                    {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
+                                });
+                            return response;
+                        }
+                        endPosition = fileInfo.Length + rangeEnd;
+                    }
+                    if (rangeEnd > 0)
+                    {
+                        if (fileInfo.Length < rangeEnd)
+                        {
+                            response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                                new Dictionary<string, string>
+                                {
+                                    {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
+                                });
+                            return response;
+                        }
+                        endPosition = rangeEnd;
+                    }
+                }
+                if (Range.RangeStart != null)
+                {
+                    startPosition = Range.RangeStart.Value;
+                }
+
+                byte[] buffer;
+                var length = endPosition - startPosition + 1;
+                using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    using (var reader = new BinaryReader(fileStream))
+                    {
+                        reader.BaseStream.Seek(startPosition, SeekOrigin.Begin);
+                        buffer = reader.ReadBytes((int)length);
+                    }
+                }
+                response = ResponseFactory.CreateResponse(HttpStatusCode.PartialContent, null);
+                response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
+                response.Body = new MemoryStream(buffer);
+            }
+
+            response.ContentType = DetermineContentType(fileName);
+            return response;
+        }
 
         /// <summary>
         ///     This will return true if request is correct (not if range is found)
@@ -88,6 +174,48 @@ namespace ITCC.HTTP.Server.Files.Requests
                 return false;
             }
         }
+
+        protected Tuple<int, int> GetFileResolution(string fileName)
+        {
+            if (FileType != FileType.Image && FileType != FileType.Video)
+                return InvalidResolutionTuple();
+
+            var changedIndex = fileName.LastIndexOf(Constants.ChangedString, StringComparison.Ordinal);
+            var targetPart = Path.GetFileNameWithoutExtension(fileName.Remove(changedIndex + Constants.ChangedString.Length));
+            var parts = targetPart.Split('x');
+            if (parts.Length != 2)
+                return InvalidResolutionTuple();
+            int width;
+            int height;
+            if (!int.TryParse(parts[0], out width))
+                return InvalidResolutionTuple();
+            if (width < 0)
+                return InvalidResolutionTuple();
+            if (!int.TryParse(parts[1], out height))
+                return InvalidResolutionTuple();
+            if (height < 0)
+                return InvalidResolutionTuple();
+            return new Tuple<int, int>(width, height);
+        }
+
+        protected static string DetermineContentType(string filename)
+        {
+            var extension = IoHelper.GetExtension(filename);
+            if (extension == null)
+                return "x-application/unknown";
+
+            return MimeTypes.GetTypeByExtenstion(extension);
+        }
+
+        protected static Tuple<int, int> InvalidResolutionTuple() => new Tuple<int, int>(-1, -1);
+        #endregion
+
+        #region log
+
+        protected void LogMessage(LogLevel level, string message) => Logger.LogEntry($"{FileType.ToString().ToUpper()} RQST", level, message);
+
+        protected void LogException(LogLevel level, Exception exception) => Logger.LogException($"{FileType.ToString().ToUpper()} RQST", level, exception);
+
         #endregion
     }
 }

@@ -25,7 +25,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         public static void EnqueueFile(string fileName)
         {
-            var task = FilePreprocessTaskBuilder.BuildTask(fileName);
+            var task = FilePreprocessTaskFactory.BuildTask(fileName);
             if (task == null)
             {
                 LogMessage(LogLevel.Debug, $"Skipped preprocessing for file {fileName}");

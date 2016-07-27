@@ -2,7 +2,7 @@
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {
-    internal static class FilePreprocessTaskBuilder
+    internal static class FilePreprocessTaskFactory
     {
         #region public
 
