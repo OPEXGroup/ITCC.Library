@@ -218,9 +218,12 @@ namespace ITCC.HTTP.Server.Files
                 return response;
             }
 
+            var compressed = IoHelper.LoadAllChanged(filePath);
+
             try
             {
                 File.Delete(filePath);
+                compressed.ForEach(File.Delete);
                 response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
             }
             catch (Exception ex)
