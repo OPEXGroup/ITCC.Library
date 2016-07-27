@@ -199,7 +199,7 @@ namespace ITCC.HTTP.Server.Files
             LogMessage(LogLevel.Debug, $"File {filePath} created");
             if (FilesPreprocessingEnabled)
             {
-                var code = FilePreprocessController.EnqueueFile(filePath) ? HttpStatusCode.Accepted : HttpStatusCode.OK;
+                var code = FilePreprocessController.EnqueueFile(filePath) ? HttpStatusCode.Accepted : HttpStatusCode.Created;
                 response = ResponseFactory.CreateResponse(code, null);
             }
             else
