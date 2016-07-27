@@ -23,15 +23,16 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         public static void Stop() => WorkerThreads.ForEach(t => t.Stop());
 
-        public static void EnqueueFile(string fileName)
+        public static bool EnqueueFile(string fileName)
         {
             var task = FilePreprocessTaskFactory.BuildTask(fileName);
             if (task == null)
             {
-                return;
+                return false;
             }
             LogMessage(LogLevel.Debug, $"Preprocess task queued for {fileName} ({task.FileType})");
             TaskQueue.Enqueue(task);
+            return true;
         }
 
         public static bool FileInProgress(string fileName)
