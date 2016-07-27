@@ -109,6 +109,8 @@ namespace ITCC.HTTP.Server
                         configuration.FilesNeedAuthorization,
                         configuration.FileSections,
                         configuration.FilesAuthorizer,
+                        configuration.FilesPreprocessingEnabled,
+                        configuration.FilesPreprocessorThreads,
                         _statistics);
                     if (! fileControllerStartSucceeded)
                         return ServerStartStatus.BadParameters;
@@ -159,6 +161,8 @@ namespace ITCC.HTTP.Server
         {
             if (!_started)
                 return;
+            if (FilesEnabled)
+                FileRequestController<TAccount>.Stop();
             lock (OperationLock)
             {
                 if (_operationInProgress)

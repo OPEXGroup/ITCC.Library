@@ -66,7 +66,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             }
         }
 
-        private string _name;
+        private readonly string _name;
         private Thread _thread;
         private readonly ConcurrentQueue<BaseFilePreprocessTask> _taskQueue; 
         #endregion

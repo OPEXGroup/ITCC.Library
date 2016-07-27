@@ -17,7 +17,6 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                 WorkerThreads.Add(new FilePreprocessorThread(TaskQueue, $"FPP-0{i}"));
             }
             WorkerThreads.ForEach(t => t.Start());
-            WorkerThreads.ForEach(t => t.Join());
 
             return true;
         }

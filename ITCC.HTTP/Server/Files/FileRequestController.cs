@@ -9,6 +9,7 @@ using Griffin.Net.Channels;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
+using ITCC.HTTP.Server.Files.Preprocess;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
 
@@ -24,18 +25,27 @@ namespace ITCC.HTTP.Server.Files
             bool filesNeedAuthorization,
             List<FileSection> fileSections,
             Delegates.FilesAuthorizer<TAccount> filesAuthorizer,
+            bool filesPreprocessingEnabled,
+            int filesPreprocessorThreads,
             ServerStatistics<TAccount> statistics)
         {
             FilesLocation = filesLocation;
             FaviconPath = faviconPath;
             FilesNeedAuthorization = filesNeedAuthorization;
             FileSections = fileSections;
+            FilesPreprocessingEnabled = filesPreprocessingEnabled;
             _filesAuthorizer = filesAuthorizer;
+            _statistics = statistics;
 
             if (!IOHelper.HasWriteAccessToDirectory(FilesLocation))
             {
                 LogMessage(LogLevel.Warning, $"Cannot use file folder {FilesLocation} : no write access");
                 return false;
+            }
+
+            if (filesPreprocessingEnabled)
+            {
+                FilePreprocessController.Start(filesPreprocessorThreads);
             }
 
             _started = true;
@@ -44,6 +54,10 @@ namespace ITCC.HTTP.Server.Files
 
         public static void Stop()
         {
+            if (FilesPreprocessingEnabled)
+            {
+                FilePreprocessController.Stop();
+            }
             _started = false;
         }
 
@@ -51,6 +65,7 @@ namespace ITCC.HTTP.Server.Files
         public static string FaviconPath { get; private set; }
         public static bool FilesNeedAuthorization { get; private set; }
         public static List<FileSection> FileSections { get; private set; }
+        public static bool FilesPreprocessingEnabled { get; private set; }
 
         private static Delegates.FilesAuthorizer<TAccount> _filesAuthorizer;
         private static ServerStatistics<TAccount> _statistics; 
@@ -61,7 +76,7 @@ namespace ITCC.HTTP.Server.Files
         #region requests
         public static async Task<HttpResponse> HandleFileRequest(HttpRequest request)
         {
-            if (_started)
+            if (! _started)
                 return ResponseFactory.CreateResponse(HttpStatusCode.NotImplemented, null);
 
             try

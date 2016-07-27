@@ -36,23 +36,10 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
-            //AsynchronousClient.StartClient();
             StaticClient.ServerAddress = "http://localhost:8888";
-            //using (var client = new HttpClient())
-            //{
-            //    var firstTask = client.GetAsync(new Uri("http://127.0.0.1:8888/bigdata"), HttpCompletionOption.ResponseHeadersRead);
-            //    var secondTask = client.GetAsync(new Uri("http://127.0.0.1:8888/bigdata"), HttpCompletionOption.ResponseHeadersRead);
-            //    var firstResponse = await firstTask;
-            //    var secondResponse = await secondTask;
-            //    await firstResponse.Content.ReadAsStringAsync();
-            //    await secondResponse.Content.ReadAsStreamAsync();
-
-            //    Console.WriteLine("done");
-            //}
-            await StaticClient.GetRawAsync("/bigdata?a=b");
-            Logger.LogEntry("MAIN", LogLevel.Info, "Downloaded");
 
             Console.ReadLine();
+            StopServer();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
         }
 
@@ -83,12 +70,14 @@ namespace ITCC.Library.Testing
                 {
                     new FileSection
                     {
-                        Folder = "temp",
+                        Folder = "Pictures",
                         MaxFileSize = -1,
-                        Name = "temp"
+                        Name = "Pictures"
                     }
                 },
-                FilesLocation = "."
+                FilesLocation = @"C:\Users\vladimir.tyrin",
+                FilesPreprocessingEnabled = true,
+                FilesPreprocessorThreads = 1
             });
 
             StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
