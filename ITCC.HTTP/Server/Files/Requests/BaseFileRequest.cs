@@ -34,7 +34,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             HttpResponse response;
             if (!File.Exists(fileName))
             {
-                LogMessage(LogLevel.Debug, $"File {FileName} was requested but not found");
+                LogMessage(LogLevel.Debug, $"File {fileName} was requested but not found");
                 response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
                 return response;
             }
@@ -44,62 +44,61 @@ namespace ITCC.HTTP.Server.Files.Requests
                 var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
                     FileShare.ReadWrite);
                 response.Body = fileStream;
+                response.ContentType = DetermineContentType(fileName);
+                return response;
             }
-            else
+            var fileInfo = new FileInfo(fileName);
+            long startPosition = 0;
+            long endPosition = fileInfo.Length - 1;
+            if (Range.RangeEnd != null)
             {
-                var fileInfo = new FileInfo(fileName);
-                long startPosition = 0;
-                long endPosition = fileInfo.Length - 1;
-                if (Range.RangeEnd != null)
+                var rangeEnd = Range.RangeEnd.Value;
+                if (rangeEnd < 0)
                 {
-                    var rangeEnd = Range.RangeEnd.Value;
-                    if (rangeEnd < 0)
+                    if (fileInfo.Length < -rangeEnd)
                     {
-                        if (fileInfo.Length < -rangeEnd)
-                        {
-                            response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
-                                new Dictionary<string, string>
-                                {
-                                    {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
-                                });
-                            return response;
-                        }
-                        startPosition = fileInfo.Length + rangeEnd;
-                        endPosition = fileInfo.Length - 1;
+                        response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                            new Dictionary<string, string>
+                            {
+                                {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
+                            });
+                        return response;
                     }
-                    if (rangeEnd > 0)
-                    {
-                        if (fileInfo.Length < rangeEnd)
-                        {
-                            response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
-                                new Dictionary<string, string>
-                                {
-                                    {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
-                                });
-                            return response;
-                        }
-                        endPosition = rangeEnd;
-                    }
+                    startPosition = fileInfo.Length + rangeEnd;
+                    endPosition = fileInfo.Length - 1;
                 }
-                if (Range.RangeStart != null)
+                if (rangeEnd > 0)
                 {
-                    startPosition = Range.RangeStart.Value;
-                }
-
-                byte[] buffer;
-                var length = endPosition - startPosition + 1;
-                using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    using (var reader = new BinaryReader(fileStream))
+                    if (fileInfo.Length < rangeEnd)
                     {
-                        reader.BaseStream.Seek(startPosition, SeekOrigin.Begin);
-                        buffer = reader.ReadBytes((int)length);
+                        response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                            new Dictionary<string, string>
+                            {
+                                {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
+                            });
+                        return response;
                     }
+                    endPosition = rangeEnd;
                 }
-                response = ResponseFactory.CreateResponse(HttpStatusCode.PartialContent, null);
-                response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
-                response.Body = new MemoryStream(buffer);
             }
+            if (Range.RangeStart != null)
+            {
+                startPosition = Range.RangeStart.Value;
+            }
+
+            byte[] buffer;
+            var length = endPosition - startPosition + 1;
+            using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using (var reader = new BinaryReader(fileStream))
+                {
+                    reader.BaseStream.Seek(startPosition, SeekOrigin.Begin);
+                    buffer = reader.ReadBytes((int)length);
+                }
+            }
+            response = ResponseFactory.CreateResponse(HttpStatusCode.PartialContent, null);
+            response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
+            response.Body = new MemoryStream(buffer);
 
             response.ContentType = DetermineContentType(fileName);
             return response;
@@ -114,7 +113,6 @@ namespace ITCC.HTTP.Server.Files.Requests
         {
             if (!request.Headers.Contains("Range"))
             {
-                Range = new RequestRange {RangeStart = null, RangeEnd = null};
                 return true;
             }
 
@@ -188,7 +186,10 @@ namespace ITCC.HTTP.Server.Files.Requests
                 return InvalidResolutionTuple();
 
             var changedIndex = fileName.LastIndexOf(Constants.ChangedString, StringComparison.Ordinal);
-            var targetPart = Path.GetFileNameWithoutExtension(fileName.Remove(changedIndex + Constants.ChangedString.Length));
+            var endPart = fileName.Remove(0, changedIndex + Constants.ChangedString.Length);
+            LogMessage(LogLevel.Trace, endPart);
+            var targetPart = Path.GetFileNameWithoutExtension(endPart);
+            
             var parts = targetPart.Split('x');
             if (parts.Length != 2)
                 return InvalidResolutionTuple();
@@ -215,6 +216,9 @@ namespace ITCC.HTTP.Server.Files.Requests
         }
 
         protected static Tuple<int, int> InvalidResolutionTuple() => new Tuple<int, int>(-1, -1);
+
+        protected double GetDiagonal(Tuple<int, int> size) => Math.Sqrt(size.Item1*size.Item1 + size.Item2*size.Item2);
+
         #endregion
 
         #region log

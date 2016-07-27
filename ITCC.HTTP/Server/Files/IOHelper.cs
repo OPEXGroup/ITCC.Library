@@ -28,7 +28,7 @@ namespace ITCC.HTTP.Server.Files
             if (!filename.Contains("."))
                 return null;
 
-            return Path.GetExtension(filename);
+            return Path.GetExtension(filename).TrimStart('.');
         }
 
         internal static string GetDirectory(string filename)
@@ -80,8 +80,7 @@ namespace ITCC.HTTP.Server.Files
             try
             {
                 var files = Directory.GetFiles(directory);
-                var relativeNames = files.Select(Path.GetFileName);
-                result.AddRange(relativeNames.Where(n => n.Contains(Constants.ChangedString) && n.StartsWith(relativeName)));
+                result.AddRange(files.Where(n => n.Contains(Constants.ChangedString) && Path.GetFileName(n).StartsWith(relativeName)));
             }
             catch (Exception ex)
             {

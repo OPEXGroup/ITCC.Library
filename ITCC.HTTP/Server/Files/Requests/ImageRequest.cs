@@ -38,6 +38,9 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public override async Task<HttpResponse> BuildResponse()
         {
+            if (Diagonal == null && Width == null && Height == null)
+                return await base.BuildResponse();
+
             var availableFiles = IoHelper.LoadAllChanged(FileName);
             if (availableFiles == null || availableFiles.Count == 0)
             {
@@ -59,7 +62,29 @@ namespace ITCC.HTTP.Server.Files.Requests
                 return await base.BuildResponse();
             }
 
-            return await base.BuildResponse();
+            double requestedDiagonal;
+            if (Diagonal != null)
+                requestedDiagonal = Diagonal.Value;
+            else
+            {
+                var maybeWidth = Width ?? 0;
+                var maybeHeight = Height ?? 0;
+                requestedDiagonal = Math.Sqrt(maybeWidth*maybeWidth + maybeHeight*maybeHeight);
+            }
+
+            var minDiff = double.PositiveInfinity;
+            string fileName = FileName;
+            foreach (var item in resolutionDict)
+            {
+                var diff = Math.Abs(requestedDiagonal - GetDiagonal(item.Key));
+                if (diff < minDiff)
+                {
+                    minDiff = diff;
+                    fileName = item.Value;
+                }
+            }
+            LogMessage(LogLevel.Debug, $"Returning content of {fileName}");
+            return BuildRangeResponse(fileName);
         }
 
         #endregion
