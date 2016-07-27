@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
@@ -23,10 +24,16 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         {
             try
             {
-                var img = Image.FromFile(FileName);
-                float originalWidth = img.Width;
-                float originalHeight = img.Height;
-                LogMessage(LogLevel.Debug, $"Processing image {FileName}. Original resolution {(int)originalWidth}x{(int)originalHeight}");
+                float originalWidth;
+                float originalHeight;
+                using (var img = Image.FromFile(FileName))
+                {
+                    originalWidth = img.Width;
+                    originalHeight = img.Height;
+                }
+
+                LogMessage(LogLevel.Debug,
+                    $"Processing image {FileName}. Original resolution {(int) originalWidth}x{(int) originalHeight}");
 
                 ImageFormat format;
                 var extension = IoHelper.GetExtension(FileName);
@@ -39,13 +46,14 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                 }
                 foreach (var multiplier in Constants.ResolutionMultipliers)
                 {
-                    var newWidth = (int)(multiplier * originalWidth);
-                    var newHeight = (int)(multiplier *originalHeight);
-                    using (var bitmap = (Bitmap)Image.FromFile(FileName))
+                    var newWidth = (int) (multiplier*originalWidth);
+                    var newHeight = (int) (multiplier*originalHeight);
+                    using (var bitmap = (Bitmap) Image.FromFile(FileName))
                     {
                         using (var newBitmap = new Bitmap(bitmap, newWidth, newHeight))
                         {
-                            var newFileName = IoHelper.AddBeforeExtension(FileName, $"{Constants.ChangedString}{newWidth}x{newHeight}");
+                            var newFileName = IoHelper.AddBeforeExtension(FileName,
+                                $"{Constants.ChangedString}{newWidth}x{newHeight}");
                             LogMessage(LogLevel.Trace, $"Creating image {newFileName}");
                             newBitmap.Save(newFileName, format);
                         }
@@ -53,6 +61,13 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                 }
 
                 return true;
+            }
+            catch (OutOfMemoryException)
+            {
+                using (File.Create(IoHelper.AddBeforeExtension(FileName, $"{Constants.ChangedString}_FAILED")))
+                {
+                }
+                return false;
             }
             catch (Exception ex)
             {

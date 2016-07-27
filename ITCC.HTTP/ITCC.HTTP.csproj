@@ -65,6 +65,7 @@
     <Compile Include="Server\Files\Preprocess\BaseFilePreprocessTask.cs" />
     <Compile Include="Server\Files\Preprocess\FilePreprocessorThread.cs" />
     <Compile Include="Server\Files\Preprocess\FilePreprocessTaskFactory.cs" />
+    <Compile Include="Server\Files\FileRequestControllerConfiguration.cs" />
     <Compile Include="Server\Files\Preprocess\ImagePreprocessTask.cs" />
     <Compile Include="Server\Files\Preprocess\VideoPreprocessTask.cs" />
     <Compile Include="Server\Files\Requests\BaseFileRequest.cs" />

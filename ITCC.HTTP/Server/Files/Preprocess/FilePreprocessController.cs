@@ -28,7 +28,6 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             var task = FilePreprocessTaskFactory.BuildTask(fileName);
             if (task == null)
             {
-                LogMessage(LogLevel.Debug, $"Skipped preprocessing for file {fileName}");
                 return;
             }
             LogMessage(LogLevel.Debug, $"Preprocess task queued for {fileName} ({task.FileType})");

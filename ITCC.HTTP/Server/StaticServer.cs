@@ -103,15 +103,17 @@ namespace ITCC.HTTP.Server
                 if (configuration.FilesEnabled)
                 {
                     FilesEnabled = true;
-                    var fileControllerStartSucceeded = FileRequestController<TAccount>.Start(
-                        configuration.FilesLocation,
-                        configuration.FaviconPath,
-                        configuration.FilesNeedAuthorization,
-                        configuration.FileSections,
-                        configuration.FilesAuthorizer,
-                        configuration.FilesPreprocessingEnabled,
-                        configuration.FilesPreprocessorThreads,
-                        _statistics);
+                    var fileControllerStartSucceeded = FileRequestController<TAccount>.Start(new FileRequestControllerConfiguration<TAccount>
+                    {
+                        ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency,
+                        FaviconPath = configuration.FaviconPath,
+                        FilesAuthorizer = configuration.FilesAuthorizer,
+                        FileSections = configuration.FileSections,
+                        FilesLocation = configuration.FilesLocation,
+                        FilesNeedAuthorization = configuration.FilesNeedAuthorization,
+                        FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
+                        FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
+                    }, _statistics);
                     if (! fileControllerStartSucceeded)
                         return ServerStartStatus.BadParameters;
                 }

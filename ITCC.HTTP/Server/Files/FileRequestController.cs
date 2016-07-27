@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Timers;
 using Griffin.Net.Channels;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
@@ -21,21 +22,15 @@ namespace ITCC.HTTP.Server.Files
     {
         #region config
 
-        public static bool Start(string filesLocation,
-            string faviconPath,
-            bool filesNeedAuthorization,
-            List<FileSection> fileSections,
-            Delegates.FilesAuthorizer<TAccount> filesAuthorizer,
-            bool filesPreprocessingEnabled,
-            int filesPreprocessorThreads,
-            ServerStatistics<TAccount> statistics)
+        public static bool Start(FileRequestControllerConfiguration<TAccount> configuration, ServerStatistics<TAccount> statistics)
         {
-            FilesLocation = filesLocation;
-            FaviconPath = faviconPath;
-            FilesNeedAuthorization = filesNeedAuthorization;
-            FileSections = fileSections;
-            FilesPreprocessingEnabled = filesPreprocessingEnabled;
-            _filesAuthorizer = filesAuthorizer;
+            FilesLocation = configuration.FilesLocation;
+            FaviconPath = configuration.FaviconPath;
+            FilesNeedAuthorization = configuration.FilesNeedAuthorization;
+            FileSections = configuration.FileSections;
+            FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled;
+            ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency;
+            _filesAuthorizer = configuration.FilesAuthorizer;
             _statistics = statistics;
 
             if (!IoHelper.HasWriteAccessToDirectory(FilesLocation))
@@ -44,9 +39,13 @@ namespace ITCC.HTTP.Server.Files
                 return false;
             }
 
-            if (filesPreprocessingEnabled)
+            if (FilesPreprocessingEnabled)
             {
-                FilePreprocessController.Start(filesPreprocessorThreads);
+                FilePreprocessController.Start(configuration.FilesPreprocessorThreads);
+                PreprocessExistingFiles();
+                _preprocessTimer = new Timer(1000 * ExistingFilesPreprocessingFrequency);
+                _preprocessTimer.Elapsed += (sender, args) => PreprocessExistingFiles();
+                _preprocessTimer.Start();
             }
 
             _started = true;
@@ -57,6 +56,7 @@ namespace ITCC.HTTP.Server.Files
         {
             if (FilesPreprocessingEnabled)
             {
+                _preprocessTimer?.Stop();
                 FilePreprocessController.Stop();
             }
             _started = false;
@@ -67,9 +67,11 @@ namespace ITCC.HTTP.Server.Files
         public static bool FilesNeedAuthorization { get; private set; }
         public static List<FileSection> FileSections { get; private set; }
         public static bool FilesPreprocessingEnabled { get; private set; }
+        public static double ExistingFilesPreprocessingFrequency { get; private set; }
 
         private static Delegates.FilesAuthorizer<TAccount> _filesAuthorizer;
-        private static ServerStatistics<TAccount> _statistics; 
+        private static ServerStatistics<TAccount> _statistics;
+        private static Timer _preprocessTimer;
         private static bool _started;
 
         #endregion
@@ -262,7 +264,21 @@ namespace ITCC.HTTP.Server.Files
                 return null;
             }
         }
-   
+
+        private static void PreprocessExistingFiles()
+        {
+            foreach (var section in FileSections)
+            {
+                var directory = Path.Combine(FilesLocation, section.Folder);
+                foreach (var file in Directory.GetFiles(directory).Where(f => !f.Contains(Constants.ChangedString)))
+                {
+                    if (IoHelper.LoadAllChanged(file).Any())
+                        continue;
+                    FilePreprocessController.EnqueueFile(file);
+                }
+            }
+        }
+
         #endregion
 
         #region log
