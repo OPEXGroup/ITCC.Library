@@ -49,7 +49,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             {
                 var fileInfo = new FileInfo(fileName);
                 long startPosition = 0;
-                long endPosition = fileInfo.Length;
+                long endPosition = fileInfo.Length - 1;
                 if (Range.RangeEnd != null)
                 {
                     var rangeEnd = Range.RangeEnd.Value;
@@ -64,7 +64,8 @@ namespace ITCC.HTTP.Server.Files.Requests
                                 });
                             return response;
                         }
-                        endPosition = fileInfo.Length + rangeEnd;
+                        startPosition = fileInfo.Length + rangeEnd;
+                        endPosition = fileInfo.Length - 1;
                     }
                     if (rangeEnd > 0)
                     {
@@ -123,26 +124,31 @@ namespace ITCC.HTTP.Server.Files.Requests
             var rangeValue = request.Headers["Range"];
             if (! rangeValue.StartsWith("bytes="))
                 return false;
+            rangeValue = rangeValue.Replace("bytes=", "");
 
             if (rangeValue.EndsWith("-"))
             {
+                LogMessage(LogLevel.Trace, "Start range requested");
                 if (!long.TryParse(rangeValue.TrimEnd('-'), out rangeStart))
                     return false;
                 if (rangeStart < 0)
                     return false;
                 Range = new RequestRange {RangeStart = rangeStart, RangeEnd = null};
+                return true;
             }
             if (rangeValue.StartsWith("-"))
             {
+                LogMessage(LogLevel.Trace, "End range requested");
                 // rangeEnd will be negative. This is correct
                 if (!long.TryParse(rangeValue, out rangeEnd))
                     return false;
                 Range = new RequestRange { RangeStart = null, RangeEnd = rangeEnd };
+                return true;
             }
+            LogMessage(LogLevel.Trace, "Middle range requested");
             var parts = rangeValue.Split('-');
             if (parts.Length != 2)
                 return false;
-
             if (!long.TryParse(parts[0], out rangeStart))
                 return false;
             if (rangeStart < 0)
@@ -152,6 +158,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             // Here rangeEnd MUST be greater than start
             if (rangeEnd <= rangeStart)
                 return false;
+            LogMessage(LogLevel.Trace, $"Range built: {rangeStart}-{rangeEnd}");
             Range = new RequestRange {RangeStart = rangeStart, RangeEnd = rangeEnd };
             return true;
         }

@@ -157,7 +157,7 @@ namespace ITCC.HTTP.Server.Files
             var fileRequest = FileRequestFactory.BuildRequest(filePath, request);
             if (fileRequest == null) 
             {
-                LogMessage(LogLevel.Debug, $"Failed to build file requst for {filePath}");
+                LogMessage(LogLevel.Debug, $"Failed to build file request for {filePath}");
                 response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
                 return response;
             }
