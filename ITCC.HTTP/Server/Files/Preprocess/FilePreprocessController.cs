@@ -14,7 +14,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             var realThreadNumber = workerThreads > 0 ? workerThreads : Environment.ProcessorCount;
             for (var i = 0; i < realThreadNumber; ++i)
             {
-                WorkerThreads.Add(new FilePreprocessorThread(TaskQueue, $"FPP-0{i}"));
+                WorkerThreads.Add(new FilePreprocessorThread(TaskQueue, $"FPP-0{i + 1}"));
             }
             WorkerThreads.ForEach(t => t.Start());
 

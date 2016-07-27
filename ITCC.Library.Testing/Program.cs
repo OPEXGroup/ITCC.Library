@@ -74,7 +74,7 @@ namespace ITCC.Library.Testing
                 },
                 FilesLocation = @"C:\Users\vladimir.tyrin",
                 FilesPreprocessingEnabled = true,
-                FilesPreprocessorThreads = 1
+                FilesPreprocessorThreads = -1
             });
 
             StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
