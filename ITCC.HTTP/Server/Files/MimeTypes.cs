@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ITCC.HTTP.Server
+namespace ITCC.HTTP.Server.Files
 {
     public static class MimeTypes
     {
@@ -95,7 +95,7 @@ namespace ITCC.HTTP.Server
             {"mov", "video/quicktime"},
             {"movie", "video/x-sgi-movie"},
             {"mp2", "audio/mpeg"},
-            {"mp3", "audio/mpeg3"},
+            {"mp3", "audio/mp3"},
             {"mp4", "video/mp4"},
             {"mpa", "audio/mpeg"},
             {"mpeg", "video/mpeg"},

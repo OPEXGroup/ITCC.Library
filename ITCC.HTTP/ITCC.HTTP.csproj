@@ -56,9 +56,10 @@
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
     <Compile Include="Server\FileSection.cs" />
+    <Compile Include="Server\Files\FileRequestController.cs" />
     <Compile Include="Server\HandlerResult.cs" />
     <Compile Include="Server\HttpServerConfiguration.cs" />
-    <Compile Include="Server\MimeTypes.cs" />
+    <Compile Include="Server\Files\MimeTypes.cs" />
     <Compile Include="Server\RequestProcessor.cs" />
     <Compile Include="Server\RequestProcessorSelectionResult.cs" />
     <Compile Include="Server\ResponseFactory.cs" />

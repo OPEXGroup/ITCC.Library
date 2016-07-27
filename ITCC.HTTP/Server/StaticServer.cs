@@ -16,6 +16,7 @@ using Griffin.Net.Protocols;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
+using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
 using Newtonsoft.Json;
@@ -89,7 +90,6 @@ namespace ITCC.HTTP.Server
                 }
                 _authorizer = configuration.Authorizer;
                 _authentificator = configuration.Authentificator;
-                _fileAuthorizer = configuration.FilesAuthorizer;
 
                 ResponseFactory.SetBodySerializer(configuration.BodySerializer);
                 ResponseFactory.SetBodyEncoding(configuration.BodyEncoding);
@@ -99,17 +99,20 @@ namespace ITCC.HTTP.Server
 
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
-                FilesLocation = configuration.FilesLocation;
-                FileSections = configuration.FileSections;
 
-                if (FilesEnabled && !IOHelper.HasWriteAccessToDirectory(FilesLocation))
+                if (configuration.FilesEnabled)
                 {
-                    LogMessage(LogLevel.Warning, $"Cannot use file folder {FilesLocation} : no write access");
-                    return ServerStartStatus.BadParameters;
+                    FilesEnabled = true;
+                    var fileControllerStartSucceeded = FileRequestController<TAccount>.Start(
+                        configuration.FilesLocation,
+                        configuration.FaviconPath,
+                        configuration.FilesNeedAuthorization,
+                        configuration.FileSections,
+                        configuration.FilesAuthorizer,
+                        _statistics);
+                    if (! fileControllerStartSucceeded)
+                        return ServerStartStatus.BadParameters;
                 }
-
-                FilesNeedAuthorization = configuration.FilesNeedAuthorization;
-                _faviconPath = configuration.FaviconPath;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
 
@@ -564,8 +567,6 @@ namespace ITCC.HTTP.Server
 
         #region favicon
 
-        private static string _faviconPath;
-
         private static bool IsFaviconRequest(HttpRequest request)
         {
             if (request == null)
@@ -577,38 +578,23 @@ namespace ITCC.HTTP.Server
 
         private static Task HandleFavicon(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
-            HttpResponse response;
-            LogMessage(LogLevel.Trace, $"Favicon requested, path: {_faviconPath}");
-            if (string.IsNullOrEmpty(_faviconPath) || !File.Exists(_faviconPath))
-            {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                OnResponseReady(channel, response, "/favicon.ico", requestStopwatch);
-                return Task.CompletedTask;
-            }
-            response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-            var fileStream = new FileStream(_faviconPath, FileMode.Open, FileAccess.Read,
-                FileShare.ReadWrite);
-            response.ContentType = "image/x-icon";
-            response.Body = fileStream;
-
-            OnResponseReady(channel, response, "/favicon.ico", requestStopwatch);
+            var response = FileRequestController<TAccount>.HandleFavicon(request);
+            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
             return Task.CompletedTask;
         }
         #endregion
 
         #region files
 
-        private static Delegates.FilesAuthorizer<TAccount> _fileAuthorizer;
-
         public static bool FilesEnabled { get; private set; }
 
-        public static string FilesLocation { get; private set; }
+        public static string FilesLocation => FileRequestController<TAccount>.FilesLocation;
 
         public static string FilesBaseUri { get; private set; }
 
-        public static bool FilesNeedAuthorization { get; private set; }
+        public static bool FilesNeedAuthorization => FileRequestController<TAccount>.FilesNeedAuthorization;
 
-        public static List<FileSection> FileSections { get; private set; }
+        public static List<FileSection> FileSections => FileRequestController<TAccount>.FileSections;
 
         private static bool IsFilesRequest(HttpRequest request)
         {
@@ -621,179 +607,8 @@ namespace ITCC.HTTP.Server
 
         private static async Task HandleFileRequest(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
         {
-            HttpResponse response;
-            try
-            {
-                var filename = ExtractFileName(request.Uri.LocalPath);
-                var section = ExtractFileSection(request.Uri.LocalPath);
-                if (filename == null || section == null)
-                {
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
-                    return;
-                }
-                var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
-
-                AuthorizationResult<TAccount> authResult;
-                if (FilesNeedAuthorization)
-                {
-                    authResult = await _fileAuthorizer.Invoke(request, section, filename).ConfigureAwait(false);
-                }
-                else
-                {
-                    authResult = new AuthorizationResult<TAccount>(null, AuthorizationStatus.NotRequired);
-                }
-                _statistics?.AddAuthResult(authResult);
-                switch (authResult.Status)
-                {
-                    case AuthorizationStatus.NotRequired:
-                    case AuthorizationStatus.Ok:
-                        if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
-                            response = HandleFileGetRequest(filePath);
-                        else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
-                        {
-                            response = await HandleFilePostRequest(request, section, filePath).ConfigureAwait(false);
-                        }
-                        else if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
-                        {
-                            response = HandleFileDeleteRequest(filePath);
-                        }
-                        else
-                        {
-                            response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
-                        }
-                        break;
-                    default:
-                        response = ResponseFactory.CreateResponse(authResult);
-                        break;
-                }
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
-            }
-            catch (Exception exception)
-            {
-                LogException(LogLevel.Warning, exception);
-                response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
-            }
-        }
-
-        private static HttpResponse HandleFileGetRequest(string filePath)
-        {
-            HttpResponse response;
-            if (!File.Exists(filePath))
-            {
-                LogMessage(LogLevel.Debug, $"File {filePath} was requested but not found");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                return response;
-            }
-            response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
-                FileShare.ReadWrite);
-            response.ContentType = DetermineContentType(filePath);
-            response.Body = fileStream;
-            return response;
-        }
-
-        private static async Task<HttpResponse> HandleFilePostRequest(HttpRequest request, FileSection section, string filePath)
-        {
-            HttpResponse response;
-            if (File.Exists(filePath))
-            {
-                LogMessage(LogLevel.Debug, $"File {filePath} already exists");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.Conflict, null);
-                return response;
-            }
-            var fileContent = request.Body;
-            if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
-            {
-                LogMessage(LogLevel.Debug, $"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.RequestEntityTooLarge, null);
-                return response;
-            }
-            using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-            {
-                await fileContent.CopyToAsync(file).ConfigureAwait(false);
-                file.Flush();
-                file.Close();
-            }
-            fileContent.Flush();
-            fileContent.Close();
-            fileContent.Dispose();
-            GC.Collect();
-            LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
-            LogMessage(LogLevel.Debug, $"File {filePath} created");
-            response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
-
-            return response;
-        }
-
-        private static HttpResponse HandleFileDeleteRequest(string filePath)
-        {
-            HttpResponse response;
-            if (!File.Exists(filePath))
-            {
-                LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                return response;
-            }
-
-            try
-            {
-                File.Delete(filePath);
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-            }
-            catch (Exception ex)
-            {
-                LogException(LogLevel.Warning, ex);
-                response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
-            }
-            return response;
-        }
-
-        private static string ExtractFileName(string localPath)
-        {
-            if (localPath == null)
-                return null;
-            try
-            {
-                var result = localPath.Trim('/');
-                var slashIndex = result.LastIndexOf("/", StringComparison.Ordinal);
-                result = result.Remove(0, slashIndex + 1);
-                LogMessage(LogLevel.Debug, $"File requested: {result}");
-                return result;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        private static FileSection ExtractFileSection(string localPath)
-        {
-            if (localPath == null)
-                return null;
-            try
-            {
-                var sectionName = localPath.Trim('/');
-                var slashIndex = sectionName.IndexOf("/", StringComparison.Ordinal);
-                var lastSlashIndex = sectionName.LastIndexOf("/", StringComparison.Ordinal);
-                sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
-                LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
-                return FileSections.FirstOrDefault(s => s.Folder == sectionName);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        private static string DetermineContentType(string filename)
-        {
-            if (!filename.Contains("."))
-                return "x-application/unknown";
-
-            var lastDotIndex = filename.LastIndexOf(".", StringComparison.Ordinal);
-            return MimeTypes.GetTypeByExtenstion(filename.Remove(0, lastDotIndex + 1));
+            var response = await FileRequestController<TAccount>.HandleFileRequest(request);
+            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
         }
 
         #endregion
