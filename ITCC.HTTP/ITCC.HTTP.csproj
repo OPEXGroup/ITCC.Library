@@ -48,6 +48,7 @@
     <Compile Include="Client\StaticClient.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
+    <Compile Include="Enums\FileType.cs" />
     <Compile Include="Enums\Protocol.cs" />
     <Compile Include="Enums\ServerResponseStatus.cs" />
     <Compile Include="Enums\ServerStartStatus.cs" />
@@ -56,7 +57,18 @@
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
     <Compile Include="Server\FileSection.cs" />
+    <Compile Include="Server\Files\Preprocess\FilePreprocessController.cs" />
     <Compile Include="Server\Files\FileRequestController.cs" />
+    <Compile Include="Server\Files\FileTypeSelector.cs" />
+    <Compile Include="Server\Files\Preprocess\BaseFilePreprocessTask.cs" />
+    <Compile Include="Server\Files\Preprocess\FilePreprocessorThread.cs" />
+    <Compile Include="Server\Files\Preprocess\FilePreprocessTaskBuilder.cs" />
+    <Compile Include="Server\Files\Preprocess\ImagePreprocessTask.cs" />
+    <Compile Include="Server\Files\Preprocess\VideoPreprocessTask.cs" />
+    <Compile Include="Server\Files\Requests\BaseFileRequest.cs" />
+    <Compile Include="Server\Files\Requests\ImageRequest.cs" />
+    <Compile Include="Server\Files\Requests\RequestRange.cs" />
+    <Compile Include="Server\Files\Requests\VideoRequest.cs" />
     <Compile Include="Server\HandlerResult.cs" />
     <Compile Include="Server\HttpServerConfiguration.cs" />
     <Compile Include="Server\Files\MimeTypes.cs" />

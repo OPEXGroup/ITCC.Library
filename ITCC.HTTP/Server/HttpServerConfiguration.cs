@@ -52,6 +52,14 @@ namespace ITCC.HTTP.Server
         /// </summary>
         public bool FilesNeedAuthorization { get; set; }
         /// <summary>
+        ///     If true, then files will be preprocessed (image sizes variants, video transcoding)
+        /// </summary>
+        public bool FilesPreprocessingEnabled { get; set; } = true;
+        /// <summary>
+        ///     Number of threads used for files preprocessing. All CPU cores will be used for negative values
+        /// </summary>
+        public int FilesPreprocessorThreads { get; set; } = -1;
+        /// <summary>
         ///     File sections for separate access grants
         /// </summary>
         public List<FileSection> FileSections { get; set; } = new List<FileSection>(); 
@@ -170,6 +178,12 @@ namespace ITCC.HTTP.Server
             if (FilesEnabled && FilesLocation == null)
             {
                 LogMessage(LogLevel.Warning, "No file location passed to Start()");
+                return false;
+            }
+
+            if (FilesPreprocessingEnabled && FilesPreprocessorThreads == 0)
+            {
+                LogMessage(LogLevel.Warning, $"Cannot use zero threads for files preprocessing");
                 return false;
             }
 

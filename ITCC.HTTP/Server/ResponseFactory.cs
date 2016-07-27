@@ -34,7 +34,8 @@ namespace ITCC.HTTP.Server
         {
             {HttpStatusCode.OK, "OK"},
             {HttpStatusCode.Created, "Created"},
-            {HttpStatusCode.NoContent, "No content"},
+            {HttpStatusCode.NoContent, "No Content"},
+            {HttpStatusCode.PartialContent, "Partial Content"},
             {HttpStatusCode.MovedPermanently, "Moved Permanently" },
             {HttpStatusCode.Found, "Found" },
             {HttpStatusCode.BadRequest, "Bad request"},
@@ -43,9 +44,11 @@ namespace ITCC.HTTP.Server
             {HttpStatusCode.NotFound, "Not found"},
             {HttpStatusCode.Conflict, "Conflict"},
             {HttpStatusCode.RequestEntityTooLarge, "Request Entity Too Large" },
+            {HttpStatusCode.RequestedRangeNotSatisfiable, "Requested Range Not Satisfiable" },
             {(HttpStatusCode)429, "Too many requests"},
             {HttpStatusCode.InternalServerError, "Internal Server Error"},
             {HttpStatusCode.NotImplemented, "Not implemented"},
+            {HttpStatusCode.ServiceUnavailable, "Service unavailable" },
             {HttpStatusCode.MethodNotAllowed, "Method Not Allowed" }
         };
 

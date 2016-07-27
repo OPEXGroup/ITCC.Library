@@ -17,5 +17,16 @@ namespace ITCC.HTTP.Utils
                 return false;
             }
         }
+
+        internal static string GetExtension(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+                return null;
+            if (!filename.Contains("."))
+                return null;
+
+            var lastDotIndex = filename.LastIndexOf(".", StringComparison.Ordinal);
+            return filename.Remove(0, lastDotIndex + 1);
+        }
     }
 }

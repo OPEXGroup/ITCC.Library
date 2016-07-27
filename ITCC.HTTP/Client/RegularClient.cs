@@ -36,6 +36,8 @@ namespace ITCC.HTTP.Client
         {
             {HttpStatusCode.OK, ServerResponseStatus.Ok },
             {HttpStatusCode.Created, ServerResponseStatus.Ok },
+            {HttpStatusCode.Accepted, ServerResponseStatus.Ok },
+            {HttpStatusCode.PartialContent, ServerResponseStatus.Ok },
             {HttpStatusCode.NoContent, ServerResponseStatus.NothingToDo },
             {HttpStatusCode.Unauthorized, ServerResponseStatus.Unauthorized },
             {HttpStatusCode.Forbidden, ServerResponseStatus.Forbidden },
@@ -44,9 +46,11 @@ namespace ITCC.HTTP.Client
             {HttpStatusCode.Conflict, ServerResponseStatus.ClientError },
             {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError },
             {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
+            {HttpStatusCode.RequestedRangeNotSatisfiable, ServerResponseStatus.ClientError },
             {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
             {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError },
             {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError },
+            {HttpStatusCode.ServiceUnavailable, ServerResponseStatus.TemporaryUnavailable },
             {HttpStatusCode.MovedPermanently, ServerResponseStatus.Redirect },
             {HttpStatusCode.Found, ServerResponseStatus.Redirect }
         };

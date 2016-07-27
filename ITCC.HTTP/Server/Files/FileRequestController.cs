@@ -240,12 +240,14 @@ namespace ITCC.HTTP.Server.Files
 
         private static string DetermineContentType(string filename)
         {
-            if (!filename.Contains("."))
+            var extension = IOHelper.GetExtension(filename);
+            if (extension == null)
                 return "x-application/unknown";
 
-            var lastDotIndex = filename.LastIndexOf(".", StringComparison.Ordinal);
-            return MimeTypes.GetTypeByExtenstion(filename.Remove(0, lastDotIndex + 1));
+            return MimeTypes.GetTypeByExtenstion(extension);
         }
+
+        
         #endregion
 
         #region log

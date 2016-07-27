@@ -499,10 +499,10 @@ Https   // С шифрованием данных
 Тип ответа сервера. Значения
 
 ```
-Ok,                        // Все хорошо (200, 201)
+Ok,                        // Все хорошо (200, 201, 202, 206)
 NothingToDo,               // Данных нет (204)
 Redirect,                  // Перенаправление (301, 302)  
-ClientError,               // Ошибка в клиентском запросе (400, 404, 405, 409, 413)
+ClientError,               // Ошибка в клиентском запросе (400, 404, 405, 409, 413, 416)
 ServerError,               // Ошибка на сервере (500, 501)
 Unauthorized,              // Данные авторизации неверны или недостаточны (401)
 Forbidden,                 // Доступ запрещен для данного аккаунта (403)
@@ -510,7 +510,8 @@ TooManyRequests,           // Слишком много запросов с да
 IncompehensibleResponse,   // Ответ непонятен
 RequestCanceled,           // Запрос отменен клиентом до получения ответа
 RequestTimeout,            // Ответ не получен за заданное время
-ConnectionError            // Ошибка сетевого соединения
+ConnectionError,           // Ошибка сетевого соединения
+TemporaryUnavailable,      // Ресурс временно недоступен (503)
 ```
 
 ##### `enum ServerStartStatus`
@@ -598,6 +599,8 @@ bool FilesEnabled { get; set; }                                                 
 string FilesLocation { get; set; }                                                // Расположение файлов на сервер
 string FilesBaseUri { get; set; }                                                 // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
 bool FilesNeedAuthorization { get; set; }                                         // Требуется ли авторизация для доступа к файлам
+bool FilesPreprocessingEnabled { get; set; }                                      // Включен ли препроцессинг файлов (изменение размеров)
+int FilesPreprocessorThreads { get; set; }                                        // Количество потоков, используемых для препроцессинга файлов. Отрицательные значения - использовать все ядра
 /* Секции файлов, используемые на сервере. Если список пуст, на любой файловый запрос сервер будет отвечать 400 Bad Request */
 List<FileSection> FileSections { get; set; } = new List<FileSection>();           
 
