@@ -1,3 +1,12 @@
+## 0.17.0 (2016-07-27)
+
+* **New**:  202, 206, 416, 503 codes processing added in `RegularClient` and `StaticClient`  
+* **New**:  `Range` header processing for files added in `StaticServer`  
+* **New**:  Image compression (on `POST` and in background) added  
+* **New**:  `FilesPreprocessingEnabled`, `FilesPreprocessorThreads` and `ExistingFilesPreprocessingFrequency` options added to `HttpServerConfiguration`  
+* **New**:  `TemporaryUnavailable` value added to `ServerResponseStatus` enumeration  
+* **New**:  `uiThreadRunner` param recommendations added to `README.md` for `ObservableLogger`  
+
 ## 0.16.8 (2016-07-21)
 
 * **Edit**: `Newtonsoft.Json` updated to 9.0.1  
