@@ -187,7 +187,6 @@ namespace ITCC.HTTP.Server.Files.Requests
 
             var changedIndex = fileName.LastIndexOf(Constants.ChangedString, StringComparison.Ordinal);
             var endPart = fileName.Remove(0, changedIndex + Constants.ChangedString.Length);
-            LogMessage(LogLevel.Trace, endPart);
             var targetPart = Path.GetFileNameWithoutExtension(endPart);
             
             var parts = targetPart.Split('x');
