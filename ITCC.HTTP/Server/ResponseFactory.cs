@@ -34,6 +34,7 @@ namespace ITCC.HTTP.Server
         {
             {HttpStatusCode.OK, "OK"},
             {HttpStatusCode.Created, "Created"},
+            {HttpStatusCode.Accepted, "Accepted"},
             {HttpStatusCode.NoContent, "No Content"},
             {HttpStatusCode.PartialContent, "Partial Content"},
             {HttpStatusCode.MovedPermanently, "Moved Permanently" },

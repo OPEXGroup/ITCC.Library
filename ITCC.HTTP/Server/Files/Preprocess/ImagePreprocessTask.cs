@@ -1,22 +1,81 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.Drawing.Imaging;
 using ITCC.HTTP.Enums;
+using ITCC.HTTP.Utils;
+using ITCC.Logging;
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {
     internal class ImagePreprocessTask : BaseFilePreprocessTask
     {
+        #region static
+
+        public static readonly int[] Diagonals = {100, 150, 200, 300, 400, 500, 750, 1000, 2000};
+        #endregion
+
         #region BaseFilePreprocessTask
         public override FileType FileType => FileType.Image;
         public override string FileName { get; set; }
 
         public override bool Perform()
         {
-            return true;
+            try
+            {
+                var img = Image.FromFile(FileName);
+                float originalWidth = img.Width;
+                float originalHeight = img.Height;
+                var originalDiagonal = Math.Sqrt(originalWidth*originalWidth + originalHeight*originalHeight);
+                LogMessage(LogLevel.Debug, $"Processing image {FileName}. Original resolution {(int)originalWidth}x{(int)originalHeight}");
+
+                ImageFormat format;
+                var extension = IoHelper.GetExtension(FileName);
+                if (extension == null)
+                    return true;
+                if (!ImageFormatDictionary.TryGetValue(extension, out format))
+                {
+                    LogMessage(LogLevel.Warning, $"Unknown image format: {extension}");
+                    return false;
+                }
+                foreach (var diagonal in Diagonals)
+                {
+                    var multiplier = diagonal/originalDiagonal;
+                    if (multiplier >= 1)
+                        continue;
+                    var newWidth = (int)(multiplier * originalWidth);
+                    var newHeight = (int)(multiplier *originalHeight);
+                    using (var bitmap = (Bitmap)Image.FromFile(FileName))
+                    {
+                        using (var newBitmap = new Bitmap(bitmap, newWidth, newHeight))
+                        {
+                            var newFileName = IoHelper.AddBeforeExtension(FileName, $"_CHANGED_{newWidth}x{newHeight}");
+                            LogMessage(LogLevel.Trace, $"Creating image {newFileName}");
+                            newBitmap.Save(newFileName, format);
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return false;
+            }
         }
+        #endregion
+
+        #region private
+        private static readonly Dictionary<string, ImageFormat> ImageFormatDictionary = new Dictionary<string, ImageFormat>
+        {
+            {"jpg", ImageFormat.Jpeg },
+            {"jpeg", ImageFormat.Jpeg },
+            {"png", ImageFormat.Png },
+            {"gif", ImageFormat.Gif },
+            {"ico", ImageFormat.Icon },
+            {"bmp", ImageFormat.Bmp }
+        };
         #endregion
     }
 }

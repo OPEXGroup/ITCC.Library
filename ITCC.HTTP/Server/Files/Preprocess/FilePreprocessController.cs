@@ -59,15 +59,9 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         #region log
 
-        private static void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("FILE PROCESS", level, message);
-        }
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("FILE PROCESS", level, message);
 
-        private static void LogException(LogLevel level, Exception exception)
-        {
-            Logger.LogException("FILE PROCESS", level, exception);
-        }
+        private static void LogException(LogLevel level, Exception exception) => Logger.LogException("FILE PROCESS", level, exception);
 
         #endregion
     }

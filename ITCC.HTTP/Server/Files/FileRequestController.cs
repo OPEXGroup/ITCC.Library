@@ -37,7 +37,7 @@ namespace ITCC.HTTP.Server.Files
             _filesAuthorizer = filesAuthorizer;
             _statistics = statistics;
 
-            if (!IOHelper.HasWriteAccessToDirectory(FilesLocation))
+            if (!IoHelper.HasWriteAccessToDirectory(FilesLocation))
             {
                 LogMessage(LogLevel.Warning, $"Cannot use file folder {FilesLocation} : no write access");
                 return false;
@@ -188,7 +188,13 @@ namespace ITCC.HTTP.Server.Files
             GC.Collect();
             LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
             LogMessage(LogLevel.Debug, $"File {filePath} created");
-            response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
+            if (FilesPreprocessingEnabled)
+            {
+                response = ResponseFactory.CreateResponse(HttpStatusCode.Accepted, null);
+                FilePreprocessController.EnqueueFile(filePath);
+            }
+            else
+                response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
 
             return response;
         }
@@ -255,7 +261,7 @@ namespace ITCC.HTTP.Server.Files
 
         private static string DetermineContentType(string filename)
         {
-            var extension = IOHelper.GetExtension(filename);
+            var extension = IoHelper.GetExtension(filename);
             if (extension == null)
                 return "x-application/unknown";
 

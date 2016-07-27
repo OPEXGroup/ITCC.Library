@@ -8,10 +8,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         public override FileType FileType => FileType.Image;
         public override string FileName { get; set; }
 
-        public override bool Perform()
-        {
-            return true;
-        }
+        public override bool Perform() => true;
+
         #endregion
     }
 }

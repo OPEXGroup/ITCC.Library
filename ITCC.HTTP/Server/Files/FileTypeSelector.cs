@@ -32,7 +32,7 @@ namespace ITCC.HTTP.Server.Files
 
         public static FileType GetFileTypeByName(string fileName)
         {
-            var extension = IOHelper.GetExtension(fileName);
+            var extension = IoHelper.GetExtension(fileName);
             return GetFileTypeByExtension(extension);
         }
 
@@ -41,6 +41,9 @@ namespace ITCC.HTTP.Server.Files
             {"jpg", FileType.Image },
             {"jpeg", FileType.Image },
             {"png", FileType.Image },
+            {"bmp", FileType.Image },
+            {"gif", FileType.Image },
+            {"ico", FileType.Image },
             {"mp4", FileType.Video }
         };
 

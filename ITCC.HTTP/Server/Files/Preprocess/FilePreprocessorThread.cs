@@ -24,15 +24,10 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             _thread.Start();
         }
 
-        public void Join()
-        {
-            _thread.Join();
-        }
+        public void Join() => _thread.Join();
 
-        public void Stop()
-        {
-            _thread.Abort();
-        }
+        public void Stop() => _thread.Abort();
+
         #endregion
 
         #region private
@@ -53,6 +48,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
                     if (!task.Perform())
                         LogMessage(LogLevel.Warning, $"Task for file {task.FileName} ({task.FileType}) failed");
+                    else
+                        LogMessage(LogLevel.Debug, $"Task for file {task.FileName} ({task.FileType}) completed");
                 }
                 catch (ThreadAbortException)
                 {
@@ -68,20 +65,14 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         private readonly string _name;
         private Thread _thread;
-        private readonly ConcurrentQueue<BaseFilePreprocessTask> _taskQueue; 
+        private readonly ConcurrentQueue<BaseFilePreprocessTask> _taskQueue;
         #endregion
 
         #region log
 
-        private void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("FILE PROCESS", level, message);
-        }
+        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("FILE PROCESS", level, message);
 
-        private void LogException(LogLevel level, Exception exception)
-        {
-            Logger.LogException("FILE PROCESS", level, exception);
-        }
+        private void LogException(LogLevel level, Exception exception) => Logger.LogException("FILE PROCESS", level, exception);
 
         #endregion
     }

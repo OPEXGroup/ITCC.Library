@@ -16,10 +16,6 @@ using Newtonsoft.Json;
 
 namespace ITCC.Library.Testing
 {
-    
-
-   
-
     internal class Program
     {
         private static void Main(string[] args)

@@ -1,4 +1,7 @@
-﻿using ITCC.HTTP.Enums;
+﻿using System;
+using ITCC.HTTP.Enums;
+using ITCC.HTTP.Utils;
+using ITCC.Logging;
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {
@@ -13,5 +16,12 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         #endregion
 
+        #region log
+
+        protected void LogMessage(LogLevel level, string message) => Logger.LogEntry($"{FileType.ToString().ToUpper()} TASK", level, message);
+
+        protected void LogException(LogLevel level, Exception exception) => Logger.LogException($"{FileType.ToString().ToUpper()} TASK", level, exception);
+
+        #endregion
     }
 }
