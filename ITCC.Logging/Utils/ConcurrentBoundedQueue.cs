@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace ITCC.Logging.Utils
 {
+    /// <summary>
+    ///     Simple custom concurrent queue implementation
+    /// </summary>
+    /// <typeparam name="T">Queue element type</typeparam>
     internal class ConcurrentBoundedQueue<T>
     {
         #region public
@@ -51,6 +55,10 @@ namespace ITCC.Logging.Utils
             }
         }
 
+        /// <summary>
+        ///     This will return queue in last-to-first order
+        /// </summary>
+        /// <returns></returns>
         public List<T> ToList()
         {
             lock (_listLock)
