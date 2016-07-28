@@ -92,7 +92,7 @@ namespace ITCC.Logging
         /// <param name="message">Notification message</param>
         public static void LogEntry(object scope, LogLevel level, string message)
         {
-            if (level > Level || BannedScopes.Contains(scope.ToString()))
+            if (level > Level || level == LogLevel.None || BannedScopes.Contains(scope.ToString()))
                 return;
             var eventArgs = new LogEntryEventArgs(scope, level, message);
             LogEntryEvent?.Invoke(scope, eventArgs);
@@ -108,7 +108,7 @@ namespace ITCC.Logging
         {
             if (exception == null)
                 return;
-            if (level > Level || BannedScopes.Contains(scope.ToString()))
+            if (level > Level || level == LogLevel.None || BannedScopes.Contains(scope.ToString()))
                 return;
             var description = new StringBuilder($"EXCEPTION ({exception.GetType().Name})\n");
             try

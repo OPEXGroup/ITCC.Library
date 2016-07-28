@@ -10,12 +10,7 @@ namespace ITCC.Logging
         /// <summary>
         ///     Format string for message
         /// </summary>
-        public readonly string Format;
-
-        /// <summary>
-        ///     Objects used to create final string
-        /// </summary>
-        public readonly object[] FormatParams;
+        public readonly string Message;
 
         /// <summary>
         ///     Current message level
@@ -47,17 +42,20 @@ namespace ITCC.Logging
         /// </summary>
         public Exception Exception;
 
+        public LogEntryEventArgs()
+        {
+            Level = LogLevel.Info;
+        }
+
         public LogEntryEventArgs(object scope, LogLevel level, string message, Exception exception = null)
         {
             Scope = scope;
             Level = level;
-            Format = message;
+            Message = message;
             Exception = exception;
         }
 
         public string Representation => _representation ?? ToString();
-
-        public string Message => FormatParams != null ? string.Format(Format, FormatParams) : Format;
 
         public override string ToString()
         {

@@ -42,7 +42,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     BaseFilePreprocessTask task;
                     if (!_taskQueue.TryDequeue(out task))
                     {
-                        Thread.Sleep(1000);
+                        Thread.Sleep(Constants.FilesPreprocessorThreadSleepInterval);
                         continue;
                     }
 
