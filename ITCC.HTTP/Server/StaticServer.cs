@@ -351,6 +351,7 @@ namespace ITCC.HTTP.Server
                 if (StatisticsEnabled)
                     _statistics.AddSslProtocol(SslProtocols.None);
             }
+            clientConnectedEventArgs.Channel.MessageSent += (channel, message) => LogMessage(LogLevel.Debug, $"Message sent for {channel.RemoteEndpoint}");
             LogMessage(LogLevel.Debug, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}{sslDescription}");
         }
 
