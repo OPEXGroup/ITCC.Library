@@ -236,6 +236,24 @@ BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, doub
 BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = 10000);
 ```
 
+##### `class RotatingRequestLogger`
+
+Логгер, который собирает сообщения с список и выдает последние несколько сообщений по запросу. **Использует блокировки на очередь**
+
+Основной конструктор
+
+```
+RotatingRequestLogger(int capacity, LogLevel level);
+```
+
+Ключевые методы:
+
+```
+List<LogEntryEventArgs> GetEntries();          // Получение всех хранимых записей
+List<LogEntryEventArgs> GetEntries(int count); // Полученного заданного количества хранимых записей
+void Flush();                                  // Очистка очереди записей
+```
+
 ##### `class SystemEventLogger : ILogReceiver, IDisposable`
 
 Пишет лог в системные логи `Windows`. **Не поддерживает уровни логи ниже `Info`.** Основной конструктор 

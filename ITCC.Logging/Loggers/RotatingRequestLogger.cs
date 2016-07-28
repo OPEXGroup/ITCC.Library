@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ITCC.Logging.Interfaces;
 using ITCC.Logging.Utils;
 
@@ -35,6 +36,10 @@ namespace ITCC.Logging.Loggers
         }
 
         public List<LogEntryEventArgs> GetEntries() => _innerQueue.ToList();
+
+        public List<LogEntryEventArgs> GetEntries(int count) => GetEntries().Take(count).ToList();
+
+        public void Flush() => _innerQueue.Flush();
 
         #endregion
 
