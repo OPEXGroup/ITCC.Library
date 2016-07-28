@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
+using ITCC.HTTP.Security;
 using ITCC.HTTP.Server;
 using ITCC.Library.Testing.Networking;
 using ITCC.Logging;
@@ -55,7 +56,9 @@ namespace ITCC.Library.Testing
                 BodyEncoding = Encoding.UTF8,
                 BodySerializer = JsonConvert.SerializeObject,
                 Port = 8888,
-                Protocol = Protocol.Http,
+                Protocol = Protocol.Https,
+                AllowSelfSignedCertificates = true,
+                CertificateProvider = CertificateController.GetCertificate,
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",

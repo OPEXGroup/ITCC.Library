@@ -11,6 +11,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Griffin.Net;
 using Griffin.Net.Channels;
 using Griffin.Net.Protocols;
 using Griffin.Net.Protocols.Http;
@@ -84,7 +85,10 @@ namespace ITCC.HTTP.Server
                         return ServerStartStatus.CertificateError;
                     }
                     _listener.ChannelFactory =
-                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
+                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols))
+                        {
+                            OutboundMessageQueueFactory = () => new MessageQueue()
+                        };
                     LogMessage(LogLevel.Info,
                         $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
                 }
@@ -351,7 +355,7 @@ namespace ITCC.HTTP.Server
                 if (StatisticsEnabled)
                     _statistics.AddSslProtocol(SslProtocols.None);
             }
-            clientConnectedEventArgs.Channel.MessageSent += (channel, message) => LogMessage(LogLevel.Debug, $"Message sent for {channel.RemoteEndpoint}");
+            clientConnectedEventArgs.Channel.MessageSent = (channel, message) => LogMessage(LogLevel.Debug, $"Message sent for {channel.RemoteEndpoint}");
             LogMessage(LogLevel.Debug, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}{sslDescription}");
         }
 
