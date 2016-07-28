@@ -1,3 +1,8 @@
+## 0.18.0 (2016-07-28)
+
+* **New**:  Critical information protection added for `StaticServer`, `RegularClient` and `StaticClient`  
+* **New**:  `RotatingRequestLogger` added
+
 ## 0.17.1 (2016-07-28)
 
 * **New**:  More info for server message sending  
