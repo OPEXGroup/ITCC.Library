@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Griffin.Net;
 using Griffin.Net.Channels;
@@ -85,15 +86,18 @@ namespace ITCC.HTTP.Server
                         return ServerStartStatus.CertificateError;
                     }
                     _listener.ChannelFactory =
-                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols))
-                        {
-                            OutboundMessageQueueFactory = () => new MessageQueue()
-                        };
+                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
+
                     LogMessage(LogLevel.Info,
                         $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
                 }
                 _authorizer = configuration.Authorizer;
                 _authentificator = configuration.Authentificator;
+
+                if (configuration.LogBodyReplacePatterns != null)
+                    ResponseFactory.LogBodyReplacePatterns.AddRange(configuration.LogBodyReplacePatterns);
+                if (configuration.LogProhibitedHeaders != null)
+                    ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
 
                 ResponseFactory.SetBodySerializer(configuration.BodySerializer);
                 ResponseFactory.SetBodyEncoding(configuration.BodyEncoding);
@@ -118,7 +122,7 @@ namespace ITCC.HTTP.Server
                         FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
                         FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
                     }, _statistics);
-                    if (! fileControllerStartSucceeded)
+                    if (!fileControllerStartSucceeded)
                         return ServerStartStatus.BadParameters;
                 }
 
@@ -248,8 +252,9 @@ namespace ITCC.HTTP.Server
             {
                 _statistics?.AddRequest(request);
                 HttpResponse response;
-                LogMessage(LogLevel.Debug,
-                    $"Request from {channel.RemoteEndpoint}.\n{SerializeHttpRequest(request)}");
+                if (Logger.Level >= LogLevel.Debug)
+                    LogMessage(LogLevel.Debug,
+                        $"Request from {channel.RemoteEndpoint}.\n{SerializeHttpRequest(request)}");
 
                 foreach (var checker in ServiceHandlers.Keys)
                 {
@@ -757,11 +762,14 @@ namespace ITCC.HTTP.Server
                 return null;
 
             var builder = new StringBuilder();
-            builder.AppendLine($"{request.StatusLine}");
+            builder.AppendLine($"{PreprocessStatusLine(request.StatusLine)}");
 
             foreach (var header in request.Headers)
             {
-                builder.AppendLine($"{header.Key}: {header.Value}");
+                if (ResponseFactory.LogProhibitedHeaders.Contains(header.Key))
+                    builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
+                else
+                    builder.AppendLine($"{header.Key}: {header.Value}");
             }
 #if TRACE
             if (request.Body == null)
@@ -771,7 +779,12 @@ namespace ITCC.HTTP.Server
             {
                 using (var reader = new StreamReader(request.Body, _requestEncoding, true, 4096, true))
                 {
-                    builder.AppendLine(reader.ReadToEnd());
+                    var bodyString = reader.ReadToEnd();
+                    foreach (var replacePattern in ResponseFactory.LogBodyReplacePatterns)
+                    {
+                        bodyString = Regex.Replace(bodyString, replacePattern.Item1, replacePattern.Item2);
+                    }
+                    builder.AppendLine(bodyString);
                 }
                 request.Body.Position = 0;
             }
@@ -781,6 +794,14 @@ namespace ITCC.HTTP.Server
             }
 #endif
             return builder.ToString();
+        }
+
+        private static string PreprocessStatusLine(string statusLine)
+        {
+            if (string.IsNullOrEmpty(statusLine))
+                return statusLine;
+
+            return Regex.Replace(statusLine, "password=\\w+", $"password={Constants.RemovedLogString}");
         }
 
         public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ITCC.HTTP.Server.Files
+﻿namespace ITCC.HTTP
 {
     internal static class Constants
     {
@@ -14,5 +8,7 @@ namespace ITCC.HTTP.Server.Files
         public static readonly double[] ResolutionMultipliers = { 0.1, 0.25, 0.5, 0.75, 1.0 };
 
         public const string ChangedString = "_CHANGED_";
+
+        public const string RemovedLogString = "REMOVED_FROM_LOG";
     }
 }

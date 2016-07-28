@@ -58,7 +58,7 @@
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
     <Compile Include="Server\FileSection.cs" />
-    <Compile Include="Server\Files\Constants.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Server\Files\Preprocess\FilePreprocessController.cs" />
     <Compile Include="Server\Files\FileRequestController.cs" />
     <Compile Include="Server\Files\FileTypeSelector.cs" />

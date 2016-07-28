@@ -35,6 +35,7 @@ namespace ITCC.HTTP.Server
         ///     Allowed SSL protocols in case of https
         /// </summary>
         public SslProtocols SuitableSslProtocols { get; set; }
+
         /// <summary>
         ///     Does server support file streaming?
         /// </summary>
@@ -105,6 +106,16 @@ namespace ITCC.HTTP.Server
         ///     Max response body size to write to trace logs. Negative values mean no limit
         /// </summary>
         public int ResponseBodyLogLimit { get; set; } = -1;
+
+        /// <summary>
+        ///     Message body parts patterns that must NEVER be logger. Item1 will be replaced with Item2 (Regex support)
+        /// </summary>
+        public List<Tuple<string, string>> LogBodyReplacePatterns { get; set; } = new List<Tuple<string, string>>();
+
+        /// <summary>
+        ///     Headers which should NEVER be logged
+        /// </summary>
+        public List<string> LogProhibitedHeaders { get; set; } = new List<string>(); 
 
         /// <summary>
         ///     If true, then unauthorized /statistics requests are enabled

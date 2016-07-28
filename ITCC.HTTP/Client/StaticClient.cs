@@ -466,6 +466,15 @@ namespace ITCC.HTTP.Client
             }
         }
 
+        /// <summary>
+        ///     Tuples thing-to-replace thing-for-replacement for request and response bodies
+        /// </summary>
+        public static List<Tuple<string, string>> LogBodyReplacePatterns => RegularClient.LogBodyReplacePatterns;
+        /// <summary>
+        ///     Headers' names. Their values will be replaced with non-critical info
+        /// </summary>
+        public static List<string> LogProhibitedHeaders  => RegularClient.LogProhibitedHeaders;
+
         private static readonly object ClientLock = new object();
 
         #endregion

@@ -17,6 +17,11 @@ using Newtonsoft.Json;
 
 namespace ITCC.Library.Testing
 {
+    internal class TokenStore
+    {
+        public string Token { get; set; }
+    }
+
     internal class Program
     {
         private static void Main(string[] args)
@@ -34,7 +39,20 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "http://localhost:8888";
+            StaticClient.ServerAddress = "https://localhost:8888";
+            StaticClient.AllowUntrustedServerCertificates();
+            StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
+            StaticClient.LogProhibitedHeaders.Add("Authorization");
+
+            await StaticClient.GetRawAsync("token", new Dictionary<string, string>
+            {
+                {"login", "user"},
+                {"password", "pwd"}
+            },
+            new Dictionary<string, string>
+            {
+                {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd" }
+            });
 
             Console.ReadLine();
             StopServer();
@@ -59,6 +77,11 @@ namespace ITCC.Library.Testing
                 Protocol = Protocol.Https,
                 AllowSelfSignedCertificates = true,
                 CertificateProvider = CertificateController.GetCertificate,
+                LogBodyReplacePatterns = new List<Tuple<string, string>>
+                {
+                    new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3")
+                },
+                LogProhibitedHeaders = new List<string> { "Authorization"},
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
@@ -118,7 +141,7 @@ namespace ITCC.Library.Testing
                 SubUri = "bigdata",
                 Handler = (account, request) =>
                 {
-                    var builder = new StringBuilder(64 * 1024 * 1024);
+                    var builder = new StringBuilder(64*1024*1024);
                     for (var i = 0; i < 1024; ++i)
                     {
                         var str = string.Empty;
@@ -128,6 +151,14 @@ namespace ITCC.Library.Testing
                     }
                     return Task.FromResult(new HandlerResult(HttpStatusCode.OK, builder.ToString()));
                 }
+            });
+
+            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            {
+                AuthorizationRequired = false,
+                Method = HttpMethod.Get,
+                SubUri = "token",
+                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}))
             });
 
             StaticServer<object>.AddStaticRedirect("test", "delay");

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
@@ -137,9 +139,8 @@ namespace ITCC.HTTP.Server
 
             if (body == null)
             {
-#if TRACE
-                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
-#endif
+                if (Logger.Level >= LogLevel.Trace)
+                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return httpResponse;
             }
             
@@ -175,9 +176,8 @@ namespace ITCC.HTTP.Server
             httpResponse.ContentType = "application/json";
             httpResponse.ContentCharset = encoding;
 
-#if TRACE
-            Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
-#endif
+            if (Logger.Level >= LogLevel.Trace)
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
             return httpResponse;
         }
 
@@ -196,6 +196,8 @@ namespace ITCC.HTTP.Server
             builder.AppendLine($"{response.StatusLine}");
             foreach (var header in response.Headers)
             {
+                if (LogProhibitedHeaders.Contains(header.Key))
+                    builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
                 builder.AppendLine($"{header.Key}: {header.Value}");
             }
             if (response.Body == null)
@@ -213,13 +215,19 @@ namespace ITCC.HTTP.Server
             {
                 try
                 {
+                    var processedBodyString = bodyString;
+                    foreach (var prohibitedPattern in LogBodyReplacePatterns)
+                    {
+                        processedBodyString = Regex.Replace(processedBodyString, prohibitedPattern.Item1,
+                            prohibitedPattern.Item2);
+                    }
 
-                    if (ResponseBodyLogLimit < 1 || bodyString.Length <= ResponseBodyLogLimit)
-                        builder.AppendLine(bodyString);
+                    if (ResponseBodyLogLimit < 1 || processedBodyString.Length <= ResponseBodyLogLimit)
+                        builder.AppendLine(processedBodyString);
                     else
                     {
-                        builder.AppendLine(bodyString.Substring(0, ResponseBodyLogLimit));
-                        builder.AppendLine($"[And {bodyString.Length - ResponseBodyLogLimit} more bytes...]");
+                        builder.AppendLine(processedBodyString.Substring(0, ResponseBodyLogLimit));
+                        builder.AppendLine($"[And {processedBodyString.Length - ResponseBodyLogLimit} more bytes...]");
                     }
                 }
                 catch (Exception)
@@ -244,5 +252,7 @@ namespace ITCC.HTTP.Server
         private static Encoding _bodyEncoding = Encoding.UTF8;
         public static bool LogResponseBodies = true;
         public static int ResponseBodyLogLimit = -1;
+        public static readonly List<Tuple<string, string>> LogBodyReplacePatterns = new List<Tuple<string, string>>();
+        public static readonly List<string> LogProhibitedHeaders = new List<string>(); 
     }
 }

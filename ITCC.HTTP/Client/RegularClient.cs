@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Common;
@@ -148,10 +149,9 @@ namespace ITCC.HTTP.Client
                             }
                         }
 
-#if TRACE
-                        LogMessage(LogLevel.Trace,
-                            $"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
-#endif
+                        if (Logger.Level >= LogLevel.Trace)
+                            LogMessage(LogLevel.Trace,
+                                $"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
                             var responseHeaders = response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key, httpResponseHeader => string.Join(";", httpResponseHeader.Value));
@@ -218,11 +218,10 @@ namespace ITCC.HTTP.Client
                             }
 
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            
-#if TRACE
-                            LogMessage(LogLevel.Trace,
-                                $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
-#endif
+
+                            if (Logger.Level >= LogLevel.Trace)
+                                LogMessage(LogLevel.Trace,
+                                    $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
                             if (responseBodyDeserializer != null)
                             {
                                 try
@@ -718,16 +717,31 @@ namespace ITCC.HTTP.Client
                     return "NULL";
 
                 var builder = new StringBuilder();
-                builder.AppendLine($"{request.Method.ToString().ToUpper()} {request.RequestUri} HTTP/{request.Version}");
+                builder.AppendLine($"{request.Method.ToString().ToUpper()} {PreprocessStatusLine(request.RequestUri.ToString())} HTTP/{request.Version}");
                 foreach (var header in request.Headers)
                 {
-                    builder.AppendLine($"{header.Key}: {string.Join("", header.Value)}");
+                    if (LogProhibitedHeaders.Contains(header.Key))
+                    {
+                        builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
+                    }
+                    else
+                    {
+                        var normalValue = string.Join("", header.Value);
+                        builder.AppendLine($"{header.Key}: {normalValue}");
+                    }
                 }
 
                 if (requestBody == null)
                     return builder.ToString();
 
-                builder.AppendLine(requestBody);
+                var processedResponseBody = requestBody;
+                foreach (var logBodyReplacePattern in LogBodyReplacePatterns)
+                {
+                    processedResponseBody = Regex.Replace(processedResponseBody, logBodyReplacePattern.Item1,
+                        logBodyReplacePattern.Item2);
+                }
+
+                builder.AppendLine(processedResponseBody);
                 builder.AppendLine();
 
                 return builder.ToString();
@@ -736,6 +750,14 @@ namespace ITCC.HTTP.Client
             {
                 return "ERROR SERIALIZING REQUEST";
             }
+        }
+
+        private string PreprocessStatusLine(string statusLine)
+        {
+            if (string.IsNullOrEmpty(statusLine))
+                return statusLine;
+
+            return Regex.Replace(statusLine, "password=\\w+", $"password={Constants.RemovedLogString}");
         }
 
         /// <summary>
@@ -754,15 +776,29 @@ namespace ITCC.HTTP.Client
                 builder.AppendLine($"HTTP/{response.Version} {(int)response.StatusCode} {response.ReasonPhrase}");
                 foreach (var header in response.Headers)
                 {
-                    var normalValue = string.Join("", header.Value);
-                    builder.AppendLine($"{header.Key}: {normalValue}");
+                    if (LogProhibitedHeaders.Contains(header.Key))
+                    {
+                        builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
+                    }
+                    else
+                    {
+                        var normalValue = string.Join("", header.Value);
+                        builder.AppendLine($"{header.Key}: {normalValue}");
+                    }
                 }
 
                 if (responseBody == null)
                     return builder.ToString();
 
                 builder.AppendLine();
-                builder.AppendLine(responseBody);
+                var processedResponseBody = responseBody;
+                foreach (var logBodyReplacePattern in LogBodyReplacePatterns)
+                {
+                    processedResponseBody = Regex.Replace(processedResponseBody, logBodyReplacePattern.Item1,
+                        logBodyReplacePattern.Item2);
+                }
+
+                builder.AppendLine(processedResponseBody);
                 return builder.ToString();
             }
             catch (Exception)
@@ -841,6 +877,15 @@ namespace ITCC.HTTP.Client
         ///     If true, the same authorization procedure will be used for every redirect.
         /// </summary>
         public bool PreserveAuthorizationOnRedirect { get; set; } = true;
+
+        /// <summary>
+        ///     Tuples thing-to-replace thing-for-replacement for request and response bodies
+        /// </summary>
+        public List<Tuple<string, string>> LogBodyReplacePatterns { get; } = new List<Tuple<string, string>>();
+        /// <summary>
+        ///     Headers' names. Their values will be replaced with non-critical info
+        /// </summary>
+        public List<string> LogProhibitedHeaders { get; } = new List<string>();
 
         private DecompressionMethods _decompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
