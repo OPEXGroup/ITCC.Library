@@ -1,3 +1,7 @@
+## 0.17.1 (2016-07-28)
+
+* **New**:  More info for server message sending  
+
 ## 0.17.0 (2016-07-27)
 
 * **New**:  202, 206, 416, 503 codes processing added in `RegularClient` and `StaticClient`  
