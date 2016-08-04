@@ -60,8 +60,7 @@ namespace ITCC.HTTP.Server
                 _statisticsAuthorizer = null;
             }
 
-            _listener = new HttpListener();
-
+            
 
             try
             {
@@ -128,6 +127,8 @@ namespace ITCC.HTTP.Server
                     });
                 }
                 var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
+                ServicePointManager.DefaultConnectionLimit = 1000;
+                _listener = new HttpListener();
                 _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
                 _listener.Start();
                 _listenerThread = new Thread(() =>
@@ -138,21 +139,11 @@ namespace ITCC.HTTP.Server
                         {
                             var context = _listener.GetContext();
                             LogMessage(LogLevel.Debug, $"Client connected: {context.Request.RemoteEndPoint}");
-                            ThreadPool.QueueUserWorkItem(o =>
-                            {
-                                try
-                                {
-                                    OnMessage(context).Wait();
-                                }
-                                catch (ThreadAbortException)
-                                {
-                                }
-                                catch (Exception)
-                                {
-                                    // Ignore
-                                }
-
-                            });
+                            Task.Run(async () => await OnMessage(context));
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            break;
                         }
                         catch (Exception ex)
                         {
@@ -160,6 +151,7 @@ namespace ITCC.HTTP.Server
                         }
                     }
                 });
+                
                 _listenerThread.Start();
                 _started = true;
                 _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
@@ -381,7 +373,7 @@ namespace ITCC.HTTP.Server
             }
             catch (HttpListenerException)
             {
-                LogMessage(LogLevel.Debug, "Sudden client disconnect, failed to send response");
+                LogMessage(LogLevel.Info, "Sudden client disconnect, failed to send response");
             }
             catch (Exception ex)
             {

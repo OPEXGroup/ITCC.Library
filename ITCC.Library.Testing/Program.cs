@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -45,16 +47,43 @@ namespace ITCC.Library.Testing
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
 
-            await StaticClient.GetRawAsync("token", new Dictionary<string, string>
+            const int requestsPerStep = 10000;
+            const int stepCount = 100;
+            const int requestCount = requestsPerStep * stepCount;
+            double totalElapsed = 0;
+
+            var totalFailed = 0;
+            Logger.LogEntry("MAIN", LogLevel.Info, $"Using {requestsPerStep} requests per step");
+            for (var step = 0; step < stepCount; ++step)
             {
-                {"login", "user"},
-                {"password", "pwd"}
-            },
-            new Dictionary<string, string>
-            {
-                {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd" },
-                {"Accept-Encoding", "gzip" }
-            });
+                var stopWatch = Stopwatch.StartNew();
+                var tasks = new Task<RequestResult<string>>[requestCount /stepCount];
+                for (var i = 0; i < requestsPerStep; ++i)
+                {
+                    tasks[i] = StaticClient.GetRawAsync("token", new Dictionary<string, string>
+                    {
+                        {"login", "user"},
+                        {"password", "pwd"}
+                    },
+                        new Dictionary<string, string>
+                        {
+                        {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd"},
+                        {"Accept-Encoding", "gzip"}
+                        });
+                }
+                var results = await Task.WhenAll(tasks);
+                var stepFailed = results.Count(r => r.Status != ServerResponseStatus.Ok);
+                totalFailed += stepFailed;
+                stopWatch.Stop();
+                var stepElapsed = (double)stopWatch.ElapsedMilliseconds;
+                totalElapsed += stepElapsed;
+                var level = stepFailed > 0 ? LogLevel.Warning : LogLevel.Info;
+                Logger.LogEntry("MAIN", level, $"Step {step}/{stepCount} done in {stepElapsed} ms ({stepElapsed / requestsPerStep} avg). ({stepFailed}/{requestsPerStep} failed)");
+            }
+            
+            
+            
+            Logger.LogEntry("MAIN", LogLevel.Info, $"Done {requestCount} requests in {totalElapsed} ms ({totalElapsed / requestCount} avg). Failed: {totalFailed}");
 
             Console.ReadLine();
             StopServer();
@@ -63,7 +92,7 @@ namespace ITCC.Library.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Info;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -87,7 +116,7 @@ namespace ITCC.Library.Testing
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
-                AutoGzipCompression = true,
+                AutoGzipCompression = false,
                 FilesEnabled = false,
                 FilesNeedAuthorization = false,
                 FilesBaseUri = "files",
