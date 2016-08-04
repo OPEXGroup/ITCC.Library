@@ -13,7 +13,7 @@
 Потом, для подключения после клонирования родительского проекта
 
 * `git submodule init`
-* `git submodule update --init --recursive` # у нее есть свои подмодули
+* `git submodule update`
 
 Собирается из `Visual Studio`, целевая среда - `.Net 4.6 (x64)`.
 
@@ -292,7 +292,7 @@ int MaxQueueSize { get; set; }              // Размер очереди со�
 
 ### ITCC.HTTP
 
-Библиотека для асинхронной работы с сетью по протоколу `HTTP(S)/1.1`. Поддерживает и сторону клиента, и сторону сервера. Основана на `Griffin.Framework` в серверной части. Содержит следующие компоненты (более подробное описание - исходники):
+Библиотека для асинхронной работы с сетью по протоколу `HTTP(S)/1.1`. Поддерживает и сторону клиента, и сторону сервера. Содержит следующие компоненты (более подробное описание - исходники):
 
 #### Client
 
@@ -468,19 +468,19 @@ delegate TResult BodyDeserializer<out TResult>(string data); // Метод де�
 /*
     Сервер
 */
-delegate Task<AuthentificationResult> Authentificator(HttpRequest request); // Метод аутентификации на сервере (применяется к запросам на /login)
+delegate Task<AuthentificationResult> Authentificator(HttpListenerRequest request); // Метод аутентификации на сервере (применяется к запросам на /login)
 delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
-            HttpRequest request,
+            HttpListenerRequest request,
             RequestProcessor<TAccount> requestProcessor)
             where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос
-delegate Task<bool> StatisticsAuthorizer(HttpRequest request); // Метод сервера, позволяющий определить, разрешен ли запрос на /statistics
+delegate Task<bool> StatisticsAuthorizer(HttpListenerRequest request); // Метод сервера, позволяющий определить, разрешен ли запрос на /statistics
 delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
-            HttpRequest request,
+            HttpListenerRequest request,
             FileSection section,
-                  string filename)
+            string filename)
             where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам.
 delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates); // Метод сервера для получения SSL/TLS сертификата
-delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpRequest request); // Обработчик клиентского запроса (после авторизации)
+delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpListenerRequest request); // Обработчик клиентского запроса (после авторизации)
 /*
     Общие
 */
@@ -604,6 +604,7 @@ bool IsEnough();     // Достаточна ли конфигурация дл�
 ```
 
 Ключевые свойства:
+
 ```
 string SubjectName { get; set; }                                                  // Доменное имя сервера (главная цель - поис сертификата)
 ushort Port { get; set; }                                                         // Порт, на котором принимаем соединения
