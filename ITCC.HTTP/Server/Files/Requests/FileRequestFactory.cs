@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Griffin.Net.Protocols.Http;
+﻿using System.Net;
 using ITCC.HTTP.Enums;
-using ITCC.HTTP.Server.Files.Preprocess;
 
 namespace ITCC.HTTP.Server.Files.Requests
 {
     internal static class FileRequestFactory
     {
         #region public
-        public static BaseFileRequest BuildRequest(string fileName, HttpRequest request)
+        public static BaseFileRequest BuildRequest(string fileName, HttpListenerRequest request)
         {
             var type = FileTypeSelector.GetFileTypeByName(fileName);
             BaseFileRequest result;

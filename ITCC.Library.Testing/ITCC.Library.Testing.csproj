@@ -57,10 +57,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Griffin.Framework\src\Griffin.Framework\Griffin.Core\Griffin.Core.csproj">
-      <Project>{744709d5-d4d5-4551-9ebd-cbd7bdf58f5f}</Project>
-      <Name>Griffin.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ITCC.Geocoding\ITCC.Geocoding.csproj">
       <Project>{e0d80db9-1d0e-4fdc-ba31-4d0deb76bb56}</Project>
       <Name>ITCC.Geocoding</Name>

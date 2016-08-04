@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Net;
 using System.Security.Authentication;
 using System.Text;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server
@@ -135,7 +135,7 @@ namespace ITCC.HTTP.Server
             return builder.ToString();
         }
 
-        public void AddResponse(HttpResponse response, string uri, double processingTime)
+        public void AddResponse(HttpListenerResponse response, string uri, double processingTime)
         {
             _responseCodes.AddOrUpdate(response.StatusCode, 1, (key, value) => value + 1);
 
@@ -163,9 +163,9 @@ namespace ITCC.HTTP.Server
             }
         }
 
-        public void AddRequest(HttpRequest request)
+        public void AddRequest(HttpListenerRequest request)
         {
-            var uri = request.Uri.LocalPath.TrimEnd('/');
+            var uri = request.Url.LocalPath.TrimEnd('/');
             lock (_requestMethodLock)
             {
                 if (!_requestMethodCounters.ContainsKey(uri))
@@ -190,7 +190,7 @@ namespace ITCC.HTTP.Server
             _sslProtocolCounter.AddOrUpdate(protocol, 1, (key, value) => value + 1);
         }
 
-        private bool HasGoodStatusCode(HttpResponse response)
+        private bool HasGoodStatusCode(HttpListenerResponse response)
         {
             // Little hack, but...
             return response.StatusCode/100 < 4;

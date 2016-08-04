@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using ITCC.HTTP.Common;
 
 namespace ITCC.HTTP.Server

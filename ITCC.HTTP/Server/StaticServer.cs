@@ -11,18 +11,14 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
-using Griffin.Net;
-using Griffin.Net.Channels;
-using Griffin.Net.Protocols;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
 using Newtonsoft.Json;
-using HttpListener = Griffin.Net.Protocols.Http.HttpListener;
 
 namespace ITCC.HTTP.Server
 {
@@ -64,13 +60,8 @@ namespace ITCC.HTTP.Server
                 _statisticsAuthorizer = null;
             }
 
-            _listener = new HttpListener(configuration.BufferPoolSize)
-            {
-                MessageReceived = OnMessage
-            };
-            _listener.ClientConnected += OnClientConnected;
-            _listener.ClientDisconnected += OnClientDisconnected;
-            _listener.ListenerError += OnListenerError;
+            _listener = new HttpListener();
+
 
             try
             {
@@ -85,8 +76,7 @@ namespace ITCC.HTTP.Server
                         LogMessage(LogLevel.Warning, "Certificate error");
                         return ServerStartStatus.CertificateError;
                     }
-                    _listener.ChannelFactory =
-                        new SecureTcpChannelFactory(new ServerSideSslStreamBuilder(certificate, SuitableSslProtocols));
+                    
 
                     LogMessage(LogLevel.Info,
                         $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
@@ -137,9 +127,41 @@ namespace ITCC.HTTP.Server
                         {"Server", configuration.ServerName}
                     });
                 }
-                _listener.Start(IPAddress.Any, configuration.Port);
+                var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
+                _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
+                _listener.Start();
+                _listenerThread = new Thread(() =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            var context = _listener.GetContext();
+                            LogMessage(LogLevel.Debug, $"Client connected: {context.Request.RemoteEndPoint}");
+                            ThreadPool.QueueUserWorkItem(o =>
+                            {
+                                try
+                                {
+                                    OnMessage(context).Wait();
+                                }
+                                catch (ThreadAbortException)
+                                {
+                                }
+                                catch (Exception)
+                                {
+                                    // Ignore
+                                }
+
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
+                        }
+                    }
+                });
+                _listenerThread.Start();
                 _started = true;
-                var protocolString = configuration.Protocol == Protocol.Https ? "https" : "http";
                 _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
                 ServiceUris.AddRange(configuration.GetReservedUris());
                 LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
@@ -186,6 +208,7 @@ namespace ITCC.HTTP.Server
             LogMessage(LogLevel.Info, "Shutting down");
             try
             {
+                _listenerThread.Abort();
                 _listener.Stop();
                 _started = false;
                 CleanUp();
@@ -211,7 +234,10 @@ namespace ITCC.HTTP.Server
             ServiceUris.Clear();
         }
 
+        private static string GetNormalizedRequestUri(HttpListenerContext context) => "/" + context.Request.Url.LocalPath.Trim('/');
+
         private static bool _started;
+        private static Thread _listenerThread;
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
@@ -243,24 +269,24 @@ namespace ITCC.HTTP.Server
 
         #region handlers
 
-        private static async void OnMessage(ITcpChannel channel, object message)
+        private static async Task OnMessage(HttpListenerContext context)
         {
-            var request = (HttpRequest)message;
+            var request = context.Request;
+            var response = context.Response;
             // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
             var stopWatch = Stopwatch.StartNew();
             try
             {
                 _statistics?.AddRequest(request);
-                HttpResponse response;
                 if (Logger.Level >= LogLevel.Debug)
                     LogMessage(LogLevel.Debug,
-                        $"Request from {channel.RemoteEndpoint}.\n{SerializeHttpRequest(request)}");
+                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(request)}");
 
                 foreach (var checker in ServiceHandlers.Keys)
                 {
                     if (checker.Invoke(request))
                     {
-                        await ServiceHandlers[checker].Invoke(channel, request, stopWatch).ConfigureAwait(false);
+                        await ServiceHandlers[checker].Invoke(context, stopWatch).ConfigureAwait(false);
                         return;
                     }
                 }
@@ -268,24 +294,23 @@ namespace ITCC.HTTP.Server
                 var requestProcessorSelectionResult = SelectRequestProcessor(request);
                 if (requestProcessorSelectionResult == null)
                 {
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
+                    await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
+                    OnResponseReady(context, stopWatch);
                     return;
                 }
 
                 if (requestProcessorSelectionResult.IsRedirect)
                 {
                     var redirectLocation = $"{_serverAddress}{requestProcessorSelectionResult.RequestProcessor.SubUri}";
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.Found, null,
-                        new Dictionary<string, string> { { "Location", redirectLocation } });
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
+                    context.Response.Redirect(redirectLocation);
+                    OnResponseReady(context, stopWatch);
                     return;
                 }
 
                 if (!requestProcessorSelectionResult.MethodMatches)
                 {
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
-                    OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
+                    await ResponseFactory.BuildResponse(response, HttpStatusCode.MethodNotAllowed, null);
+                    OnResponseReady(context, stopWatch);
                     return;
                 }
 
@@ -309,104 +334,60 @@ namespace ITCC.HTTP.Server
                         if (requestProcessor.Handler == null)
                         {
                             LogMessage(LogLevel.Debug,
-                                $"{request.HttpMethod} {request.Uri.LocalPath} was requested, but no handler is provided");
-                            response = ResponseFactory.CreateResponse(HttpStatusCode.NotImplemented, null);
+                                $"{request.HttpMethod} {request.Url.LocalPath} was requested, but no handler is provided");
+                            await ResponseFactory.BuildResponse(response, HttpStatusCode.NotImplemented, null);
                         }
                         else
                         {
                             var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                            response = ResponseFactory.CreateResponse(handleResult, false, RequestEnablesGzip(request));
-                            if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
-                            {
-                                var savedBody = response.Body;
-                                response.Body = null;
-                                response.ContentLength = Convert.ToInt32(savedBody.Length);
-                            }
+                            await ResponseFactory.BuildResponse(response, handleResult, false, RequestEnablesGzip(request));
+                            //if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
+                            //{
+                            //    var savedBody = response.Body;
+                            //    response.Body = null;
+                            //    response.ContentLength = Convert.ToInt32(savedBody.Length);
+                            //}
                         }
                         break;
                     default:
-                        response = ResponseFactory.CreateResponse(authResult, RequestEnablesGzip(request));
+                        await ResponseFactory.BuildResponse(response, authResult, RequestEnablesGzip(request));
                         break;
                 }
-                OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), stopWatch);
+                OnResponseReady(context, stopWatch);
             }
             catch (Exception exception)
             {
-                LogMessage(LogLevel.Warning, $"Error handling client request from {channel.RemoteEndpoint}");
+                LogMessage(LogLevel.Warning, $"Error handling client request from {request.RemoteEndPoint}");
                 LogException(LogLevel.Warning, exception);
-                OnResponseReady(channel,
-                    ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null),
-                    "/" + request.Uri.LocalPath.Trim('/'),
-                    stopWatch);
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
+                OnResponseReady(context, stopWatch);
             }
         }
 
-        private static void OnClientConnected(object sender, ClientConnectedEventArgs clientConnectedEventArgs)
-        {
-            var sslDescription = string.Empty;
-            if (Protocol == Protocol.Https)
-            {
-                var secureChannel = clientConnectedEventArgs.Channel as SecureTcpChannel;
-                if (secureChannel != null)
-                {
-                    var protocol = secureChannel.SslProtocol;
-                    sslDescription = $"; SSL version={protocol}";
-                    if (StatisticsEnabled)
-                        _statistics.AddSslProtocol(protocol);
-                }
-            }
-            else
-            {
-                if (StatisticsEnabled)
-                    _statistics.AddSslProtocol(SslProtocols.None);
-            }
-            clientConnectedEventArgs.Channel.MessageSent = (channel, message) => LogMessage(LogLevel.Debug, $"Message sent for {channel.RemoteEndpoint}");
-            LogMessage(LogLevel.Debug, $"Client connected: {clientConnectedEventArgs.Channel.RemoteEndpoint}{sslDescription}");
-        }
-
-        private static void OnClientDisconnected(object sender, ClientDisconnectedEventArgs clientDisconnectedEventArgs)
-        {
-            LogMessage(LogLevel.Trace, $"Client {clientDisconnectedEventArgs.Channel.RemoteEndpoint} disconnected with status {clientDisconnectedEventArgs.Exception.Message}");
-        }
-
-        private static void OnListenerError(object sender, ErrorEventArgs errorEventArgs)
-        {
-            LogException(LogLevel.Warning, errorEventArgs.GetException());
-        }
-
-        private static void OnResponseReady(ITcpChannel channel, HttpResponse response, string uri, Stopwatch requestStopwatch)
+        private static void OnResponseReady(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             try
             {
-                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} ready.");
+                LogMessage(LogLevel.Debug, $"Response for {context.Request.RemoteEndPoint} ready.");
                 requestStopwatch.Stop();
                 var elapsedMilliseconds = requestStopwatch.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-                _statistics?.AddResponse(response, uri, elapsedMilliseconds);
+                _statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), elapsedMilliseconds);
                 if (_requestMaxServeTime > 0 && _requestMaxServeTime < elapsedMilliseconds)
                 {
-                    LogMessage(LogLevel.Warning, $"Request /{uri} from {channel.RemoteEndpoint} took {elapsedMilliseconds} milliseconds to process!");
+                    LogMessage(LogLevel.Warning, $"Request /{GetNormalizedRequestUri(context)} from {context.Request.RemoteEndPoint} took {elapsedMilliseconds} milliseconds to process!");
                 }
-                channel.Send(response);
-                LogMessage(LogLevel.Debug, $"Response for {channel.RemoteEndpoint} queued ({elapsedMilliseconds} milliseconds)");
+                context.Response.Close();
+                LogMessage(LogLevel.Debug, $"Response for {context.Request.RemoteEndPoint} queued ({elapsedMilliseconds} milliseconds)");
             }
-            catch (SocketException)
+            catch (HttpListenerException)
             {
-                LogMessage(LogLevel.Info, "Sudden client disconnect, failed to send response");
+                LogMessage(LogLevel.Debug, "Sudden client disconnect, failed to send response");
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Warning, ex);
-                try
-                {
-                    channel.Close();
-                }
-                catch (Exception)
-                {
-                    // ignore
-                }
             }
         }
-
 
         private static double _requestMaxServeTime;
         #endregion
@@ -429,30 +410,31 @@ namespace ITCC.HTTP.Server
 
         #region auth
 
-        private static bool IsLoginRequest(HttpRequest request)
+        private static bool IsLoginRequest(HttpListenerRequest request)
         {
             if (request == null || _authentificator == null)
             {
                 return false;
             }
-            if (request.Uri.LocalPath.Trim('/').StartsWith("login"))
+            if (request.Url.LocalPath.Trim('/').StartsWith("login"))
             {
                 return true;
             }
             return request.QueryString["login"] != null && request.QueryString["password"] != null;
         }
 
-        private static async Task Authentificate(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static async Task Authentificate(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             AuthentificationResult authResult;
+            var request = context.Request;
             if (_authentificator != null)
                 authResult = await _authentificator.Invoke(request);
             else
                 authResult = new AuthentificationResult(null, HttpStatusCode.NotFound);
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
-            var response = ResponseFactory.CreateResponse(authResult, RequestEnablesGzip(request));
-            OnResponseReady(channel, response, "/login", requestStopwatch);
+            await ResponseFactory.BuildResponse(context.Response, authResult, RequestEnablesGzip(request));
+            OnResponseReady(context, requestStopwatch);
         }
 
         private static Delegates.Authentificator _authentificator;
@@ -462,7 +444,7 @@ namespace ITCC.HTTP.Server
         #endregion
 
         #region ping
-        private static bool IsPingRequest(HttpRequest request)
+        private static bool IsPingRequest(HttpListenerRequest request)
         {
             if (request == null)
             {
@@ -472,17 +454,20 @@ namespace ITCC.HTTP.Server
             {
                 return true;
             }
-            return request.Uri.LocalPath.Trim('/') == "ping";
+            return request.Url.LocalPath.Trim('/') == "ping";
         }
 
-        private static Task HandlePing(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static async Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(request.ToString()), Formatting.None, converter);
-            responseBody = responseBody.Replace(@"\", "");
-            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(request));
-            OnResponseReady(channel, response, "/ping", requestStopwatch);
-            return Task.CompletedTask;
+            string requestContent;
+            using (var streamReader = new StreamReader(context.Request.InputStream))
+            {
+                requestContent = await streamReader.ReadToEndAsync();
+            }
+            var responseBody = JsonConvert.SerializeObject(new PingResponse(requestContent), Formatting.None, converter);
+            await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
+            OnResponseReady(context, requestStopwatch);
         }
 
         #endregion
@@ -495,45 +480,45 @@ namespace ITCC.HTTP.Server
 
         private static Delegates.StatisticsAuthorizer _statisticsAuthorizer;
 
-        private static bool IsStatisticsRequest(HttpRequest request)
+        private static bool IsStatisticsRequest(HttpListenerRequest request)
         {
             if (request == null)
             {
                 return false;
             }
-            return request.Uri.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
+            return request.Url.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
         }
 
-        private static async Task HandleStatistics(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static async Task HandleStatistics(HttpListenerContext context, Stopwatch requestStopwatch)
         {
-            HttpResponse response;
+            var response = context.Response;
             if (_statisticsAuthorizer != null)
             {
-                if (await _statisticsAuthorizer.Invoke(request))
+                if (await _statisticsAuthorizer.Invoke(context.Request))
                 {
                     var responseBody = _statistics?.Serialize();
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true);
+                    await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true);
                     response.ContentType = "text/plain";
                 }
                 else
                 {
-                    response = ResponseFactory.CreateResponse(HttpStatusCode.Forbidden, null);
+                    await ResponseFactory.BuildResponse(response, HttpStatusCode.Forbidden, null);
                 }
             }
             else
             {
                 var responseBody = _statistics?.Serialize();
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(request));
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
                 response.ContentType = "text/plain";
             }
 
-            OnResponseReady(channel, response, "/statistics", requestStopwatch);
+            OnResponseReady(context, requestStopwatch);
         }
         #endregion
 
         #region options
 
-        private static bool IsOptionsRequest(HttpRequest request)
+        private static bool IsOptionsRequest(HttpListenerRequest request)
         {
             if (request == null)
             {
@@ -542,14 +527,15 @@ namespace ITCC.HTTP.Server
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        private static Task HandleOptions(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static async  Task HandleOptions(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var allowValues = new List<string>();
+            var request = context.Request;
             if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
             {
                 foreach (var requestProcessor in InnerRequestProcessors)
                 {
-                    if (request.Uri.LocalPath.Trim('/') == requestProcessor.SubUri)
+                    if (request.Url.LocalPath.Trim('/') == requestProcessor.SubUri)
                     {
                         allowValues.Add(requestProcessor.Method.Method);
                         if (requestProcessor.Method == HttpMethod.Get)
@@ -564,38 +550,36 @@ namespace ITCC.HTTP.Server
             }
 
 
-            HttpResponse response;
             if (allowValues.Any())
             {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
-                response.AddHeader("Allow", string.Join(", ", allowValues));
+                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
+                context.Response.AddHeader("Allow", string.Join(", ", allowValues));
             }
             else
             {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
+                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
             }
 
-            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
-            return Task.CompletedTask;
+            OnResponseReady(context, requestStopwatch);
         }
 
         #endregion
 
         #region favicon
 
-        private static bool IsFaviconRequest(HttpRequest request)
+        private static bool IsFaviconRequest(HttpListenerRequest request)
         {
             if (request == null)
             {
                 return false;
             }
-            return request.Uri.LocalPath.Trim('/').ToLower() == "favicon.ico";
+            return request.Url.LocalPath.Trim('/').ToLower() == "favicon.ico";
         }
 
-        private static Task HandleFavicon(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static Task HandleFavicon(HttpListenerContext context, Stopwatch requestStopwatch)
         {
-            var response = FileRequestController<TAccount>.HandleFavicon(request);
-            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
+            var response = FileRequestController<TAccount>.HandleFavicon(context);
+            OnResponseReady(context, requestStopwatch);
             return Task.CompletedTask;
         }
         #endregion
@@ -612,19 +596,19 @@ namespace ITCC.HTTP.Server
 
         public static List<FileSection> FileSections => FileRequestController<TAccount>.FileSections;
 
-        private static bool IsFilesRequest(HttpRequest request)
+        private static bool IsFilesRequest(HttpListenerRequest request)
         {
             if (request == null || !FilesEnabled)
             {
                 return false;
             }
-            return request.Uri.LocalPath.Trim('/').StartsWith(FilesBaseUri);
+            return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-        private static async Task HandleFileRequest(ITcpChannel channel, HttpRequest request, Stopwatch requestStopwatch)
+        private static async Task HandleFileRequest(HttpListenerContext context, Stopwatch requestStopwatch)
         {
-            var response = await FileRequestController<TAccount>.HandleFileRequest(request);
-            OnResponseReady(channel, response, "/" + request.Uri.LocalPath.Trim('/'), requestStopwatch);
+            await FileRequestController<TAccount>.HandleFileRequest(context);
+            OnResponseReady(context, requestStopwatch);
         }
 
         #endregion
@@ -708,10 +692,10 @@ namespace ITCC.HTTP.Server
             return new Tuple<string, string, bool>(fromUri.Trim('/'), toUri.Trim('/'), true);
         }
 
-        private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpRequest request)
+        private static RequestProcessorSelectionResult<TAccount> SelectRequestProcessor(HttpListenerRequest request)
         {
             var requestMethod = CommonHelper.HttpMethodToEnum(request.HttpMethod);
-            var localUri = request.Uri.LocalPath.Trim('/');
+            var localUri = request.Url.LocalPath.Trim('/');
             if (requestMethod == HttpMethod.Get || requestMethod == HttpMethod.Head)
             {
                 string redirectionTarget;
@@ -744,49 +728,47 @@ namespace ITCC.HTTP.Server
             };
         }
 
-        private static bool RequestEnablesGzip(IHttpMessage request)
+        private static bool RequestEnablesGzip(HttpListenerRequest request)
         {
             if (!_autoGzipCompression)
                 return false;
             if (request == null)
                 return false;
-            if (!request.Headers.Contains("Accept-Encoding"))
+            if (!request.Headers.AllKeys.Contains("Accept-Encoding"))
                 return false;
             var parts = request.Headers["Accept-Encoding"].Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
             return parts.Any(p => p == "gzip");
         }
 
-        private static string SerializeHttpRequest(HttpRequest request)
+        private static string SerializeHttpRequest(HttpListenerRequest request)
         {
             if (request == null)
                 return null;
 
             var builder = new StringBuilder();
-            builder.AppendLine($"{PreprocessStatusLine(request.StatusLine)}");
+            var queryString = PreprocessStatusLine(string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={request.QueryString[k]}")));
+            builder.AppendLine($"{request.HttpMethod} {request.Url.LocalPath} HTTP/{request.ProtocolVersion}?{queryString}");
 
-            foreach (var header in request.Headers)
+            foreach (var key in request.Headers.AllKeys)
             {
-                if (ResponseFactory.LogProhibitedHeaders.Contains(header.Key))
-                    builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
+                if (ResponseFactory.LogProhibitedHeaders.Contains(key))
+                    builder.AppendLine($"{key}: {Constants.RemovedLogString}");
                 else
-                    builder.AppendLine($"{header.Key}: {header.Value}");
+                    builder.AppendLine($"{key}: {request.Headers[key]}");
             }
 #if TRACE
-            if (request.Body == null)
+            if (! request.HasEntityBody)
                 return builder.ToString();
 
             if (!IsFilesRequest(request))
             {
-                using (var reader = new StreamReader(request.Body, _requestEncoding, true, 4096, true))
+                using (var reader = new StreamReader(request.InputStream, _requestEncoding, true, 4096, true))
                 {
                     var bodyString = reader.ReadToEnd();
-                    foreach (var replacePattern in ResponseFactory.LogBodyReplacePatterns)
-                    {
-                        bodyString = Regex.Replace(bodyString, replacePattern.Item1, replacePattern.Item2);
-                    }
+                    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
                     builder.AppendLine(bodyString);
                 }
-                request.Body.Position = 0;
+                request.InputStream.Position = 0;
             }
             else
             {

@@ -89,10 +89,6 @@
     <Compile Include="Utils\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Griffin.Framework\src\Griffin.Framework\Griffin.Core\Griffin.Core.csproj">
-      <Project>{744709d5-d4d5-4551-9ebd-cbd7bdf58f5f}</Project>
-      <Name>Griffin.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.csproj">
       <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging</Name>

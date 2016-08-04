@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
 
@@ -17,7 +17,7 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public override RequestRange Range { get; protected set; }
 
-        public override bool BuildRequest(string fileName, HttpRequest request)
+        public override bool BuildRequest(string fileName, HttpListenerRequest request)
         {
             FileName = fileName;
 
@@ -36,16 +36,20 @@ namespace ITCC.HTTP.Server.Files.Requests
             return true;
         }
 
-        public override async Task<HttpResponse> BuildResponse()
+        public override async Task BuildResponse(HttpListenerContext context)
         {
             if (Diagonal == null && Width == null && Height == null)
-                return await base.BuildResponse();
+            {
+                await base.BuildResponse(context);
+                return;
+            }
 
             var availableFiles = IoHelper.LoadAllChanged(FileName);
             if (availableFiles == null || availableFiles.Count == 0)
             {
                 LogMessage(LogLevel.Debug, $"No preprocessed images found for {FileName}");
-                return await base.BuildResponse();
+                await base.BuildResponse(context);
+                return;
             }
 
             var resolutionDict = new Dictionary<Tuple<int, int>, string>();
@@ -59,7 +63,8 @@ namespace ITCC.HTTP.Server.Files.Requests
             if (!resolutionDict.Any())
             {
                 LogMessage(LogLevel.Debug, $"No additional resolutions found for image {FileName}");
-                return await base.BuildResponse();
+                await base.BuildResponse(context);
+                return;
             }
 
             double requestedDiagonal;
@@ -84,7 +89,7 @@ namespace ITCC.HTTP.Server.Files.Requests
                 }
             }
             LogMessage(LogLevel.Debug, $"Returning content of {fileName}");
-            return BuildRangeResponse(fileName);
+            await BuildRangeResponse(context, fileName);
         }
 
         #endregion

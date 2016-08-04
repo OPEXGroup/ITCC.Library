@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
-using ITCC.HTTP.Security;
-using ITCC.Logging;
-using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Client
 {

@@ -39,10 +39,11 @@ namespace ITCC.Library.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "https://localhost:8888";
+            StaticClient.ServerAddress = "http://localhost:8888";
             StaticClient.AllowUntrustedServerCertificates();
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
+            StaticClient.AllowGzipEncoding = true;
 
             await StaticClient.GetRawAsync("token", new Dictionary<string, string>
             {
@@ -51,7 +52,8 @@ namespace ITCC.Library.Testing
             },
             new Dictionary<string, string>
             {
-                {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd" }
+                {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd" },
+                {"Accept-Encoding", "gzip" }
             });
 
             Console.ReadLine();
@@ -74,19 +76,19 @@ namespace ITCC.Library.Testing
                 BodyEncoding = Encoding.UTF8,
                 BodySerializer = JsonConvert.SerializeObject,
                 Port = 8888,
-                Protocol = Protocol.Https,
+                Protocol = Protocol.Http,
                 AllowSelfSignedCertificates = true,
                 CertificateProvider = CertificateController.GetCertificate,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
-                    new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3")
+                    new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
                 },
                 LogProhibitedHeaders = new List<string> { "Authorization"},
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
                 AutoGzipCompression = true,
-                FilesEnabled = true,
+                FilesEnabled = false,
                 FilesNeedAuthorization = false,
                 FilesBaseUri = "files",
                 FileSections = new List<FileSection>

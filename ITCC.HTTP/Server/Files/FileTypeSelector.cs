@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ITCC.HTTP.Enums;
-using ITCC.HTTP.Utils;
 
 namespace ITCC.HTTP.Server.Files
 {

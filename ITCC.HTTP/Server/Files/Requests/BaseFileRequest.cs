@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
 
@@ -19,33 +18,35 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public abstract RequestRange Range { get; protected set; }
 
-        public abstract bool BuildRequest(string fileName, HttpRequest request);
+        public abstract bool BuildRequest(string fileName, HttpListenerRequest request);
 
-        public virtual Task<HttpResponse> BuildResponse()
+        public virtual async Task BuildResponse(HttpListenerContext context)
         {
-            return Task.FromResult(BuildRangeResponse(FileName));
+            await BuildRangeResponse(context, FileName);
         }
         #endregion
 
         #region protected
 
-        protected HttpResponse BuildRangeResponse(string fileName)
+        protected async Task BuildRangeResponse(HttpListenerContext context, string fileName)
         {
-            HttpResponse response;
+            var response = context.Response;
             if (!File.Exists(fileName))
             {
                 LogMessage(LogLevel.Debug, $"File {fileName} was requested but not found");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                return;
             }
             if (Range == null)
             {
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-                var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
-                    FileShare.ReadWrite);
-                response.Body = fileStream;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
+                using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite))
+                {
+                    await fileStream.CopyToAsync(response.OutputStream);
+                }
                 response.ContentType = DetermineContentType(fileName);
-                return response;
+                return;
             }
             var fileInfo = new FileInfo(fileName);
             long startPosition = 0;
@@ -57,12 +58,12 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < -rangeEnd)
                     {
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                         await ResponseFactory.BuildResponse(response, HttpStatusCode.RequestedRangeNotSatisfiable, null,
                             new Dictionary<string, string>
                             {
                                 {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
                             });
-                        return response;
+                        return;
                     }
                     startPosition = fileInfo.Length + rangeEnd;
                     endPosition = fileInfo.Length - 1;
@@ -71,12 +72,12 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < rangeEnd)
                     {
-                        response = ResponseFactory.CreateResponse(HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                        await ResponseFactory.BuildResponse(response, HttpStatusCode.RequestedRangeNotSatisfiable, null,
                             new Dictionary<string, string>
                             {
                                 {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
                             });
-                        return response;
+                        return;
                     }
                     endPosition = rangeEnd;
                 }
@@ -96,12 +97,11 @@ namespace ITCC.HTTP.Server.Files.Requests
                     buffer = reader.ReadBytes((int)length);
                 }
             }
-            response = ResponseFactory.CreateResponse(HttpStatusCode.PartialContent, null);
+            await ResponseFactory.BuildResponse(response, HttpStatusCode.PartialContent, null);
             response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
-            response.Body = new MemoryStream(buffer);
+            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
 
             response.ContentType = DetermineContentType(fileName);
-            return response;
         }
 
         /// <summary>
@@ -109,9 +109,9 @@ namespace ITCC.HTTP.Server.Files.Requests
         /// </summary>
         /// <param name="request">Request to parse</param>
         /// <returns>False if 400 response is required</returns>
-        protected bool ParseRange(HttpRequest request)
+        protected bool ParseRange(HttpListenerRequest request)
         {
-            if (!request.Headers.Contains("Range"))
+            if (!request.Headers.AllKeys.Contains("Range"))
             {
                 return true;
             }
@@ -161,7 +161,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             return true;
         }
 
-        protected bool ParseIntParam(HttpRequest request, string paramName, Action<int> callbackAction)
+        protected bool ParseIntParam(HttpListenerRequest request, string paramName, Action<int> callbackAction)
         {
             if (request.QueryString[paramName] == null)
                 return true;

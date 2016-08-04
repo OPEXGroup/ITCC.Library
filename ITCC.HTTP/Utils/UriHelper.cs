@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Utils
 {

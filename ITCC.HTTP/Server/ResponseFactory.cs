@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using Griffin.Net.Protocols.Http;
+using System.Threading.Tasks;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;
@@ -86,15 +85,15 @@ namespace ITCC.HTTP.Server
             _bodyEncoding = encoding;
         }
 
-        public static HttpResponse CreateResponse(AuthentificationResult authentificationResult, bool gzipResponse = false)
+        public static async Task BuildResponse(HttpListenerResponse httpResponse, AuthentificationResult authentificationResult, bool gzipResponse = false)
         {
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            return CreateResponse(authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
+            await BuildResponse(httpResponse, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
         }
 
-        public static HttpResponse CreateResponse<TAccount>(AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
+        public static async Task BuildResponse<TAccount>(HttpListenerResponse httpResponse, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
             where TAccount : class
         {
             if (authorizationResult == null)
@@ -104,23 +103,26 @@ namespace ITCC.HTTP.Server
                 ? AuthResultDictionary[authorizationResult.Status]
                 : HttpStatusCode.InternalServerError;
 
-            return CreateResponse(httpStatusCode,
+            await BuildResponse(httpResponse,
+                httpStatusCode,
                 (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
                 authorizationResult.AdditionalHeaders,
                 gzipResponse);
         }
 
-        public static HttpResponse CreateResponse(HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static async Task BuildResponse(HttpListenerResponse httpResponse, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             if (handlerResult == null)
                 throw new ArgumentNullException(nameof(handlerResult));
 
-            return CreateResponse(handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
+            await BuildResponse(httpResponse, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
         }
 
-        public static HttpResponse CreateResponse(HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static async Task BuildResponse(HttpListenerResponse httpResponse, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
         {
-            var httpResponse = new HttpResponse(code, SelectReasonPhrase(code), "HTTP/1.1");
+            httpResponse.StatusCode = (int)code;
+            httpResponse.StatusDescription = SelectReasonPhrase(code);
+
             if (_commonHeaders != null)
             {
                 foreach (var header in _commonHeaders)
@@ -141,7 +143,7 @@ namespace ITCC.HTTP.Server
             {
                 if (Logger.Level >= LogLevel.Trace)
                     Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
-                return httpResponse;
+                return;
             }
             
 
@@ -158,27 +160,24 @@ namespace ITCC.HTTP.Server
             {
                 using (var uncompressedStream = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty)))
                 {
-                    httpResponse.Body = new MemoryStream(512);
-                    using (var gzipStream = new GZipStream(httpResponse.Body, CompressionMode.Compress, true))
+                    using (var gzipStream = new GZipStream(httpResponse.OutputStream, CompressionMode.Compress, true))
                     {
-                        uncompressedStream.CopyTo(gzipStream);
+                        await uncompressedStream.CopyToAsync(gzipStream);
                     }
-                    httpResponse.Body.Position = 0;
-                    httpResponse.ContentLength = (int)httpResponse.Body.Length;
                 }
                 httpResponse.AddHeader("Content-Encoding", "gzip");
             }
             else
             {
-                httpResponse.Body = new MemoryStream(encoding.GetBytes(bodyString ?? string.Empty));
+                var bodyBuffer = encoding.GetBytes(bodyString ?? string.Empty);
+                await httpResponse.OutputStream.WriteAsync(bodyBuffer, 0, bodyBuffer.Length);
             }
 
-            httpResponse.ContentType = "application/json";
-            httpResponse.ContentCharset = encoding;
+            httpResponse.ContentType = "application/json; charset=utf-8";
+            // httpResponse.ContentLength64 = httpResponse.OutputStream.Length;
 
             if (Logger.Level >= LogLevel.Trace)
                 Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
-            return httpResponse;
         }
 
         /// <summary>
@@ -187,29 +186,29 @@ namespace ITCC.HTTP.Server
         /// <param name="response">Response</param>
         /// <param name="bodyString">Body string. we do not use response.Body because of gzip encoding</param>
         /// <returns>String representation</returns>
-        public static string SerializeResponse(HttpResponse response, string bodyString)
+        public static string SerializeResponse(HttpListenerResponse response, string bodyString)
         {
             if (response == null)
                 return string.Empty;
 
             var builder = new StringBuilder();
-            builder.AppendLine($"{response.StatusLine}");
-            foreach (var header in response.Headers)
+            builder.AppendLine($"HTTP/{response.ProtocolVersion} {response.StatusCode} {response.StatusDescription}");
+            foreach (var key in response.Headers.AllKeys)
             {
-                if (LogProhibitedHeaders.Contains(header.Key))
-                    builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
-                builder.AppendLine($"{header.Key}: {header.Value}");
+                if (LogProhibitedHeaders.Contains(key))
+                    builder.AppendLine($"{key}: {Constants.RemovedLogString}");
+                builder.AppendLine($"{key}: {response.Headers[key]}");
             }
-            if (response.Body == null)
+            if (response.OutputStream == null)
                 return builder.ToString();
 
             builder.AppendLine();
             if (!LogResponseBodies)
                 return builder.ToString();
 
-            if (response.Body is FileStream)
+            if (response.OutputStream is FileStream)
             {
-                builder.AppendLine($"<File {((FileStream)response.Body).Name} content>");
+                builder.AppendLine($"<File {((FileStream)response.OutputStream).Name} content>");
             }
             else
             {

@@ -6,8 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Timers;
-using Griffin.Net.Channels;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server.Files.Preprocess;
@@ -80,18 +78,23 @@ namespace ITCC.HTTP.Server.Files
         #endregion
 
         #region requests
-        public static async Task<HttpResponse> HandleFileRequest(HttpRequest request)
+        public static async Task HandleFileRequest(HttpListenerContext context)
         {
-            if (! _started)
-                return ResponseFactory.CreateResponse(HttpStatusCode.NotImplemented, null);
+            if (!_started)
+            {
+                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotImplemented, null);
+                return;
+            }
 
+            var request = context.Request;
             try
             {
-                var filename = ExtractFileName(request.Uri.LocalPath);
-                var section = ExtractFileSection(request.Uri.LocalPath);
+                var filename = ExtractFileName(request.Url.LocalPath);
+                var section = ExtractFileSection(request.Url.LocalPath);
                 if (filename == null || section == null || filename.Contains("_CHANGED_"))
                 {
-                    return ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
+                    await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.BadRequest, null);
+                    return;
                 }
                 var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
 
@@ -111,79 +114,86 @@ namespace ITCC.HTTP.Server.Files
                     case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
                         {
-                            return await HandleFileGetRequest(request, filePath);
+                            await HandleFileGetRequest(context, filePath);
+                            return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
-                            return await HandleFilePostRequest(request, section, filePath).ConfigureAwait(false);
+                            await HandleFilePostRequest(context, section, filePath).ConfigureAwait(false);
+                            return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
                         {
-                            return HandleFileDeleteRequest(filePath);
+                            await HandleFileDeleteRequest(context, filePath);
+                            return;
                         }
-                        return ResponseFactory.CreateResponse(HttpStatusCode.MethodNotAllowed, null);
+                        await ResponseFactory.BuildResponse(context.Response,  HttpStatusCode.MethodNotAllowed, null);
+                        return;
                     default:
-                        return ResponseFactory.CreateResponse(authResult);
+                        await ResponseFactory.BuildResponse(context.Response, authResult);
+                        return;
                 }
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Warning, exception);
-                return ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
+                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.InternalServerError, null);
             }
         }
 
-        public static HttpResponse HandleFavicon(HttpRequest request)
+        public static async Task HandleFavicon(HttpListenerContext context)
         {
+            var response = context.Response;
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {FaviconPath}");
             if (string.IsNullOrEmpty(FaviconPath) || !File.Exists(FaviconPath))
             {
-                return ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                return;
             }
-            var response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
-            var fileStream = new FileStream(FaviconPath, FileMode.Open, FileAccess.Read,
-                FileShare.ReadWrite);
+            await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
             response.ContentType = "image/x-icon";
-            response.Body = fileStream;
-
-            return response;
+            using (var fileStream = new FileStream(FaviconPath, FileMode.Open, FileAccess.Read,
+                FileShare.ReadWrite))
+            {
+                await fileStream.CopyToAsync(response.OutputStream);
+            }
         }
 
-        private static async Task<HttpResponse> HandleFileGetRequest(HttpRequest request, string filePath)
+        private static async Task HandleFileGetRequest(HttpListenerContext context, string filePath)
         {
-            HttpResponse response;
+            var response = context.Response;
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} was requested but is in progress");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.ServiceUnavailable, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.ServiceUnavailable, null);
+                return;
             }
 
-            var fileRequest = FileRequestFactory.BuildRequest(filePath, request);
+            var fileRequest = FileRequestFactory.BuildRequest(filePath, context.Request);
             if (fileRequest == null) 
             {
                 LogMessage(LogLevel.Debug, $"Failed to build file request for {filePath}");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.BadRequest, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.BadRequest, null);
+                return;
             }
-            return await fileRequest.BuildResponse();
+            await fileRequest.BuildResponse(context);
         }
 
-        private static async Task<HttpResponse> HandleFilePostRequest(HttpRequest request, FileSection section, string filePath)
+        private static async Task HandleFilePostRequest(HttpListenerContext context, FileSection section, string filePath)
         {
-            HttpResponse response;
+            var response = context.Response;
             if (File.Exists(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} already exists");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.Conflict, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.Conflict, null);
+                return;
             }
-            var fileContent = request.Body;
+            var fileContent = context.Request.InputStream;
             if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
             {
                 LogMessage(LogLevel.Debug, $"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.RequestEntityTooLarge, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.RequestEntityTooLarge, null);
+                return;
             }
             using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
@@ -200,22 +210,20 @@ namespace ITCC.HTTP.Server.Files
             if (FilesPreprocessingEnabled)
             {
                 var code = FilePreprocessController.EnqueueFile(filePath) ? HttpStatusCode.Accepted : HttpStatusCode.Created;
-                response = ResponseFactory.CreateResponse(code, null);
+                await ResponseFactory.BuildResponse(context.Response, code, null);
             }
             else
-                response = ResponseFactory.CreateResponse(HttpStatusCode.Created, null);
-
-            return response;
+                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.Created, null);
         }
 
-        private static HttpResponse HandleFileDeleteRequest(string filePath)
+        private static async Task HandleFileDeleteRequest(HttpListenerContext context, string filePath)
         {
-            HttpResponse response;
+            var response = context.Response;
             if (!File.Exists(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
-                response = ResponseFactory.CreateResponse(HttpStatusCode.NotFound, null);
-                return response;
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                return;
             }
 
             var compressed = IoHelper.LoadAllChanged(filePath);
@@ -224,14 +232,13 @@ namespace ITCC.HTTP.Server.Files
             {
                 File.Delete(filePath);
                 compressed.ForEach(File.Delete);
-                response = ResponseFactory.CreateResponse(HttpStatusCode.OK, null);
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Warning, ex);
-                response = ResponseFactory.CreateResponse(HttpStatusCode.InternalServerError, null);
+                await ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
             }
-            return response;
         }
 
         private static string ExtractFileName(string localPath)

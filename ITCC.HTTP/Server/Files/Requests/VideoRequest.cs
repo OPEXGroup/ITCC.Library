@@ -1,4 +1,4 @@
-﻿using Griffin.Net.Protocols.Http;
+﻿using System.Net;
 using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server.Files.Requests
@@ -12,7 +12,7 @@ namespace ITCC.HTTP.Server.Files.Requests
 
         public override RequestRange Range { get; protected set; }
 
-        public override bool BuildRequest(string fileName, HttpRequest request)
+        public override bool BuildRequest(string fileName, HttpListenerRequest request)
         {
             FileName = fileName;
 

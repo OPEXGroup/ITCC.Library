@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using Griffin.Net.Channels;
-using Griffin.Net.Protocols.Http;
 using ITCC.HTTP.Server;
 
 namespace ITCC.HTTP.Common
@@ -25,7 +24,7 @@ namespace ITCC.HTTP.Common
         /// </summary>
         /// <param name="request">Login request</param>
         /// <returns>Authentification task</returns>
-        public delegate Task<AuthentificationResult> Authentificator(HttpRequest request);
+        public delegate Task<AuthentificationResult> Authentificator(HttpListenerRequest request);
 
         /// <summary>
         ///     Kind of authorization procedure
@@ -34,7 +33,7 @@ namespace ITCC.HTTP.Common
         /// <param name="requestProcessor">Way to process request</param>
         /// <returns>Authentification status</returns>
         public delegate Task<AuthorizationResult<TAccount>> Authorizer<TAccount>(
-            HttpRequest request,
+            HttpListenerRequest request,
             RequestProcessor<TAccount> requestProcessor)
             where TAccount : class;
 
@@ -43,7 +42,7 @@ namespace ITCC.HTTP.Common
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public delegate Task<bool> StatisticsAuthorizer(HttpRequest request);
+        public delegate Task<bool> StatisticsAuthorizer(HttpListenerRequest request);
 
         /// <summary>
         ///     Kind of authorization procedure
@@ -52,7 +51,7 @@ namespace ITCC.HTTP.Common
         /// <param name="filename">Requested filename</param>
         /// <returns>Authentification status</returns>
         public delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
-            HttpRequest request,
+            HttpListenerRequest request,
             FileSection section,
             string filename)
             where TAccount : class;
@@ -86,21 +85,20 @@ namespace ITCC.HTTP.Common
         /// <param name="account">Server account</param>
         /// <param name="request">Received HTTP(S) request</param>
         /// <returns></returns>
-        public delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpRequest request);
+        public delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpListenerRequest request);
 
         /// <summary>
         ///     Used to find service requests, independent from user-registered handlers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        internal delegate bool ServiceRequestChecker(HttpRequest request);
+        internal delegate bool ServiceRequestChecker(HttpListenerRequest request);
 
         /// <summary>
         ///     Used to serve service requests, independent from user-registered handlers
         /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="request"></param>
+        /// <param name="context"></param>
         /// <param name="requestStopWatch">For performance measuring</param>
-        internal delegate Task ServiceRequestHandler(ITcpChannel channel, HttpRequest request, Stopwatch requestStopWatch);
+        internal delegate Task ServiceRequestHandler(HttpListenerContext context, Stopwatch requestStopWatch);
     }
 }
