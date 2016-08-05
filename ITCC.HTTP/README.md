@@ -187,7 +187,6 @@ delegate Task<AuthorizationResult<TAccount>> FilesAuthorizer<TAccount>(
             FileSection section,
             string filename)
             where TAccount : class; // Метод сервера, позволяющий определить, разрешен ли данный запрос к файлам.
-delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates); // Метод сервера для получения SSL/TLS сертификата
 delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpListenerRequest request); // Обработчик клиентского запроса (после авторизации)
 /*
     Общие
@@ -250,15 +249,6 @@ CertificateError,   // Ошибка получения сертификата (�
 BadParameters,      // Ошибка в переданной конфигурации сервера
 AlreadyStarted,     // Ошибка в переданной конфигурации сервера
 UnknownError        // Прочие ошибки
-```
-
-### Security
-
-#### `static class CertificateController`
-
-Управление сертификатами сервера. Ключевой метод:
-```
-X509Certificate2 GetCertificate(string subjectName, bool allowSelfSigned)
 ```
 
 ### Server
@@ -328,10 +318,6 @@ bool IsEnough();     // Достаточна ли конфигурация дл�
 string SubjectName { get; set; }                                                  // Доменное имя сервера (главная цель - поис сертификата)
 ushort Port { get; set; }                                                         // Порт, на котором принимаем соединения
 Protocol Protocol { get; set; }                                                   // Используемый протокол
-
-Delegates.CertificateProvider CertificateProvider { get; set; }                   // Метод получения сертификата
-bool AllowSelfSignedCertificates { get; set; }                                    // Можно ли использовать самоподписанные сертификаты
-System.Security.Authentification.SslProtocols SuitableSslProtocols { get; set; }  // Разрешенные для клиентов версии SSL/TLS 
 
 bool FilesEnabled { get; set; }                                                   // Поддерживает ли сервер работу с файлами
 string FilesLocation { get; set; }                                                // Расположение файлов на сервер

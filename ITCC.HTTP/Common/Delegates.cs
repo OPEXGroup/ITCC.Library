@@ -72,14 +72,6 @@ namespace ITCC.HTTP.Common
         public delegate string BodySerializer(object data);
 
         /// <summary>
-        ///     Method type used to load server TLS certificate
-        /// </summary>
-        /// <param name="subjectName">Subject name (server address of fqdn)</param>
-        /// <param name="allowSelfSignedCertificates">If true, certificate is allowed to be generated in place</param>
-        /// <returns>Certificate instance</returns>
-        public delegate X509Certificate2 CertificateProvider(string subjectName, bool allowSelfSignedCertificates);
-
-        /// <summary>
         ///     Method type user to handle user requests on server
         /// </summary>
         /// <param name="account">Server account</param>

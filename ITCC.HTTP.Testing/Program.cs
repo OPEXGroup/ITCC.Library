@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
-using ITCC.HTTP.Security;
 using ITCC.HTTP.Server;
 using ITCC.Logging;
 using ITCC.Logging.Loggers;
@@ -122,8 +121,6 @@ namespace ITCC.HTTP.Testing
                 },
                 Port = 8888,
                 Protocol = Protocol.Https,
-                AllowSelfSignedCertificates = true,
-                CertificateProvider = CertificateController.GetCertificate,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")

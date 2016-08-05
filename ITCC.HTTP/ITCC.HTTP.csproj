@@ -54,7 +54,7 @@
     <Compile Include="Enums\ServerResponseStatus.cs" />
     <Compile Include="Enums\ServerStartStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Security\CertificateController.cs" />
+    <Compile Include="Client\CertificateController.cs" />
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
     <Compile Include="Server\BodyEncoder.cs" />
@@ -110,6 +110,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Security\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

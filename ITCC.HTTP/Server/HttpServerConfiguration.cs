@@ -23,18 +23,6 @@ namespace ITCC.HTTP.Server
         ///     Http/https
         /// </summary>
         public Protocol Protocol { get; set; }
-        /// <summary>
-        ///     Method used to find certificate. Used with https Protocol
-        /// </summary>
-        public Delegates.CertificateProvider CertificateProvider { get; set; }
-        /// <summary>
-        ///     If false, CertificateProvider cannot provide self-signed certificates
-        /// </summary>
-        public bool AllowSelfSignedCertificates { get; set; }
-        /// <summary>
-        ///     Allowed SSL protocols in case of https
-        /// </summary>
-        public SslProtocols SuitableSslProtocols { get; set; }
 
         /// <summary>
         ///     Does server support file streaming?
@@ -137,11 +125,6 @@ namespace ITCC.HTTP.Server
             if (SubjectName == null)
             {
                 LogMessage(LogLevel.Warning, "You must specify server subject");
-                return false;
-            }
-            if (Protocol == Protocol.Https && CertificateProvider == null)
-            {
-                LogMessage(LogLevel.Warning, "No certificate provider passed to Start()");
                 return false;
             }
 

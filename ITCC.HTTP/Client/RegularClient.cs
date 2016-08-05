@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
-using ITCC.HTTP.Security;
 using ITCC.HTTP.Utils;
 using ITCC.Logging;
 using Newtonsoft.Json;

@@ -65,21 +65,6 @@ namespace ITCC.HTTP.Server
             try
             {
                 Protocol = configuration.Protocol;
-                SuitableSslProtocols = configuration.SuitableSslProtocols;
-                if (configuration.Protocol == Protocol.Https)
-                {
-                    var certificate = configuration.CertificateProvider.Invoke(configuration.SubjectName,
-                        configuration.AllowSelfSignedCertificates);
-                    if (certificate == null)
-                    {
-                        LogMessage(LogLevel.Warning, "Certificate error");
-                        return ServerStartStatus.CertificateError;
-                    }
-                    
-
-                    LogMessage(LogLevel.Info,
-                        $"Server certificate {certificate.SubjectName.Decode(X500DistinguishedNameFlags.None)}");
-                }
                 _authorizer = configuration.Authorizer;
                 _authentificator = configuration.Authentificator;
 
@@ -238,8 +223,6 @@ namespace ITCC.HTTP.Server
         #region security
 
         public static Protocol Protocol { get; private set; }
-
-        public static SslProtocols SuitableSslProtocols { get; private set; }
 
         #endregion
 
