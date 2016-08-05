@@ -1,0 +1,3 @@
+makecert -n "CN=ITCCTestCA" -r -sv ITCCTestCA.pvk ITCCTestCA.cer
+makecert -sk ITCCTestSignedByCA -iv ITCCTestCA.pvk -n "CN=ITCCTestSignedByCA" -ic ITCCTestCA.cer ITCCTestSignedByCA.cer -sr localmachine -ss My
+netsh http add sslcert ipport=0.0.0.0:8888 certhash=1426b766b939d6fc8071762561ca5b0e6d9f5559 appid=77016ad7-9655-4918-832c-d26a767e29b4

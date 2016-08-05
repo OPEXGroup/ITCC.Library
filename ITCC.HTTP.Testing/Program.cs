@@ -1,4 +1,4 @@
-﻿#define STRESS_TEST
+﻿// #define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace ITCC.HTTP.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "http://localhost:8888";
+            StaticClient.ServerAddress = "https://localhost:8888";
             StaticClient.AllowUntrustedServerCertificates();
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
@@ -98,12 +98,12 @@ namespace ITCC.HTTP.Testing
 #endif
             Console.ReadLine();
             StopServer();
-            Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
+            Logger.LogEntry("MAIN", LogLevel.Trace, "Finished");
         }
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Info;
+            Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -121,7 +121,7 @@ namespace ITCC.HTTP.Testing
                     Serializer = JsonConvert.SerializeObject
                 },
                 Port = 8888,
-                Protocol = Protocol.Http,
+                Protocol = Protocol.Https,
                 AllowSelfSignedCertificates = true,
                 CertificateProvider = CertificateController.GetCertificate,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
