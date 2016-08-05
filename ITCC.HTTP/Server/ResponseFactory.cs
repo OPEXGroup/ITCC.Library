@@ -104,13 +104,24 @@ namespace ITCC.HTTP.Server
                 httpResponse.SendChunked = false;
                 httpResponse.ContentType = $"{_encoder.ContentType}; charset={_encoder.Encoding.WebName}";
                 httpResponse.AddHeader("Content-Encoding", "gzip");
-                
-                using (var uncompressedStream = new MemoryStream(_encoder.Encoding.GetBytes(bodyString ?? string.Empty)))
+
+                var memoryStream = new MemoryStream();
+                try
                 {
-                    using (var gzipStream = new GZipStream(httpResponse.OutputStream, CompressionMode.Compress, true))
+                    using (var uncompressedStream = new MemoryStream(_encoder.Encoding.GetBytes(bodyString ?? string.Empty)))
                     {
-                        await uncompressedStream.CopyToAsync(gzipStream);
+                        using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+                        {
+                            await uncompressedStream.CopyToAsync(gzipStream);
+                        }
                     }
+                    httpResponse.ContentLength64 = memoryStream.Length;
+                    await httpResponse.OutputStream.WriteAsync(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                    memoryStream.Close();
+                }
+                finally 
+                {
+                    memoryStream.Dispose();
                 }
             }
             else
