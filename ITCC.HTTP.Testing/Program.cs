@@ -48,7 +48,7 @@ namespace ITCC.Library.Testing
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
-
+#if !STRESS_TEST
             var result = await StaticClient.GetRawAsync("token",
                 new Dictionary<string, string>
                 {
@@ -60,9 +60,7 @@ namespace ITCC.Library.Testing
                     {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd"},
                     {"Accept-Encoding", "gzip"}
                 });
-
-
-#if STRESS_TEST
+#else
             const int requestsPerStep = 10000;
             const int stepCount = 100;
             const int requestCount = requestsPerStep * stepCount;
@@ -107,7 +105,7 @@ namespace ITCC.Library.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Info;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
