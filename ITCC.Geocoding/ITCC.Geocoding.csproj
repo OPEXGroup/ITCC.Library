@@ -66,6 +66,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Prebuild.ps1" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
