@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define STRESS_TEST
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -47,6 +49,7 @@ namespace ITCC.Library.Testing
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
 
+#if STRESS_TEST
             const int requestsPerStep = 10000;
             const int stepCount = 100;
             const int requestCount = requestsPerStep * stepCount;
@@ -81,10 +84,9 @@ namespace ITCC.Library.Testing
                 Logger.LogEntry("MAIN", level, $"Step {step}/{stepCount} done in {stepElapsed} ms ({stepElapsed / requestsPerStep} avg). ({stepFailed}/{requestsPerStep} failed)");
             }
             
-            
-            
             Logger.LogEntry("MAIN", LogLevel.Info, $"Done {requestCount} requests in {totalElapsed} ms ({totalElapsed / requestCount} avg). Failed: {totalFailed}");
 
+#endif
             Console.ReadLine();
             StopServer();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
@@ -92,7 +94,7 @@ namespace ITCC.Library.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Info;
+            Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
