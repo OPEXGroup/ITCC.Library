@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Library.Testing", "ITCC.Library.Testing\ITCC.Library.Testing.csproj", "{097A520A-5AB7-45A1-86BA-F094C698F5E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.HTTP.Testing", "ITCC.HTTP.Testing\ITCC.HTTP.Testing.csproj", "{097A520A-5AB7-45A1-86BA-F094C698F5E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.UI", "ITCC.UI\ITCC.UI.csproj", "{07D36841-8876-437C-B7A4-CBF1012513EB}"
 EndProject

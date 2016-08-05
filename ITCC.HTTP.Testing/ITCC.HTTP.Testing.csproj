@@ -7,8 +7,8 @@
     <ProjectGuid>{097A520A-5AB7-45A1-86BA-F094C698F5E1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.Library.Testing</RootNamespace>
-    <AssemblyName>ITCC.Library.Testing</AssemblyName>
+    <RootNamespace>ITCC.HTTP.Testing</RootNamespace>
+    <AssemblyName>ITCC.HTTP.Testing</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
