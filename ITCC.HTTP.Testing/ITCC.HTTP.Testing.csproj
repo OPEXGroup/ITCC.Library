@@ -55,6 +55,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="TLS\ITCCTestCA.cer" />
+    <None Include="TLS\ITCCTestCA.pvk" />
+    <None Include="TLS\ITCCTestSignedByCA.cer" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITCC.Geocoding\ITCC.Geocoding.csproj">
@@ -69,6 +72,9 @@
       <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
       <Name>ITCC.Logging</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TLS\certExample.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
