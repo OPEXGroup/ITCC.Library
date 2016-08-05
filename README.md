@@ -22,7 +22,7 @@
 
 ### ITCC.HTTP
 
-Работа с HTTP (клиент с сервер)
+Работа с HTTP (клиент с сервер). Настройка TLS на сервере описана [здесь](http://stackoverflow.com/questions/11403333/httplistener-with-https-support)
 
 ### ITCC.Logging
 
