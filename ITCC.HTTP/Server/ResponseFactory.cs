@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -121,7 +122,6 @@ namespace ITCC.HTTP.Server
                 await httpResponse.OutputStream.WriteAsync(bodyBuffer, 0, bodyBuffer.Length);
             }
 
-
             if (Logger.Level >= LogLevel.Trace)
                 Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
         }
@@ -154,12 +154,7 @@ namespace ITCC.HTTP.Server
             {
                 try
                 {
-                    var processedBodyString = bodyString;
-                    foreach (var prohibitedPattern in LogBodyReplacePatterns)
-                    {
-                        processedBodyString = Regex.Replace(processedBodyString, prohibitedPattern.Item1,
-                            prohibitedPattern.Item2);
-                    }
+                    var processedBodyString = LogBodyReplacePatterns.Aggregate(bodyString, (current, prohibitedPattern) => Regex.Replace(current, prohibitedPattern.Item1, prohibitedPattern.Item2));
 
                     if (ResponseBodyLogLimit < 1 || processedBodyString.Length <= ResponseBodyLogLimit)
                         builder.AppendLine(processedBodyString);
