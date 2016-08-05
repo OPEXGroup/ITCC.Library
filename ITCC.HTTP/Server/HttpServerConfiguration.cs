@@ -83,19 +83,9 @@ namespace ITCC.HTTP.Server
         public Delegates.Authorizer<TAccount> Authorizer { get; set; }
 
         /// <summary>
-        ///     Method used to serialize server responses
+        ///     Used to process response bodies. Defaults to application/json; charset=utf-8
         /// </summary>
-        public Delegates.BodySerializer BodySerializer { get; set; }
-
-        /// <summary>
-        ///     Response body encoding
-        /// </summary>
-        public Encoding BodyEncoding { get; set; } = Encoding.UTF8;
-
-        /// <summary>
-        ///     If true, all requests that contain Accept-Encoding: gzip will be served with gzipped responses
-        /// </summary>
-        public bool AutoGzipCompression { get; set; } = true;
+        public BodyEncoder BodyEncoder { get; set; } = new BodyEncoder();
 
         /// <summary>
         ///     If true, server will write response bodies into trace logs
@@ -138,11 +128,6 @@ namespace ITCC.HTTP.Server
         public string ServerName { get; set; }
 
         /// <summary>
-        ///     Amount of 64k buffers for socket data
-        /// </summary>
-        public int BufferPoolSize { get; set; } = 100;
-
-        /// <summary>
         ///     Warning will be given if request handle workes for more milliseconds. Negatime values mean infinity
         /// </summary>
         public double RequestMaxServeTime { get; set; } = -1;
@@ -160,15 +145,9 @@ namespace ITCC.HTTP.Server
                 return false;
             }
 
-            if (BodySerializer == null)
+            if (BodyEncoder == null)
             {
-                LogMessage(LogLevel.Warning, "No body serializer passed to Start()");
-                return false;
-            }
-
-            if (BodyEncoding == null)
-            {
-                LogMessage(LogLevel.Warning, "Null body encoding passed to Start()");
+                LogMessage(LogLevel.Warning, "null BodyEncoder passed to Start()");
                 return false;
             }
 

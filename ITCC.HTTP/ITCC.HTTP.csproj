@@ -57,6 +57,7 @@
     <Compile Include="Security\CertificateController.cs" />
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
+    <Compile Include="Server\BodyEncoder.cs" />
     <Compile Include="Server\FileSection.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Server\Files\Preprocess\FilePreprocessController.cs" />

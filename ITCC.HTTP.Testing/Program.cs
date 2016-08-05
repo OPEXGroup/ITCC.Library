@@ -49,6 +49,19 @@ namespace ITCC.Library.Testing
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
 
+            var result = await StaticClient.GetRawAsync("token",
+                new Dictionary<string, string>
+                {
+                    {"login", "user"},
+                    {"password", "pwd"}
+                },
+                new Dictionary<string, string>
+                {
+                    {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd"},
+                    {"Accept-Encoding", "gzip"}
+                });
+
+
 #if STRESS_TEST
             const int requestsPerStep = 10000;
             const int stepCount = 100;
@@ -104,8 +117,13 @@ namespace ITCC.Library.Testing
         {
             StaticServer<object>.Start(new HttpServerConfiguration<object>
             {
-                BodyEncoding = Encoding.UTF8,
-                BodySerializer = JsonConvert.SerializeObject,
+                BodyEncoder = new BodyEncoder
+                {
+                    AutoGzipCompression = true,
+                    ContentType = "application/json",
+                    Encoding = Encoding.UTF8,
+                    Serializer = JsonConvert.SerializeObject
+                },
                 Port = 8888,
                 Protocol = Protocol.Http,
                 AllowSelfSignedCertificates = true,
@@ -114,11 +132,10 @@ namespace ITCC.Library.Testing
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
                 },
-                LogProhibitedHeaders = new List<string> { "Authorization"},
+                LogProhibitedHeaders = new List<string> { "Authorization" },
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
-                AutoGzipCompression = false,
                 FilesEnabled = false,
                 FilesNeedAuthorization = false,
                 FilesBaseUri = "files",
@@ -174,7 +191,7 @@ namespace ITCC.Library.Testing
                 SubUri = "bigdata",
                 Handler = (account, request) =>
                 {
-                    var builder = new StringBuilder(64*1024*1024);
+                    var builder = new StringBuilder(64 * 1024 * 1024);
                     for (var i = 0; i < 1024; ++i)
                     {
                         var str = string.Empty;
@@ -191,7 +208,7 @@ namespace ITCC.Library.Testing
                 AuthorizationRequired = false,
                 Method = HttpMethod.Get,
                 SubUri = "token",
-                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}))
+                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore { Token = "Hello111" }))
             });
 
             StaticServer<object>.AddStaticRedirect("test", "delay");

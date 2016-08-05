@@ -284,6 +284,17 @@ string ErrorDescription { get; set; }                       // описание 
 IDictionary<string, string> AdditionalHeaders { get; set; } // Дополнительные заголовки ответа
 ```
 
+#### `class BodyEncoder`
+
+Класс для сериализации и кодирования тел ответов. Ключевые свойства:
+
+```
+public Encoding Encoding { get; set; } = Encoding.UTF8;                                 // Кодировка ответов
+public Delegates.BodySerializer Serializer { get; set; } = JsonConvert.SerializeObject; // Метод сериализации объектов в строки
+public string ContentType { get; set; } = "application/json";                           // Content-Type
+bool AutoGzipCompression { get; set; } = true;                                          // Используется ли клиентский заголовок Accept-Encoding: gzip
+```
+
 #### `class FileSection`
 
 Представление секции файлов на сервере. Файловые секции соответствуют локальным папкам и имеют раздельные права доступа. Ключевые свойства:
@@ -337,9 +348,7 @@ Delegates.Authentificator Authentificator { get; set; }                         
 Delegates.Authorizer<TAccount> Authorizer { get; set; }                           // Метод авторизации
 Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
-Delegates.BodySerializer BodySerializer { get; set; }                             // Метод для сериализации тел ответов
-System.Text.Encoding BodyEncoding { get; set; } = Encoding.UTF8;                  // Кодировка ответов
-bool AutoGzipCompression { get; set; } = true;                                    // Используется ли клиентский заголовок Accept-Encoding: gzip
+BodyEncoder BodyEncoder { get; set; }                                             // Способ кодирования ответов                            
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
 int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого значения. Отрицательное значение - нет ограничения

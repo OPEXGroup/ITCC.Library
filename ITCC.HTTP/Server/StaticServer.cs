@@ -88,11 +88,11 @@ namespace ITCC.HTTP.Server
                 if (configuration.LogProhibitedHeaders != null)
                     ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
 
-                ResponseFactory.SetBodySerializer(configuration.BodySerializer);
-                ResponseFactory.SetBodyEncoding(configuration.BodyEncoding);
+                ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
+                _requestEncoding = configuration.BodyEncoder.Encoding;
+                _autoGzipCompression = configuration.BodyEncoder.AutoGzipCompression;
                 ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
                 ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
-                _requestEncoding = configuration.BodyEncoding;
 
                 FilesEnabled = configuration.FilesEnabled;
                 FilesBaseUri = configuration.FilesBaseUri;
@@ -116,8 +116,6 @@ namespace ITCC.HTTP.Server
                 }
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
-
-                _autoGzipCompression = configuration.AutoGzipCompression;
 
                 if (configuration.ServerName != null)
                 {
@@ -568,11 +566,10 @@ namespace ITCC.HTTP.Server
             return request.Url.LocalPath.Trim('/').ToLower() == "favicon.ico";
         }
 
-        private static Task HandleFavicon(HttpListenerContext context, Stopwatch requestStopwatch)
+        private static async Task HandleFavicon(HttpListenerContext context, Stopwatch requestStopwatch)
         {
-            var response = FileRequestController<TAccount>.HandleFavicon(context);
+            await FileRequestController<TAccount>.HandleFavicon(context);
             OnResponseReady(context, requestStopwatch);
-            return Task.CompletedTask;
         }
         #endregion
 
@@ -784,8 +781,9 @@ namespace ITCC.HTTP.Server
         private static readonly List<RequestProcessor<TAccount>> InnerRequestProcessors =
             new List<RequestProcessor<TAccount>>();
         private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>();
-        private static bool _autoGzipCompression;
         private static Encoding _requestEncoding = Encoding.UTF8;
+        private static bool _autoGzipCompression;
+
         #endregion
     }
 }
