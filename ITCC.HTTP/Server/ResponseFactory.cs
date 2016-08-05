@@ -29,15 +29,15 @@ namespace ITCC.HTTP.Server
             _encoder = encoder;
         }
 
-        public static async Task BuildResponse(HttpListenerResponse httpResponse, AuthentificationResult authentificationResult, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerResponse httpResponse, AuthentificationResult authentificationResult, bool gzipResponse = false)
         {
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            await BuildResponse(httpResponse, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
+            BuildResponse(httpResponse, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
         }
 
-        public static async Task BuildResponse<TAccount>(HttpListenerResponse httpResponse, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
+        public static void BuildResponse<TAccount>(HttpListenerResponse httpResponse, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
             where TAccount : class
         {
             if (authorizationResult == null)
@@ -47,22 +47,22 @@ namespace ITCC.HTTP.Server
                 ? AuthResultDictionary[authorizationResult.Status]
                 : HttpStatusCode.InternalServerError;
 
-            await BuildResponse(httpResponse,
+            BuildResponse(httpResponse,
                 httpStatusCode,
                 (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
                 authorizationResult.AdditionalHeaders,
                 gzipResponse);
         }
 
-        public static async Task BuildResponse(HttpListenerResponse httpResponse, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerResponse httpResponse, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             if (handlerResult == null)
                 throw new ArgumentNullException(nameof(handlerResult));
 
-            await BuildResponse(httpResponse, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
+            BuildResponse(httpResponse, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
         }
 
-        public static async Task BuildResponse(HttpListenerResponse httpResponse, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerResponse httpResponse, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             httpResponse.StatusCode = (int)code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
@@ -112,11 +112,11 @@ namespace ITCC.HTTP.Server
                     {
                         using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
                         {
-                            await uncompressedStream.CopyToAsync(gzipStream);
+                            uncompressedStream.CopyTo(gzipStream);
                         }
                     }
                     httpResponse.ContentLength64 = memoryStream.Length;
-                    await httpResponse.OutputStream.WriteAsync(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                    httpResponse.OutputStream.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                     memoryStream.Close();
                 }
                 finally 
@@ -130,7 +130,7 @@ namespace ITCC.HTTP.Server
                 httpResponse.SendChunked = false;
                 httpResponse.ContentLength64 = bodyBuffer.Length;
                 httpResponse.ContentType = $"{_encoder.ContentType}; charset={_encoder.Encoding.WebName}";
-                await httpResponse.OutputStream.WriteAsync(bodyBuffer, 0, bodyBuffer.Length);
+                httpResponse.OutputStream.Write(bodyBuffer, 0, bodyBuffer.Length);
             }
 
             if (Logger.Level >= LogLevel.Trace)

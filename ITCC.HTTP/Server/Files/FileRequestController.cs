@@ -82,7 +82,7 @@ namespace ITCC.HTTP.Server.Files
         {
             if (!_started)
             {
-                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotImplemented, null);
+                ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotImplemented, null);
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace ITCC.HTTP.Server.Files
                 var section = ExtractFileSection(request.Url.LocalPath);
                 if (filename == null || section == null || filename.Contains("_CHANGED_"))
                 {
-                    await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.BadRequest, null);
+                    ResponseFactory.BuildResponse(context.Response, HttpStatusCode.BadRequest, null);
                     return;
                 }
                 var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
@@ -124,20 +124,20 @@ namespace ITCC.HTTP.Server.Files
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
                         {
-                            await HandleFileDeleteRequest(context, filePath);
+                            HandleFileDeleteRequest(context, filePath);
                             return;
                         }
-                        await ResponseFactory.BuildResponse(context.Response,  HttpStatusCode.MethodNotAllowed, null);
+                        ResponseFactory.BuildResponse(context.Response,  HttpStatusCode.MethodNotAllowed, null);
                         return;
                     default:
-                        await ResponseFactory.BuildResponse(context.Response, authResult);
+                        ResponseFactory.BuildResponse(context.Response, authResult);
                         return;
                 }
             }
             catch (Exception exception)
             {
                 LogException(LogLevel.Warning, exception);
-                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.InternalServerError, null);
+                ResponseFactory.BuildResponse(context.Response, HttpStatusCode.InternalServerError, null);
             }
         }
 
@@ -147,10 +147,10 @@ namespace ITCC.HTTP.Server.Files
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {FaviconPath}");
             if (string.IsNullOrEmpty(FaviconPath) || !File.Exists(FaviconPath))
             {
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
                 return;
             }
-            await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
+            ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
             response.ContentType = "image/x-icon";
             using (var fileStream = new FileStream(FaviconPath, FileMode.Open, FileAccess.Read,
                 FileShare.ReadWrite))
@@ -165,7 +165,7 @@ namespace ITCC.HTTP.Server.Files
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} was requested but is in progress");
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.ServiceUnavailable, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.ServiceUnavailable, null);
                 return;
             }
 
@@ -173,7 +173,7 @@ namespace ITCC.HTTP.Server.Files
             if (fileRequest == null) 
             {
                 LogMessage(LogLevel.Debug, $"Failed to build file request for {filePath}");
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.BadRequest, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.BadRequest, null);
                 return;
             }
             await fileRequest.BuildResponse(context);
@@ -185,14 +185,14 @@ namespace ITCC.HTTP.Server.Files
             if (File.Exists(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} already exists");
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.Conflict, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.Conflict, null);
                 return;
             }
             var fileContent = context.Request.InputStream;
             if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
             {
                 LogMessage(LogLevel.Debug, $"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.RequestEntityTooLarge, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.RequestEntityTooLarge, null);
                 return;
             }
             using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
@@ -210,19 +210,19 @@ namespace ITCC.HTTP.Server.Files
             if (FilesPreprocessingEnabled)
             {
                 var code = FilePreprocessController.EnqueueFile(filePath) ? HttpStatusCode.Accepted : HttpStatusCode.Created;
-                await ResponseFactory.BuildResponse(context.Response, code, null);
+                ResponseFactory.BuildResponse(context.Response, code, null);
             }
             else
-                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.Created, null);
+                ResponseFactory.BuildResponse(context.Response, HttpStatusCode.Created, null);
         }
 
-        private static async Task HandleFileDeleteRequest(HttpListenerContext context, string filePath)
+        private static void HandleFileDeleteRequest(HttpListenerContext context, string filePath)
         {
             var response = context.Response;
             if (!File.Exists(filePath))
             {
                 LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
                 return;
             }
 
@@ -232,12 +232,12 @@ namespace ITCC.HTTP.Server.Files
             {
                 File.Delete(filePath);
                 compressed.ForEach(File.Delete);
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Warning, ex);
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
             }
         }
 

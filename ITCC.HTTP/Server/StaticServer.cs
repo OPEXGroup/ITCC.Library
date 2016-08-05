@@ -284,7 +284,7 @@ namespace ITCC.HTTP.Server
                 var requestProcessorSelectionResult = SelectRequestProcessor(request);
                 if (requestProcessorSelectionResult == null)
                 {
-                    await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
+                    ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
                     OnResponseReady(context, stopWatch);
                     return;
                 }
@@ -299,7 +299,7 @@ namespace ITCC.HTTP.Server
 
                 if (!requestProcessorSelectionResult.MethodMatches)
                 {
-                    await ResponseFactory.BuildResponse(response, HttpStatusCode.MethodNotAllowed, null);
+                    ResponseFactory.BuildResponse(response, HttpStatusCode.MethodNotAllowed, null);
                     OnResponseReady(context, stopWatch);
                     return;
                 }
@@ -325,12 +325,12 @@ namespace ITCC.HTTP.Server
                         {
                             LogMessage(LogLevel.Debug,
                                 $"{request.HttpMethod} {request.Url.LocalPath} was requested, but no handler is provided");
-                            await ResponseFactory.BuildResponse(response, HttpStatusCode.NotImplemented, null);
+                            ResponseFactory.BuildResponse(response, HttpStatusCode.NotImplemented, null);
                         }
                         else
                         {
                             var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                            await ResponseFactory.BuildResponse(response, handleResult, false, RequestEnablesGzip(request));
+                            ResponseFactory.BuildResponse(response, handleResult, false, RequestEnablesGzip(request));
                             //if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
                             //{
                             //    var savedBody = response.Body;
@@ -340,7 +340,7 @@ namespace ITCC.HTTP.Server
                         }
                         break;
                     default:
-                        await ResponseFactory.BuildResponse(response, authResult, RequestEnablesGzip(request));
+                        ResponseFactory.BuildResponse(response, authResult, RequestEnablesGzip(request));
                         break;
                 }
                 OnResponseReady(context, stopWatch);
@@ -349,7 +349,7 @@ namespace ITCC.HTTP.Server
             {
                 LogMessage(LogLevel.Warning, $"Error handling client request from {request.RemoteEndPoint}");
                 LogException(LogLevel.Warning, exception);
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
+                ResponseFactory.BuildResponse(response, HttpStatusCode.InternalServerError, null);
                 OnResponseReady(context, stopWatch);
             }
         }
@@ -423,7 +423,7 @@ namespace ITCC.HTTP.Server
                 authResult = new AuthentificationResult(null, HttpStatusCode.NotFound);
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
-            await ResponseFactory.BuildResponse(context.Response, authResult, RequestEnablesGzip(request));
+            ResponseFactory.BuildResponse(context.Response, authResult, RequestEnablesGzip(request));
             OnResponseReady(context, requestStopwatch);
         }
 
@@ -456,7 +456,7 @@ namespace ITCC.HTTP.Server
                 requestContent = await streamReader.ReadToEndAsync();
             }
             var responseBody = JsonConvert.SerializeObject(new PingResponse(requestContent), Formatting.None, converter);
-            await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
+            ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
         }
 
@@ -487,18 +487,18 @@ namespace ITCC.HTTP.Server
                 if (await _statisticsAuthorizer.Invoke(context.Request))
                 {
                     var responseBody = _statistics?.Serialize();
-                    await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true);
+                    ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true);
                     response.ContentType = "text/plain";
                 }
                 else
                 {
-                    await ResponseFactory.BuildResponse(response, HttpStatusCode.Forbidden, null);
+                    ResponseFactory.BuildResponse(response, HttpStatusCode.Forbidden, null);
                 }
             }
             else
             {
                 var responseBody = _statistics?.Serialize();
-                await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
+                ResponseFactory.BuildResponse(response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
                 response.ContentType = "text/plain";
             }
 
@@ -517,7 +517,7 @@ namespace ITCC.HTTP.Server
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        private static async  Task HandleOptions(HttpListenerContext context, Stopwatch requestStopwatch)
+        private static Task HandleOptions(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var allowValues = new List<string>();
             var request = context.Request;
@@ -542,15 +542,16 @@ namespace ITCC.HTTP.Server
 
             if (allowValues.Any())
             {
-                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
+                ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
                 context.Response.AddHeader("Allow", string.Join(", ", allowValues));
             }
             else
             {
-                await ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
+                ResponseFactory.BuildResponse(context.Response, HttpStatusCode.NotFound, null);
             }
 
             OnResponseReady(context, requestStopwatch);
+            return Task.CompletedTask;
         }
 
         #endregion

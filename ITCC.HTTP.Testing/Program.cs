@@ -1,7 +1,9 @@
-﻿// #define STRESS_TEST
+﻿#define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -58,7 +60,7 @@ namespace ITCC.HTTP.Testing
                 });
 #else
             const int requestsPerStep = 10000;
-            const int stepCount = 100;
+            const int stepCount = 10;
             const int requestCount = requestsPerStep * stepCount;
             double totalElapsed = 0;
 
@@ -113,7 +115,7 @@ namespace ITCC.HTTP.Testing
             {
                 BodyEncoder = new BodyEncoder
                 {
-                    AutoGzipCompression = true,
+                    AutoGzipCompression = false,
                     ContentType = "application/json",
                     Encoding = Encoding.UTF8,
                     Serializer = JsonConvert.SerializeObject
