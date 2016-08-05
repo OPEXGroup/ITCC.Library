@@ -40,12 +40,13 @@ namespace ITCC.HTTP.Server.Files.Requests
             if (Range == null)
             {
                 await ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
+                response.ContentType = DetermineContentType(fileName);
+                response.ContentLength64 = new FileInfo(fileName).Length;
                 using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
                     FileShare.ReadWrite))
                 {
                     await fileStream.CopyToAsync(response.OutputStream);
                 }
-                response.ContentType = DetermineContentType(fileName);
                 return;
             }
             var fileInfo = new FileInfo(fileName);
@@ -99,9 +100,9 @@ namespace ITCC.HTTP.Server.Files.Requests
             }
             await ResponseFactory.BuildResponse(response, HttpStatusCode.PartialContent, null);
             response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
-            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-
             response.ContentType = DetermineContentType(fileName);
+            response.ContentLength64 = buffer.Length;
+            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
         }
 
         /// <summary>
@@ -208,7 +209,7 @@ namespace ITCC.HTTP.Server.Files.Requests
         protected static string DetermineContentType(string filename)
         {
             var extension = IoHelper.GetExtension(filename);
-            if (extension == null)
+            if (string.IsNullOrEmpty(extension))
                 return "x-application/unknown";
 
             return MimeTypes.GetTypeByExtenstion(extension);

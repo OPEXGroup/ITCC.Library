@@ -130,7 +130,7 @@ namespace ITCC.HTTP.Testing
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
                 SubjectName = "localhost",
-                FilesEnabled = false,
+                FilesEnabled = true,
                 FilesNeedAuthorization = false,
                 FilesBaseUri = "files",
                 FileSections = new List<FileSection>
@@ -143,7 +143,7 @@ namespace ITCC.HTTP.Testing
                     }
                 },
                 FilesLocation = @"C:\Users\vladimir.tyrin",
-                FilesPreprocessingEnabled = true,
+                FilesPreprocessingEnabled = false,
                 FilesPreprocessorThreads = -1
             });
 
