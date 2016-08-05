@@ -2,11 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,12 +11,11 @@ using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Security;
 using ITCC.HTTP.Server;
-using ITCC.Library.Testing.Networking;
 using ITCC.Logging;
 using ITCC.Logging.Loggers;
 using Newtonsoft.Json;
 
-namespace ITCC.Library.Testing
+namespace ITCC.HTTP.Testing
 {
     internal class TokenStore
     {
