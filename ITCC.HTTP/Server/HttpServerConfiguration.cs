@@ -91,7 +91,12 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     Headers which should NEVER be logged
         /// </summary>
-        public List<string> LogProhibitedHeaders { get; set; } = new List<string>(); 
+        public List<string> LogProhibitedHeaders { get; set; } = new List<string>();
+
+        /// <summary>
+        ///     Query params which should NEVER be logged
+        /// </summary>
+        public List<string> LogProhibitedQueryParams { get; set; } = new List<string>();
 
         /// <summary>
         ///     If true, then unauthorized /statistics requests are enabled

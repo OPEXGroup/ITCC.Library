@@ -70,6 +70,7 @@ namespace ITCC.HTTP.Server
                     ResponseFactory.LogBodyReplacePatterns.AddRange(configuration.LogBodyReplacePatterns);
                 if (configuration.LogProhibitedHeaders != null)
                     ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
+                _logProhibitedQueryParams = configuration.LogProhibitedQueryParams ?? new List<string>();
 
                 ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
                 _requestEncoding = configuration.BodyEncoder.Encoding;
@@ -608,7 +609,7 @@ namespace ITCC.HTTP.Server
         {
             if (!FilesEnabled)
                 return FileOperationStatus.FilesNotEnabled;
-            return await FileRequestController<TAccount>.DeleteFile(sectionName, filename);
+            return FileRequestController<TAccount>.DeleteFile(sectionName, filename);
         }
 
         #endregion
@@ -746,7 +747,7 @@ namespace ITCC.HTTP.Server
                 return null;
 
             var builder = new StringBuilder();
-            var queryString = PreprocessStatusLine(string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={request.QueryString[k]}")));
+            var queryString = PreprocessStatusLine(string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}")));
             builder.AppendLine($"{request.HttpMethod} {request.Url.LocalPath} HTTP/{request.ProtocolVersion}?{queryString}");
 
             foreach (var key in request.Headers.AllKeys)
@@ -778,6 +779,10 @@ namespace ITCC.HTTP.Server
             return builder.ToString();
         }
 
+        private static string QueryParamValueForLog(HttpListenerRequest request, string paramName) => _logProhibitedQueryParams.Contains(paramName)
+            ? Constants.RemovedLogString
+            : request.QueryString[paramName];
+
         private static string PreprocessStatusLine(string statusLine)
         {
             if (string.IsNullOrEmpty(statusLine))
@@ -794,6 +799,7 @@ namespace ITCC.HTTP.Server
         private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>();
         private static Encoding _requestEncoding = Encoding.UTF8;
         private static bool _autoGzipCompression;
+        private static List<string> _logProhibitedQueryParams;
 
         #endregion
     }
