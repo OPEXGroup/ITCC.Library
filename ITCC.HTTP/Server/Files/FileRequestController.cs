@@ -159,6 +159,21 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
+        public static bool FileExists(string sectionName, string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+                return false;
+            var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
+            if (section == null)
+            {
+                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                return false;
+            }
+
+            var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
+            return File.Exists(filePath);
+        }
+
         public static Stream GetFileStream(string sectionName, string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))

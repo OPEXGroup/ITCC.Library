@@ -409,9 +409,11 @@ bool AddRequestProcessorRange(IEnumerable<RequestProcessor<TAccount>> requestPro
 bool AddStaticRedirect(string fromUri, string toUri);                                     // Добавление статичного (302) перенаправления
 bool AddStaticRedirectRange(IDictionary<string, string> uriTable);                        // Добавление нескольких статичных (302) перенаправлений
 
+bool FileExists(string sectionName, string filename);                                     // Есть ли файл (ложь в случае неправильных параметров или выключенных файлов)
 Stream GetFileStream(string sectionName, string filename);                                // Получение содержимого файла в виде открытого на чтение потока (надо не забыть потом вызвать у него Dispose)
 Task<string> GetFileString(string sectionName, string filename);                          // Получение содержимого файла в виде строки.
 Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content);   // Добавление файла на сервер
+FileOperationStatus DeleteFile(string sectionName, string filename);                      // Удаление файла
 ```
 
 ### Utils

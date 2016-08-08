@@ -584,6 +584,13 @@ namespace ITCC.HTTP.Server
             OnResponseReady(context, requestStopwatch);
         }
 
+        public static bool FileExists(string sectionName, string filename)
+        {
+            if (!FilesEnabled)
+                return false;
+            return FileRequestController<TAccount>.FileExists(sectionName, filename);
+        }
+
         public static Stream GetFileStream(string sectionName, string filename)
         {
             if (!FilesEnabled)
