@@ -77,7 +77,7 @@ namespace ITCC.HTTP.Server.Files
 
         #endregion
 
-        #region requests
+        #region public
         public static async Task HandleFileRequest(HttpListenerContext context)
         {
             if (!_started)
@@ -159,6 +159,88 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
+        public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+                return FileOperationStatus.BadParameters;
+            var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
+            if (section == null)
+            {
+                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                return FileOperationStatus.NotFound;
+            }
+            if (content == null || !content.CanRead)
+                return FileOperationStatus.BadParameters;
+
+            if (filename.Contains("_CHANGED_"))
+                return FileOperationStatus.BadParameters;
+            var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
+
+            if (File.Exists(filePath))
+                return FileOperationStatus.Conflict;
+
+            try
+            {
+                using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    await content.CopyToAsync(file).ConfigureAwait(false);
+                    file.Flush();
+                    file.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return FileOperationStatus.Error;
+            }
+
+            if (FilesPreprocessingEnabled)
+            {
+                return FilePreprocessController.EnqueueFile(filePath)
+                    ? FileOperationStatus.JobQueued
+                    : FileOperationStatus.Ok;
+            }
+            return FileOperationStatus.Ok;
+        }
+
+        public static FileOperationStatus DeleteFile(string sectionName, string filename)
+        {
+            var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
+            if (section == null)
+            {
+                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                return FileOperationStatus.NotFound;
+            }
+
+            if (filename.Contains("_CHANGED_"))
+                return FileOperationStatus.BadParameters;
+            var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
+
+            if (!File.Exists(filePath))
+            {
+                LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
+                return FileOperationStatus.NotFound;
+            }
+
+            var compressed = IoHelper.LoadAllChanged(filePath);
+
+            try
+            {
+                File.Delete(filePath);
+                compressed.ForEach(File.Delete);
+                return FileOperationStatus.Ok;
+            }
+            catch (Exception ex)
+            {
+                LogException(LogLevel.Warning, ex);
+                return FileOperationStatus.Error;
+            }
+        }
+
+        #endregion
+
+        #region private
+
         private static async Task HandleFileGetRequest(HttpListenerContext context, string filePath)
         {
             var response = context.Response;
@@ -201,9 +283,6 @@ namespace ITCC.HTTP.Server.Files
                 file.Flush();
                 file.Close();
             }
-            fileContent.Flush();
-            fileContent.Close();
-            fileContent.Dispose();
             GC.Collect();
             LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
             LogMessage(LogLevel.Debug, $"File {filePath} created");

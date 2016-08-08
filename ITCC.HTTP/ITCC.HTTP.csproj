@@ -49,6 +49,7 @@
     <Compile Include="Client\StaticClient.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
+    <Compile Include="Enums\FileOperationStatus.cs" />
     <Compile Include="Enums\FileType.cs" />
     <Compile Include="Enums\Protocol.cs" />
     <Compile Include="Enums\ServerResponseStatus.cs" />
