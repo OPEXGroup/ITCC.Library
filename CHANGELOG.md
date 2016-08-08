@@ -1,3 +1,9 @@
+## 1.0.0-rc1 (2016-08-08)
+
+* **New**:  Griffin.Framework removed from dependencies  
+* **Edit**: Docs splitted  
+* **New**:  Server configuration breaking change  
+
 ## 0.18.0 (2016-07-28)
 
 * **New**:  Critical information protection added for `StaticServer`, `RegularClient` and `StaticClient`  
