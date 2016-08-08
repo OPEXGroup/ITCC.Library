@@ -25,10 +25,7 @@ namespace ITCC.HTTP.Utils
             throw new NotImplementedException();
         }
 
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof (PingResponse);
-        }
+        public override bool CanConvert(Type objectType) => objectType == typeof (PingResponse);
 
         public override bool CanRead => false;
     }
