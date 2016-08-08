@@ -747,7 +747,7 @@ namespace ITCC.HTTP.Server
                 return null;
 
             var builder = new StringBuilder();
-            var queryString = PreprocessStatusLine(string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}")));
+            var queryString = string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}"));
             builder.AppendLine($"{request.HttpMethod} {request.Url.LocalPath} HTTP/{request.ProtocolVersion}?{queryString}");
 
             foreach (var key in request.Headers.AllKeys)
@@ -782,14 +782,6 @@ namespace ITCC.HTTP.Server
         private static string QueryParamValueForLog(HttpListenerRequest request, string paramName) => _logProhibitedQueryParams.Contains(paramName)
             ? Constants.RemovedLogString
             : request.QueryString[paramName];
-
-        private static string PreprocessStatusLine(string statusLine)
-        {
-            if (string.IsNullOrEmpty(statusLine))
-                return statusLine;
-
-            return Regex.Replace(statusLine, "password=\\w+", $"password={Constants.RemovedLogString}");
-        }
 
         public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);
         public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
