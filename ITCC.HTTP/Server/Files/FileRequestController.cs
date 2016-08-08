@@ -180,9 +180,12 @@ namespace ITCC.HTTP.Server.Files
             if (stream == null)
                 return null;
 
-            using (var reader = new StreamReader(stream))
+            using (stream)
             {
-                return await reader.ReadToEndAsync();
+                using (var reader = new StreamReader(stream))
+                {
+                    return await reader.ReadToEndAsync();
+                }
             }
         }
 

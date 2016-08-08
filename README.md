@@ -18,19 +18,35 @@
 
 ### ITCC.Geocoding
 
-Классы для работы с геокодерами Яндекса и Google
+Классы для работы с геокодерами Яндекса и Google. Интересные классы:
+
+* `ITCC.Geocoding.Geocoder.cs`
 
 ### ITCC.HTTP
 
-Работа с HTTP (клиент с сервер). Настройка TLS на сервере описана [здесь](http://stackoverflow.com/questions/11403333/httplistener-with-https-support)
+Работа с HTTP (клиент с сервер). Настройка TLS на сервере описана [здесь](http://stackoverflow.com/questions/11403333/httplistener-with-https-support). Интересные классы:
+
+* `ITCC.HTTP.Server.StaticServer<TAccount>`  
+* `ITCC.HTTP.Server.HttpServerConfiguration`  
+* `ITCC.HTTP.Client.StaticClient`  
 
 ### ITCC.Logging
 
-Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`
+Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`. Интересные классы:
+
+* `ITCC.Logging.Logger`
+* `ITCC.Logging.Loggers.ColouredConsoleLogger`  
+* `ITCC.Logging.Loggers.BufferedFileLogger`  
+* `ITCC.Logging.Loggers.SystemEventLogger`  
+* `ITCC.Logging.Loggers.EmailLogger`  
 
 ### ITCC.UI
 
-Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов
+Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов. Интересные классы:  
+
+* `ITCC.UI.Windows.LogWindow`  
+* `ITCC.UI.Utils.DataGridHelper`  
+* `ITCC.UI.Utils.ScrollViewerExtensions`  
 
 ## Подключение
 
