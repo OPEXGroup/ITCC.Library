@@ -159,6 +159,33 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
+        public static Stream GetFileStream(string sectionName, string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+                return null;
+            var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
+            if (section == null)
+            {
+                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                return null;
+            }
+
+            var filePath = FilesLocation + Path.DirectorySeparatorChar + section.Folder + Path.DirectorySeparatorChar + filename;
+            return File.Exists(filePath) ? new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null;
+        }
+
+        public static async Task<string> GetFileString(string sectionName, string filename)
+        {
+            var stream = GetFileStream(sectionName, filename);
+            if (stream == null)
+                return null;
+
+            using (var reader = new StreamReader(stream))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
+
         public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
         {
             if (string.IsNullOrWhiteSpace(filename))

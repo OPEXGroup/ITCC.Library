@@ -7,7 +7,7 @@
         BadParameters,
         NotFound,
         Conflict,
+        FilesNotEnabled,
         Error
-
     }
 }

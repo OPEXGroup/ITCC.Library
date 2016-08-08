@@ -583,6 +583,34 @@ namespace ITCC.HTTP.Server
             OnResponseReady(context, requestStopwatch);
         }
 
+        public static Stream GetFileStream(string sectionName, string filename)
+        {
+            if (!FilesEnabled)
+                return null;
+            return FileRequestController<TAccount>.GetFileStream(sectionName, filename);
+        }
+
+        public static async Task<string> GetFileString(string sectionName, string filename)
+        {
+            if (!FilesEnabled)
+                return null;
+            return await FileRequestController<TAccount>.GetFileString(sectionName, filename);
+        }
+
+        public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
+        {
+            if (!FilesEnabled)
+                return FileOperationStatus.FilesNotEnabled;
+            return await FileRequestController<TAccount>.AddFile(sectionName, filename, content);
+        }
+
+        public static FileOperationStatus DeleteFile(string sectionName, string filename)
+        {
+            if (!FilesEnabled)
+                return FileOperationStatus.FilesNotEnabled;
+            return await FileRequestController<TAccount>.DeleteFile(sectionName, filename);
+        }
+
         #endregion
 
         #region requests
