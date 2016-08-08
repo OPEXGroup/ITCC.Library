@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Authentication;
-using System.Text;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.Logging;

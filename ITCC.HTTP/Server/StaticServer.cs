@@ -7,8 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -60,7 +58,7 @@ namespace ITCC.HTTP.Server
                 _statisticsAuthorizer = null;
             }
 
-            
+
 
             try
             {
@@ -134,7 +132,7 @@ namespace ITCC.HTTP.Server
                         }
                     }
                 });
-                
+
                 _listenerThread.Start();
                 _started = true;
                 _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
@@ -312,7 +310,8 @@ namespace ITCC.HTTP.Server
                         }
                         else
                         {
-                            var handleResult = await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                            var handleResult =
+                                await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
                             ResponseFactory.BuildResponse(response, handleResult, false, RequestEnablesGzip(request));
                             //if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
                             //{
@@ -730,7 +729,7 @@ namespace ITCC.HTTP.Server
                     builder.AppendLine($"{key}: {request.Headers[key]}");
             }
 #if TRACE
-            if (! request.HasEntityBody)
+            if (!request.HasEntityBody)
                 return builder.ToString();
 
             if (!IsFilesRequest(request))

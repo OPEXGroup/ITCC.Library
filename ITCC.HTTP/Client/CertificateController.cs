@@ -3,8 +3,6 @@ using System.IdentityModel.Selectors;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using CERTENROLLLib;
-using ITCC.Logging;
 
 namespace ITCC.HTTP.Client
 {
