@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 using ITCC.HTTP.Enums;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Utils
 {

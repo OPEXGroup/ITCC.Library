@@ -1,6 +1,6 @@
 ﻿using System;
 using ITCC.HTTP.Enums;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {

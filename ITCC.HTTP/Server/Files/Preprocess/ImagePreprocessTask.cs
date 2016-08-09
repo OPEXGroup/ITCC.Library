@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using ITCC.HTTP.Enums;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {

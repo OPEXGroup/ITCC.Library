@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.Geocoding.Yandex.Enums;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.Geocoding.Yandex
 {

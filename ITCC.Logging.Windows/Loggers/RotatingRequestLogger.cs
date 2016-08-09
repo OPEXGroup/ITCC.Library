@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ITCC.Logging.Interfaces;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
 using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers

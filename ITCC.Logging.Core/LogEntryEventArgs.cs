@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Threading;
 
-namespace ITCC.Logging
+namespace ITCC.Logging.Core
 {
     public class LogEntryEventArgs : EventArgs
     {
@@ -25,12 +24,7 @@ namespace ITCC.Logging
         /// <summary>
         ///     Event thread
         /// </summary>
-        public readonly int ThreadId = Thread.CurrentThread.ManagedThreadId;
-
-        /// <summary>
-        ///     Event thread human-readable name
-        /// </summary>
-        public readonly string ThreadName = Thread.CurrentThread.Name;
+        public readonly int ThreadId = Environment.CurrentManagedThreadId;
 
         /// <summary>
         ///     Event time
@@ -61,8 +55,7 @@ namespace ITCC.Logging
         {
             try
             {
-                var threadInfo = ThreadName == null ? $"{ThreadId,-6}" : $"{ThreadName,-6}";
-                var result = $"[{Time.ToString("dd.MM.yyyy HH:mm:ss.fff")}] [{LogLevelRepresentation(Level), 5}] [THR {threadInfo}] [{Scope, 12}] {Message}";
+                var result = $"[{Time.ToString("dd.MM.yyyy HH:mm:ss.fff")}] [{LogLevelRepresentation(Level), 5}] [THR {ThreadId,-6}] [{Scope, 12}] {Message}";
                 _representation = result;
                 return result;
             }

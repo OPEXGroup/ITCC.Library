@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files
 {

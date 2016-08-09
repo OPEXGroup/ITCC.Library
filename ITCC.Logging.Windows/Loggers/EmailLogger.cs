@@ -6,8 +6,9 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
 using ITCC.Logging.Enums;
-using ITCC.Logging.Interfaces;
 using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers

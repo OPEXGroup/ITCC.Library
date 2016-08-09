@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using ITCC.Logging.Interfaces;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
 using ITCC.Logging.Utils;
 
 namespace ITCC.Logging.Loggers

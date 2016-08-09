@@ -3,10 +3,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using ITCC.Logging;
-using LogLevel = ITCC.Logging.LogLevel;
+using ITCC.Logging.Core;
+using LogLevel = ITCC.Logging.Core.LogLevel;
 
-namespace ITCC.Library.Testing.Networking
+namespace ITCC.HTTP.Testing.Networking
 {
     public class AsynchronousClient
     {

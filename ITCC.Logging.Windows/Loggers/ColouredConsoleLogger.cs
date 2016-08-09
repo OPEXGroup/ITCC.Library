@@ -1,4 +1,5 @@
 ﻿using System;
+using ITCC.Logging.Core;
 
 namespace ITCC.Logging.Loggers
 {

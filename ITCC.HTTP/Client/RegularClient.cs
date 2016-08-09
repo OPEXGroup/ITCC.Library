@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Utils;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Client

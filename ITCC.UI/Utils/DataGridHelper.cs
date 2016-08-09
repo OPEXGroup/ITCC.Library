@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 using ITCC.UI.Attributes;
 
 namespace ITCC.UI.Utils

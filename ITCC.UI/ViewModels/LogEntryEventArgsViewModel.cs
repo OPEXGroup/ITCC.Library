@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 using ITCC.UI.Attributes;
 using ITCC.UI.Utils;
 

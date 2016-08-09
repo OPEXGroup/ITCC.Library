@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.Geocoding.Yandex
 {

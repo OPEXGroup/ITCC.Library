@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
-using ITCC.Logging;
-using ITCC.Logging.Interfaces;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
 using ITCC.UI.Utils;
 
 namespace ITCC.UI.Loggers

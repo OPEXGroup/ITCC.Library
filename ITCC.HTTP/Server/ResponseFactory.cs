@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using ITCC.HTTP.Enums;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server
 {

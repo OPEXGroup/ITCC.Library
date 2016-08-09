@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging", "ITCC.Logging\ITCC.Logging.csproj", "{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging.Windows", "ITCC.Logging.Windows\ITCC.Logging.Windows.csproj", "{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.HTTP", "ITCC.HTTP\ITCC.HTTP.csproj", "{77016AD7-9655-4918-832C-D26A767E29B4}"
 EndProject
@@ -19,8 +19,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.UI", "ITCC.UI\ITCC.UI.csproj", "{07D36841-8876-437C-B7A4-CBF1012513EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.UI.Testing", "ITCC.UI.Testing\ITCC.UI.Testing.csproj", "{B2BA0903-819E-429B-9206-B93B67A29F4C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC73DFCF-4D11-4400-BB98-5115CA2608E1} = {FC73DFCF-4D11-4400-BB98-5115CA2608E1}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Geocoding", "ITCC.Geocoding\ITCC.Geocoding.csproj", "{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging.Core", "ITCC.Logging.Core\ITCC.Logging.Core.csproj", "{FC73DFCF-4D11-4400-BB98-5115CA2608E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +57,10 @@ Global
 		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC73DFCF-4D11-4400-BB98-5115CA2608E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC73DFCF-4D11-4400-BB98-5115CA2608E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC73DFCF-4D11-4400-BB98-5115CA2608E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC73DFCF-4D11-4400-BB98-5115CA2608E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

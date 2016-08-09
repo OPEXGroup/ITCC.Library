@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
+using ITCC.Logging.Core;
 
 namespace ITCC.Logging.Utils
 {

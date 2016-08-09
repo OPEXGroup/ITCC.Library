@@ -1,6 +1,6 @@
-﻿using ITCC.Logging;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using ITCC.Logging.Core;
 
 namespace ITCC.UI.Utils
 {

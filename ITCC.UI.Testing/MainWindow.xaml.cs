@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 using ITCC.UI.Loggers;
 using ITCC.UI.Windows;
 

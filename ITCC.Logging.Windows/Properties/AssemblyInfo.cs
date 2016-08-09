@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ITCC.HTTP.Testing")]
+[assembly: AssemblyTitle("ITCC.Logging.Windows")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ITCC.Library.Testing")]
+[assembly: AssemblyProduct("ITCC.Logging")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("097a520a-5ab7-45a1-86ba-f094c698f5e1")]
+[assembly: Guid("bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1")]
 
 // Version information for an assembly consists of the following four values:
 //

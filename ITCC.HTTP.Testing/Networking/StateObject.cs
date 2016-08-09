@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 
-namespace ITCC.Library.Testing.Networking
+namespace ITCC.HTTP.Testing.Networking
 {
     public class StateObject
     {

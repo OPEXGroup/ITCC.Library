@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ITCC.Logging.Interfaces;
+using ITCC.Logging.Core.Interfaces;
 
-namespace ITCC.Logging
+namespace ITCC.Logging.Core
 {
     /// <summary>
     ///     Logger based on events and subscribers
@@ -153,7 +153,10 @@ namespace ITCC.Logging
                 lock (LockObject)
                 {
                     _logLevel = value;
-                    MutableReceivers.ForEach(r => r.Level = value);
+                    foreach (var mutableReceiver in MutableReceivers)
+                    {
+                        mutableReceiver.Level = _logLevel;
+                    }
                 }
             }
         }

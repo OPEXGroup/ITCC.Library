@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Geocoding;
 using Geocoding.Google;
 using ITCC.Geocoding.Enums;
 using ITCC.Geocoding.Utils;
 using ITCC.Geocoding.Yandex;
-using ITCC.Logging;
+using ITCC.Logging.Core;
 
 namespace ITCC.Geocoding
 {

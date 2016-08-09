@@ -1,4 +1,4 @@
-﻿namespace ITCC.Logging
+﻿namespace ITCC.Logging.Core
 {
     /// <summary>
     ///     Possible log severity levels

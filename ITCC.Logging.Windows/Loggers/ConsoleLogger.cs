@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Diagnostics;
-using ITCC.Logging.Interfaces;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
 
 namespace ITCC.Logging.Loggers
 {
     /// <summary>
-    ///     Simple logger for debug logging (via System.Diagnostics.Debug)
+    ///     Simple logger for console
     /// </summary>
-    public class DebugLogger : ILogReceiver
+    public class ConsoleLogger : ILogReceiver
     {
         #region ILogReceiver
         public LogLevel Level { get; set; }
@@ -17,17 +17,17 @@ namespace ITCC.Logging.Loggers
             if (args.Level > Level)
                 return;
 
-            Debug.WriteLine(args);
+            Console.WriteLine(args);
         }
         #endregion
 
         #region public
-        public DebugLogger()
+        public ConsoleLogger()
         {
             Level = Logger.Level;
         }
 
-        public DebugLogger(LogLevel level)
+        public ConsoleLogger(LogLevel level)
         {
             Level = level;
         }

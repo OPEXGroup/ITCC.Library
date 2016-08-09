@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace ITCC.Logging.Interfaces
+namespace ITCC.Logging.Core.Interfaces
 {
     public interface IFlushableLogReceiver : ILogReceiver
     {

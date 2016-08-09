@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath Condition="Exists('..\packages')">..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <HintPath Condition="Exists('..\..\..\packages')">..\..\..\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <HintPath Condition="Exists('..\..\..\ITCC.Library\packages')">..\..\..\ITCC.Library\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -94,9 +94,13 @@
     <Compile Include="Utils\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.csproj">
+    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
+      <Name>ITCC.Logging.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.Windows.csproj">
       <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
-      <Name>ITCC.Logging</Name>
+      <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -122,7 +126,8 @@
 SET "scripthpath="$(ProjectDir)%25script%25"
 ECHO "$(ProjectDir)"
 ECHO %25scripthpath%25
-Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)</PreBuildEvent>
+Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
+exit 0</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
