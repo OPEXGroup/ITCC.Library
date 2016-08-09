@@ -4,7 +4,7 @@ using System.Diagnostics;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
 
-namespace ITCC.Logging.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     public class SystemEventLogger : ILogReceiver, IDisposable
     {

@@ -2,9 +2,9 @@
 using System.Linq;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.Logging.Utils;
+using ITCC.Logging.Windows.Utils;
 
-namespace ITCC.Logging.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     /// <summary>
     ///     Logger than cat return last log entries by request

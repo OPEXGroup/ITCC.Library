@@ -1,7 +1,7 @@
 ﻿using System;
 using ITCC.Logging.Core;
 
-namespace ITCC.Logging.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     public class ColouredConsoleLogger : ConsoleLogger
     {

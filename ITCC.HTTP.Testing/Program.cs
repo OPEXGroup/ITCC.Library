@@ -11,7 +11,7 @@ using ITCC.HTTP.Client;
 using ITCC.HTTP.Enums;
 using ITCC.HTTP.Server;
 using ITCC.Logging.Core;
-using ITCC.Logging.Loggers;
+using ITCC.Logging.Windows.Loggers;
 using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing

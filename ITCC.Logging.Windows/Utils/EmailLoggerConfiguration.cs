@@ -2,7 +2,7 @@
 using System.Linq;
 using ITCC.Logging.Core;
 
-namespace ITCC.Logging.Utils
+namespace ITCC.Logging.Windows.Utils
 {
     public class EmailLoggerConfiguration
     {

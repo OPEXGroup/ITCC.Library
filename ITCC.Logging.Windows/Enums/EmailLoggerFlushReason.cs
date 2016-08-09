@@ -1,4 +1,4 @@
-﻿namespace ITCC.Logging.Enums
+﻿namespace ITCC.Logging.Windows.Enums
 {
     internal enum EmailLoggerFlushReason
     {

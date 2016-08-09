@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.Logging.Utils;
+using ITCC.Logging.Windows.Utils;
 
-namespace ITCC.Logging.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     public class BufferedFileLogger : FileLogger, IFlushableLogReceiver
     {

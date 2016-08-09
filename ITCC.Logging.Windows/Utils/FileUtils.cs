@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using ITCC.Logging.Core;
 
-namespace ITCC.Logging.Utils
+namespace ITCC.Logging.Windows.Utils
 {
     internal static class FileUtils
     {
