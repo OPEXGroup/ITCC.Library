@@ -72,7 +72,7 @@
       <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging\ITCC.Logging.Windows.csproj">
+    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
       <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>

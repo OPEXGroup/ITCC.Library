@@ -30,11 +30,16 @@
 * `ITCC.HTTP.Server.HttpServerConfiguration`  
 * `ITCC.HTTP.Client.StaticClient`  
 
-### ITCC.Logging
+### ITCC.Logging.Core
 
-Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`. Интересные классы:
+Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`. **Собирается везде.** Интересные классы:
 
-* `ITCC.Logging.Logger`
+* `ITCC.Logging.Core.Logger`
+
+### ITCC.Logging.Windows
+
+Различные реализации логов для .Net 4.6. Интересные классы:
+
 * `ITCC.Logging.Loggers.ColouredConsoleLogger`  
 * `ITCC.Logging.Loggers.BufferedFileLogger`  
 * `ITCC.Logging.Loggers.SystemEventLogger`  
