@@ -1,3 +1,8 @@
+## 1.0.0-rc2 (2016-08-09)
+
+* **New**:  `ITCC.Logging.Core` extracted as portable class library.  
+* **New**:  `StaticServer` files API improvements
+
 ## 1.0.0-rc1 (2016-08-08)
 
 * **New**:  Griffin.Framework removed from dependencies  
