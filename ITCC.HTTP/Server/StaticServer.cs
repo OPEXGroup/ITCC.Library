@@ -434,7 +434,7 @@ namespace ITCC.HTTP.Server
         private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context.Request)), Formatting.None, converter);
+            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context.Request, true)), Formatting.None, converter);
             ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
             return Task.CompletedTask;
@@ -485,7 +485,7 @@ namespace ITCC.HTTP.Server
             OnResponseReady(context, requestStopwatch);
         }
 
-        public static string GetStatistics() => _statistics.Serialize();
+        public static string GetStatistics() => _statistics?.Serialize();
 
         #endregion
 
