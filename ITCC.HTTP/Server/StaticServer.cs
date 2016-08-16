@@ -17,6 +17,7 @@ using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Utils;
 using ITCC.Logging.Core;
 using Newtonsoft.Json;
+// ReSharper disable StaticMemberInGenericType
 
 namespace ITCC.HTTP.Server
 {
@@ -430,17 +431,13 @@ namespace ITCC.HTTP.Server
             return request.Url.LocalPath.Trim('/') == "ping";
         }
 
-        private static async Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
+        private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
-            string requestContent;
-            using (var streamReader = new StreamReader(context.Request.InputStream))
-            {
-                requestContent = await streamReader.ReadToEndAsync();
-            }
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(requestContent), Formatting.None, converter);
+            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context.Request)), Formatting.None, converter);
             ResponseFactory.BuildResponse(context.Response, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -487,6 +484,9 @@ namespace ITCC.HTTP.Server
 
             OnResponseReady(context, requestStopwatch);
         }
+
+        public static string GetStatistics() => _statistics.Serialize();
+
         #endregion
 
         #region options
@@ -748,14 +748,16 @@ namespace ITCC.HTTP.Server
             return parts.Any(p => p == "gzip");
         }
 
-        private static string SerializeHttpRequest(HttpListenerRequest request)
+        private static string SerializeHttpRequest(HttpListenerRequest request, bool absolutePath = false)
         {
             if (request == null)
                 return null;
 
             var builder = new StringBuilder();
             var queryString = string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}"));
-            builder.AppendLine($"{request.HttpMethod} {request.Url.LocalPath} HTTP/{request.ProtocolVersion}?{queryString}");
+            var separator = string.IsNullOrEmpty(queryString) ? string.Empty : "?";
+            var url = absolutePath ? request.Url.ToString() : request.Url.LocalPath;
+            builder.AppendLine($"{request.HttpMethod} {url} HTTP/{request.ProtocolVersion}{separator}{queryString}");
 
             foreach (var key in request.Headers.AllKeys)
             {

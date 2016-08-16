@@ -38,7 +38,7 @@ namespace ITCC.HTTP.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "https://localhost:8888";
+            StaticClient.ServerAddress = "http://localhost:8888";
             StaticClient.AllowUntrustedServerCertificates();
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
@@ -118,7 +118,7 @@ namespace ITCC.HTTP.Testing
                     Serializer = JsonConvert.SerializeObject
                 },
                 Port = 8888,
-                Protocol = Protocol.Https,
+                Protocol = Protocol.Http,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
@@ -139,7 +139,7 @@ namespace ITCC.HTTP.Testing
                         Name = "Pictures"
                     }
                 },
-                FilesLocation = @"C:\Users\vladimir.tyrin",
+                FilesLocation = @"C:\Users\b0-0b",
                 FilesPreprocessingEnabled = false,
                 FilesPreprocessorThreads = -1
             });
