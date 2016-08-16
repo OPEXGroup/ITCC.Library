@@ -46,100 +46,24 @@ namespace ITCC.HTTP.Server
             if (configuration == null || !configuration.IsEnough())
                 return ServerStartStatus.BadParameters;
 
-            if (configuration.StatisticsEnabled)
-            {
-                StatisticsEnabled = true;
-                _statistics = new ServerStatistics<TAccount>();
-                _statisticsAuthorizer = configuration.StatisticsAuthorizer;
-            }
-            else
-            {
-                StatisticsEnabled = false;
-                _statistics = null;
-                _statisticsAuthorizer = null;
-            }
-
             try
             {
+                PrepareStatistics(configuration);
+
                 Protocol = configuration.Protocol;
                 _authorizer = configuration.Authorizer;
                 _authentificator = configuration.Authentificator;
 
-                if (configuration.LogBodyReplacePatterns != null)
-                    ResponseFactory.LogBodyReplacePatterns.AddRange(configuration.LogBodyReplacePatterns);
-                if (configuration.LogProhibitedHeaders != null)
-                    ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
-                _logProhibitedQueryParams = configuration.LogProhibitedQueryParams ?? new List<string>();
+                ConfigureResponseBuilding(configuration);
 
-                ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
-                _requestEncoding = configuration.BodyEncoder.Encoding;
-                _autoGzipCompression = configuration.BodyEncoder.AutoGzipCompression;
-                ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
-                ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
-
-                FilesEnabled = configuration.FilesEnabled;
-                FilesBaseUri = configuration.FilesBaseUri;
-
-                if (configuration.FilesEnabled)
-                {
-                    FilesEnabled = true;
-                    var fileControllerStartSucceeded = FileRequestController<TAccount>.Start(new FileRequestControllerConfiguration<TAccount>
-                    {
-                        ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency,
-                        FaviconPath = configuration.FaviconPath,
-                        FilesAuthorizer = configuration.FilesAuthorizer,
-                        FileSections = configuration.FileSections,
-                        FilesLocation = configuration.FilesLocation,
-                        FilesNeedAuthorization = configuration.FilesNeedAuthorization,
-                        FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
-                        FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
-                    }, _statistics);
-                    if (!fileControllerStartSucceeded)
-                        return ServerStartStatus.BadParameters;
-                }
+                if (!StartFileProcessing(configuration))
+                    return ServerStartStatus.BadParameters;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
 
-                if (configuration.ServerName != null)
-                {
-                    ResponseFactory.SetCommonHeaders(new Dictionary<string, string>
-                    {
-                        {"Server", configuration.ServerName}
-                    });
-                }
-                var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
-                ServicePointManager.DefaultConnectionLimit = 1000;
-                _listener = new HttpListener();
-                _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
-                _listener.Start();
-                _listenerThread = new Thread(() =>
-                {
-                    LogMessage(LogLevel.Info, "Server listener thread started");
-                    while (true)
-                    {
-                        try
-                        {
-                            var context = _listener.GetContext();
-                            LogMessage(LogLevel.Debug, $"Client connected: {context.Request.RemoteEndPoint}");
-                            Task.Run(async () => await OnMessage(context));
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            LogMessage(LogLevel.Info, "Server listener thread stopped");
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(LogLevel.Error, ex);
-                        }
-                    }
-                });
-
-                _listenerThread.Start();
+                StartListenerThread(configuration);
                 _started = true;
-                _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
                 ServiceUris.AddRange(configuration.GetReservedUris());
-                LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
                 if (ServiceUris.Any())
                     LogMessage(LogLevel.Debug, $"Reserved sections:\n{string.Join("\n", ServiceUris)}");
 
@@ -148,11 +72,13 @@ namespace ITCC.HTTP.Server
             catch (SocketException)
             {
                 LogMessage(LogLevel.Critical, $"Error binding to port {configuration.Port}. Is it in use?");
+                FileRequestController<TAccount>.Stop();
                 return ServerStartStatus.BindingError;
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Critical, ex);
+                FileRequestController<TAccount>.Stop();
                 return ServerStartStatus.UnknownError;
             }
             finally
@@ -162,6 +88,98 @@ namespace ITCC.HTTP.Server
                     _operationInProgress = false;
                 }
             }
+        }
+
+        private static void PrepareStatistics(HttpServerConfiguration<TAccount> configuration)
+        {
+            if (configuration.StatisticsEnabled)
+            {
+                StatisticsEnabled = true;
+                _statistics = new ServerStatistics<TAccount>();
+                _statisticsAuthorizer = configuration.StatisticsAuthorizer;
+                return;
+            }
+            StatisticsEnabled = false;
+            _statistics = null;
+            _statisticsAuthorizer = null;
+        }
+
+        private static void ConfigureResponseBuilding(HttpServerConfiguration<TAccount> configuration)
+        {
+            if (configuration.LogBodyReplacePatterns != null)
+                ResponseFactory.LogBodyReplacePatterns.AddRange(configuration.LogBodyReplacePatterns);
+            if (configuration.LogProhibitedHeaders != null)
+                ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
+            _logProhibitedQueryParams = configuration.LogProhibitedQueryParams ?? new List<string>();
+
+            ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
+            _requestEncoding = configuration.BodyEncoder.Encoding;
+            _autoGzipCompression = configuration.BodyEncoder.AutoGzipCompression;
+            ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
+            ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
+
+            if (configuration.ServerName != null)
+            {
+                ResponseFactory.SetCommonHeaders(new Dictionary<string, string> {{"Server", configuration.ServerName}});
+            }
+        }
+
+        private static bool StartFileProcessing(HttpServerConfiguration<TAccount> configuration)
+        {
+            FilesEnabled = configuration.FilesEnabled;
+            FilesBaseUri = configuration.FilesBaseUri;
+
+            if (FilesEnabled)
+            {
+                return FileRequestController<TAccount>.Start(new FileRequestControllerConfiguration<TAccount>
+                {
+                    ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency,
+                    FaviconPath = configuration.FaviconPath,
+                    FilesAuthorizer = configuration.FilesAuthorizer,
+                    FileSections = configuration.FileSections,
+                    FilesLocation = configuration.FilesLocation,
+                    FilesNeedAuthorization = configuration.FilesNeedAuthorization,
+                    FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
+                    FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
+                },
+                _statistics);
+            }
+            return true;
+        }
+
+        private static void StartListenerThread(HttpServerConfiguration<TAccount> configuration)
+        {
+            var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
+            ServicePointManager.DefaultConnectionLimit = 1000;
+            _listener = new HttpListener();
+            _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
+            _listener.Start();
+            _listenerThread = new Thread(() =>
+            {
+                LogMessage(LogLevel.Info, "Server listener thread started");
+                LogMessage(LogLevel.Info, $"Started listening port {configuration.Port}");
+                while (true)
+                {
+                    try
+                    {
+                        var context = _listener.GetContext();
+                        LogMessage(LogLevel.Debug, $"Client connected: {context.Request.RemoteEndPoint}");
+                        Task.Run(async () => await OnMessage(context));
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        LogMessage(LogLevel.Info, "Server listener thread stopped");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(LogLevel.Error, ex);
+                    }
+                }
+            });
+
+            _listenerThread.Start();
+            _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
         }
 
         public static void Stop()
