@@ -59,8 +59,6 @@ namespace ITCC.HTTP.Server
                 _statisticsAuthorizer = null;
             }
 
-
-
             try
             {
                 Protocol = configuration.Protocol;
@@ -116,6 +114,7 @@ namespace ITCC.HTTP.Server
                 _listener.Start();
                 _listenerThread = new Thread(() =>
                 {
+                    LogMessage(LogLevel.Info, "Server listener thread started");
                     while (true)
                     {
                         try
@@ -126,11 +125,12 @@ namespace ITCC.HTTP.Server
                         }
                         catch (ThreadAbortException)
                         {
+                            LogMessage(LogLevel.Info, "Server listener thread stopped");
                             break;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
+                            LogException(LogLevel.Error, ex);
                         }
                     }
                 });
