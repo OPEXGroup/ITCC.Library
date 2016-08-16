@@ -34,12 +34,12 @@ namespace ITCC.HTTP.Server.Files.Requests
             if (!File.Exists(fileName))
             {
                 LogMessage(LogLevel.Debug, $"File {fileName} was requested but not found");
-                ResponseFactory.BuildResponse(response, HttpStatusCode.NotFound, null);
+                ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
                 return;
             }
             if (Range == null)
             {
-                ResponseFactory.BuildResponse(response, HttpStatusCode.OK, null);
+                ResponseFactory.BuildResponse(context, HttpStatusCode.OK, null);
                 response.ContentType = DetermineContentType(fileName);
                 response.ContentLength64 = new FileInfo(fileName).Length;
                 using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
@@ -59,7 +59,7 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < -rangeEnd)
                     {
-                         ResponseFactory.BuildResponse(response, HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                         ResponseFactory.BuildResponse(context, HttpStatusCode.RequestedRangeNotSatisfiable, null,
                             new Dictionary<string, string>
                             {
                                 {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
@@ -73,7 +73,7 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < rangeEnd)
                     {
-                        ResponseFactory.BuildResponse(response, HttpStatusCode.RequestedRangeNotSatisfiable, null,
+                        ResponseFactory.BuildResponse(context, HttpStatusCode.RequestedRangeNotSatisfiable, null,
                             new Dictionary<string, string>
                             {
                                 {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
@@ -98,7 +98,7 @@ namespace ITCC.HTTP.Server.Files.Requests
                     buffer = reader.ReadBytes((int)length);
                 }
             }
-            ResponseFactory.BuildResponse(response, HttpStatusCode.PartialContent, null);
+            ResponseFactory.BuildResponse(context, HttpStatusCode.PartialContent, null);
             response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
             response.ContentType = DetermineContentType(fileName);
             response.ContentLength64 = buffer.Length;

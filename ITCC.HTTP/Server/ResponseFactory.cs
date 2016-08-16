@@ -28,15 +28,15 @@ namespace ITCC.HTTP.Server
             _encoder = encoder;
         }
 
-        public static void BuildResponse(HttpListenerResponse httpResponse, AuthentificationResult authentificationResult, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult, bool gzipResponse = false)
         {
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            BuildResponse(httpResponse, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
+            BuildResponse(context, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
         }
 
-        public static void BuildResponse<TAccount>(HttpListenerResponse httpResponse, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
+        public static void BuildResponse<TAccount>(HttpListenerContext context, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
             where TAccount : class
         {
             if (authorizationResult == null)
@@ -46,23 +46,25 @@ namespace ITCC.HTTP.Server
                 ? AuthResultDictionary[authorizationResult.Status]
                 : HttpStatusCode.InternalServerError;
 
-            BuildResponse(httpResponse,
+            BuildResponse(context,
                 httpStatusCode,
                 (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
                 authorizationResult.AdditionalHeaders,
                 gzipResponse);
         }
 
-        public static void BuildResponse(HttpListenerResponse httpResponse, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
         {
             if (handlerResult == null)
                 throw new ArgumentNullException(nameof(handlerResult));
 
-            BuildResponse(httpResponse, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
+            BuildResponse(context, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
         }
 
-        public static void BuildResponse(HttpListenerResponse httpResponse, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
         {
+            var httpResponse = context.Response;
+            var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
             httpResponse.StatusCode = (int)code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
 
@@ -115,7 +117,8 @@ namespace ITCC.HTTP.Server
                         }
                     }
                     httpResponse.ContentLength64 = memoryStream.Length;
-                    httpResponse.OutputStream.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                    if (! isHeadRequest)
+                        httpResponse.OutputStream.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                     memoryStream.Close();
                 }
                 finally 
@@ -129,11 +132,12 @@ namespace ITCC.HTTP.Server
                 httpResponse.SendChunked = false;
                 httpResponse.ContentLength64 = bodyBuffer.Length;
                 httpResponse.ContentType = $"{_encoder.ContentType}; charset={_encoder.Encoding.WebName}";
-                httpResponse.OutputStream.Write(bodyBuffer, 0, bodyBuffer.Length);
+                if (! isHeadRequest)
+                    httpResponse.OutputStream.Write(bodyBuffer, 0, bodyBuffer.Length);
             }
 
             if (Logger.Level >= LogLevel.Trace)
-                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, bodyString)}");
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
         }
 
         public static string SerializeResponse(HttpListenerResponse response, string bodyString)
@@ -149,6 +153,8 @@ namespace ITCC.HTTP.Server
                     builder.AppendLine($"{key}: {Constants.RemovedLogString}");
                 builder.AppendLine($"{key}: {response.Headers[key]}");
             }
+            if (response.ContentLength64 > 0)
+                builder.AppendLine($"Content-Length: {response.ContentLength64}");
             if (response.OutputStream == null)
                 return builder.ToString();
 
