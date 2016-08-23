@@ -1,3 +1,10 @@
+## 1.0.0 (2016-08-23)
+
+* **New**:  Build configurations for different platforms (finally :) )  
+* **Edit**: HTTP server core refactoring and simplification  
+* **Fix**:  `ITCC.Geocoding` prebuild fixed  
+* **Fix**:  HEAD requests work again  
+
 ## 1.0.0-rc2 (2016-08-09)
 
 * **New**:  `ITCC.Logging.Core` extracted as portable class library.  
