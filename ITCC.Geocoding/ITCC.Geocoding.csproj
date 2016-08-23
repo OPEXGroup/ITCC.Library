@@ -79,7 +79,10 @@
   <PropertyGroup>
     <PreBuildEvent>SET script=PreBuild.ps1
 SET "scripthpath="$(ProjectDir)%25script%25"
-ECHO "$(ProjectDir)"</PreBuildEvent>
+ECHO "$(ProjectDir)"
+ECHO %25scripthpath%25
+Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
+exit 0</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
