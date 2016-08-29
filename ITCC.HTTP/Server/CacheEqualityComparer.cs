@@ -18,7 +18,8 @@ namespace ITCC.HTTP.Server
             if ((x.Account == null && y.Account != null) || (x.Account != null && y.Account == null))
                 return false;
 
-            return x.Account != null && x.Account.Equals(y.Account) && x.RequestProcessor == y.RequestProcessor;
+            // ReSharper disable once PossibleNullReferenceException
+            return x.Account.Equals(y.Account) && x.RequestProcessor == y.RequestProcessor;
         }
 
         public int GetHashCode(AccountProcessorPair<TAccount> obj)

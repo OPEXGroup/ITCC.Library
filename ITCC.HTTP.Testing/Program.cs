@@ -69,7 +69,7 @@ namespace ITCC.HTTP.Testing
                     {"Accept-Encoding", "gzip"}
                 });
 #else
-            const int requestsPerStep = 10;
+            const int requestsPerStep = 1000;
             const int stepCount = 10;
             const int requestCount = requestsPerStep * stepCount;
             double totalElapsed = 0;
@@ -113,7 +113,7 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Debug;
+            Logger.Level = LogLevel.Info;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -158,7 +158,7 @@ namespace ITCC.HTTP.Testing
                 Authorizer = async (request, processor)
                 =>
                 {
-                    await Task.Delay(50);
+                    //await Task.Delay(50);
                     return await Task.FromResult(new AuthorizationResult<AccountMock>(new AccountMock
                     {
                         Guid = new Random().Next(1, 5).ToString()
@@ -214,7 +214,8 @@ namespace ITCC.HTTP.Testing
                         builder.Append(str);
                     }
                     return Task.FromResult(new HandlerResult(HttpStatusCode.OK, builder.ToString()));
-                }
+                },
+                CachePolicy = CachePolicy.PublicCache
             });
 
             Server.AddRequestProcessor(new RequestProcessor<AccountMock>
@@ -228,7 +229,7 @@ namespace ITCC.HTTP.Testing
                     return
                         await Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}));
                 },
-                CachePolicy = CachePolicy.PrivateCache
+                CachePolicy = CachePolicy.NoCache
             });
 
             Server.AddStaticRedirect("test", "delay");
