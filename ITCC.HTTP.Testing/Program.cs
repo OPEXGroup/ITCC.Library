@@ -28,6 +28,8 @@ namespace ITCC.HTTP.Testing
     {
         public string Guid { get; set; } = System.Guid.NewGuid().ToString();
 
+        public override string ToString() => Guid;
+
         public bool Equals(AccountMock other)
         {
             Logger.LogEntry("COMPARE", LogLevel.Trace, $"Comparing {Guid} to {other.Guid}");
@@ -226,7 +228,7 @@ namespace ITCC.HTTP.Testing
                     return
                         await Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}));
                 },
-                CachePolicy = CachePolicy.NoCache
+                CachePolicy = CachePolicy.PrivateCache
             });
 
             Server.AddStaticRedirect("test", "delay");

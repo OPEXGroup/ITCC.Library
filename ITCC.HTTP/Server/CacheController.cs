@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using ITCC.HTTP.Enums;
 using ITCC.Logging.Core;
 
@@ -9,6 +12,30 @@ namespace ITCC.HTTP.Server
         where TAccount : class, IEquatable<TAccount>
     {
         #region public
+
+        public static async Task<HandlerResult> Process(HttpListenerContext context, TAccount account, RequestProcessor<TAccount> requestProcessor)
+        {
+            if (requestProcessor.Method != HttpMethod.Get &&
+                                    requestProcessor.Method != HttpMethod.Head)
+            {
+                LogMessage(LogLevel.Debug, "Dropping cache");
+                Clear();
+                return await requestProcessor.Handler.Invoke(account, context.Request).ConfigureAwait(false);
+            }
+            else
+            {
+                HandlerResult cacheResult;
+                if (TryGet(account, requestProcessor, out cacheResult))
+                {
+                    LogMessage(LogLevel.Debug, "Data loaded from cache");
+                    return cacheResult;
+                }
+                LogMessage(LogLevel.Debug, "Cache miss");
+                var handleResult = await requestProcessor.Handler.Invoke(account, context.Request).ConfigureAwait(false);
+                AddOrUpdate(account, requestProcessor, handleResult);
+                return handleResult;
+            }
+        }
 
         public static bool AddOrUpdate(TAccount account, RequestProcessor<TAccount> requestProcessor, HandlerResult data)
         {
@@ -23,7 +50,7 @@ namespace ITCC.HTTP.Server
             }
             catch (OutOfMemoryException oom)
             {
-                Logger.LogException("SERVERCACHE", LogLevel.Warning, oom);
+                LogException(LogLevel.Warning, oom);
                 Clear();
                 return false;
             }
@@ -65,6 +92,9 @@ namespace ITCC.HTTP.Server
 
         private static readonly ConcurrentDictionary<AccountProcessorPair<TAccount>, HandlerResult> CacheDictionary
             = new ConcurrentDictionary<AccountProcessorPair<TAccount>, HandlerResult>(new CacheEqualityComparer<TAccount>());
+
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("SERVER CACHE", level, message);
+        private static void LogException(LogLevel level, Exception ex) => Logger.LogException("SERVER CACHE", level, ex);
         #endregion
 
     }

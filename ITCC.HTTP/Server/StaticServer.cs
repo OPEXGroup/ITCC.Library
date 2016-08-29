@@ -248,15 +248,9 @@ namespace ITCC.HTTP.Server
 
         #region log
 
-        private static void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("HTTP SERVER", level, message);
-        }
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP SERVER", level, message);
 
-        private static void LogException(LogLevel level, Exception ex)
-        {
-            Logger.LogException("HTTP SERVER", level, ex);
-        }
+        private static void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP SERVER", level, ex);
 
         #endregion
 
@@ -331,41 +325,18 @@ namespace ITCC.HTTP.Server
                         }
                         else
                         {
+                            HandlerResult handleResult;
                             if (_cacheEnabled)
                             {
-                                if (requestProcessor.Method != HttpMethod.Get &&
-                                    requestProcessor.Method != HttpMethod.Head)
-                                {
-                                    LogMessage(LogLevel.Debug, "Dropping cache");
-                                    CacheController<TAccount>.Clear();
-                                }
-                                else
-                                {
-                                    HandlerResult cacheResult;
-                                    if (CacheController<TAccount>.TryGet(authResult.Account, requestProcessor,
-                                        out cacheResult))
-                                    {
-                                        LogMessage(LogLevel.Debug, "Data loaded from cache");
-                                        ResponseFactory.BuildResponse(context, cacheResult, false,
-                                            RequestEnablesGzip(request));
-                                    }
-                                    else
-                                    {
-                                        LogMessage(LogLevel.Debug, "Cache miss");
-                                        var handleResult =
-                                            await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                                        CacheController<TAccount>.AddOrUpdate(authResult.Account, requestProcessor,
-                                            handleResult);
-                                        ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
-                                    }
-                                }
+                                handleResult =
+                                    await CacheController<TAccount>.Process(context, authResult.Account, requestProcessor);
                             }
                             else
                             {
-                                var handleResult =
+                                handleResult =
                                     await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                                ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
                             }
+                            ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
                         }
                         break;
                     default:
