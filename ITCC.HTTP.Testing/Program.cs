@@ -24,11 +24,15 @@ namespace ITCC.HTTP.Testing
         public string Token { get; set; }
     }
 
-    internal class AccountMock : IComparable<AccountMock>
+    internal class AccountMock : IEquatable<AccountMock>
     {
         public string Guid { get; set; } = System.Guid.NewGuid().ToString();
 
-        public int CompareTo(AccountMock other) => other == null ? 1 : string.Compare(Guid, other.Guid, StringComparison.Ordinal);
+        public bool Equals(AccountMock other)
+        {
+            Logger.LogEntry("COMPARE", LogLevel.Trace, $"Comparing {Guid} to {other.Guid}");
+            return Guid == other.Guid;
+        }
     }
     
     internal class Program
@@ -63,7 +67,7 @@ namespace ITCC.HTTP.Testing
                     {"Accept-Encoding", "gzip"}
                 });
 #else
-            const int requestsPerStep = 1000;
+            const int requestsPerStep = 10;
             const int stepCount = 10;
             const int requestCount = requestsPerStep * stepCount;
             double totalElapsed = 0;
@@ -107,7 +111,7 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Info;
+            Logger.Level = LogLevel.Debug;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -155,9 +159,10 @@ namespace ITCC.HTTP.Testing
                     await Task.Delay(50);
                     return await Task.FromResult(new AuthorizationResult<AccountMock>(new AccountMock
                     {
-                        Guid = new Random().Next(1, 10).ToString()
+                        Guid = new Random().Next(1, 5).ToString()
                     }, AuthorizationStatus.Ok));
-                }
+                },
+                CacheEnabled = true
             });
 
             Server.AddRequestProcessor(new RequestProcessor<AccountMock>
@@ -220,7 +225,8 @@ namespace ITCC.HTTP.Testing
                     await Task.Delay(100);
                     return
                         await Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}));
-                }
+                },
+                CachePolicy = CachePolicy.NoCache
             });
 
             Server.AddStaticRedirect("test", "delay");

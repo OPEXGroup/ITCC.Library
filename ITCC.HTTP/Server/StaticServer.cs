@@ -25,7 +25,7 @@ namespace ITCC.HTTP.Server
     ///     Represents static (and so, singleton HTTP(S) server
     /// </summary>
     public static class StaticServer<TAccount>
-        where TAccount : class, IComparable<TAccount>
+        where TAccount : class, IEquatable<TAccount>
     {
         #region main
         public static ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration)
@@ -61,6 +61,7 @@ namespace ITCC.HTTP.Server
                     return ServerStartStatus.BadParameters;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
+                _cacheEnabled = configuration.CacheEnabled;
 
                 StartListenerThread(configuration);
                 _started = true;
@@ -330,9 +331,41 @@ namespace ITCC.HTTP.Server
                         }
                         else
                         {
-                            var handleResult =
-                                await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                            ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
+                            if (_cacheEnabled)
+                            {
+                                if (requestProcessor.Method != HttpMethod.Get &&
+                                    requestProcessor.Method != HttpMethod.Head)
+                                {
+                                    LogMessage(LogLevel.Debug, "Dropping cache");
+                                    CacheController<TAccount>.Clear();
+                                }
+                                else
+                                {
+                                    HandlerResult cacheResult;
+                                    if (CacheController<TAccount>.TryGet(authResult.Account, requestProcessor,
+                                        out cacheResult))
+                                    {
+                                        LogMessage(LogLevel.Debug, "Data loaded from cache");
+                                        ResponseFactory.BuildResponse(context, cacheResult, false,
+                                            RequestEnablesGzip(request));
+                                    }
+                                    else
+                                    {
+                                        LogMessage(LogLevel.Debug, "Cache miss");
+                                        var handleResult =
+                                            await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                                        CacheController<TAccount>.AddOrUpdate(authResult.Account, requestProcessor,
+                                            handleResult);
+                                        ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var handleResult =
+                                    await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                                ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
+                            }
                         }
                         break;
                     default:
@@ -376,6 +409,7 @@ namespace ITCC.HTTP.Server
         }
 
         private static double _requestMaxServeTime;
+        private static bool _cacheEnabled;
         #endregion
 
         #region service
