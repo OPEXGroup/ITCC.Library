@@ -27,10 +27,10 @@ namespace ITCC.HTTP.Server
                 HandlerResult cacheResult;
                 if (TryGet(account, requestProcessor, out cacheResult))
                 {
-                    LogMessage(LogLevel.Debug, "Data loaded from cache");
+                    LogMessage(LogLevel.Debug, $"Data loaded from cache for {account}");
                     return cacheResult;
                 }
-                LogMessage(LogLevel.Debug, "Cache miss");
+                LogMessage(LogLevel.Debug, $"Cache miss for {account}");
                 var handleResult = await requestProcessor.Handler.Invoke(account, context.Request).ConfigureAwait(false);
                 AddOrUpdate(account, requestProcessor, handleResult);
                 return handleResult;

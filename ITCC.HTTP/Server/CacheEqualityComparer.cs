@@ -23,6 +23,6 @@ namespace ITCC.HTTP.Server
         }
 
         public int GetHashCode(AccountProcessorPair<TAccount> obj)
-            => obj.GetHashCode();
+            => (obj.Account?.GetHashCode() ?? 0) + (obj.RequestProcessor?.GetHashCode() ?? 0);
     }
 }
