@@ -24,7 +24,8 @@ namespace ITCC.HTTP.Server
     /// <summary>
     ///     Represents static (and so, singleton HTTP(S) server
     /// </summary>
-    public static class StaticServer<TAccount> where TAccount : class
+    public static class StaticServer<TAccount>
+        where TAccount : class, IComparable<TAccount>
     {
         #region main
         public static ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration)
