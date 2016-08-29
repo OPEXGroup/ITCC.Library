@@ -16,17 +16,22 @@ using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
+    using Server = ITCC.HTTP.Server.StaticServer<AccountMock>;
     internal class TokenStore
     {
         public string Token { get; set; }
     }
 
+    internal class AccountMock : IComparable<AccountMock>
+    {
+        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+
+        public int CompareTo(AccountMock other) => other == null ? 1 : string.Compare(Guid, other.Guid, StringComparison.Ordinal);
+    }
+    
     internal class Program
     {
-        private static void Main(string[] args)
-        {
-            MainAsync().GetAwaiter().GetResult();
-        }
+        private static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
         private static async Task MainAsync()
         {
@@ -108,7 +113,7 @@ namespace ITCC.HTTP.Testing
 
         private static void StartServer()
         {
-            StaticServer<object>.Start(new HttpServerConfiguration<object>
+            Server.Start(new HttpServerConfiguration<AccountMock>
             {
                 BodyEncoder = new BodyEncoder
                 {
@@ -144,7 +149,7 @@ namespace ITCC.HTTP.Testing
                 FilesPreprocessorThreads = -1
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
                 AuthorizationRequired = false,
                 Handler = async (o, request) =>
@@ -175,7 +180,7 @@ namespace ITCC.HTTP.Testing
                 SubUri = "delay"
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
                 AuthorizationRequired = false,
                 Method = HttpMethod.Get,
@@ -194,20 +199,22 @@ namespace ITCC.HTTP.Testing
                 }
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
                 AuthorizationRequired = false,
                 Method = HttpMethod.Get,
                 SubUri = "token",
-                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore { Token = "Hello111" }))
+                Handler = async (account, request) =>
+                {
+                    await Task.Delay(100);
+                    return
+                        await Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}));
+                }
             });
 
-            StaticServer<object>.AddStaticRedirect("test", "delay");
+            Server.AddStaticRedirect("test", "delay");
         }
 
-        private static void StopServer()
-        {
-            StaticServer<object>.Stop();
-        }
+        private static void StopServer() => Server.Stop();
     }
 }
