@@ -1,7 +1,9 @@
-﻿// #define STRESS_TEST
+﻿#define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -61,7 +63,7 @@ namespace ITCC.HTTP.Testing
                     {"Accept-Encoding", "gzip"}
                 });
 #else
-            const int requestsPerStep = 10000;
+            const int requestsPerStep = 1000;
             const int stepCount = 10;
             const int requestCount = requestsPerStep * stepCount;
             double totalElapsed = 0;
@@ -105,7 +107,7 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Info;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -146,12 +148,21 @@ namespace ITCC.HTTP.Testing
                 },
                 FilesLocation = @"C:\Users\b0-0b",
                 FilesPreprocessingEnabled = false,
-                FilesPreprocessorThreads = -1
+                FilesPreprocessorThreads = -1,
+                Authorizer = async (request, processor)
+                =>
+                {
+                    await Task.Delay(50);
+                    return await Task.FromResult(new AuthorizationResult<AccountMock>(new AccountMock
+                    {
+                        Guid = new Random().Next(1, 10).ToString()
+                    }, AuthorizationStatus.Ok));
+                }
             });
 
             Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Handler = async (o, request) =>
                 {
                     int delay;
@@ -182,7 +193,7 @@ namespace ITCC.HTTP.Testing
 
             Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Method = HttpMethod.Get,
                 SubUri = "bigdata",
                 Handler = (account, request) =>
@@ -201,7 +212,7 @@ namespace ITCC.HTTP.Testing
 
             Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Method = HttpMethod.Get,
                 SubUri = "token",
                 Handler = async (account, request) =>
