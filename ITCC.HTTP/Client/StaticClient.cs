@@ -172,12 +172,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => PostRawAsync(partialUri,
-                parameters,
-                headers,
-                data,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.PostRawAsync(partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Posts object and returns deserialized json response
