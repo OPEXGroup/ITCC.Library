@@ -165,18 +165,18 @@ namespace ITCC.HTTP.Client
 
         #endregion
 
-            #region post
+        #region post
 
-            /// <summary>
-            ///     Basic POST method: posts data and returns status and body
-            /// </summary>
-            /// <param name="partialUri">Uri part after server address/fqdn and port</param>
-            /// <param name="parameters">Request parameters after `?`</param>
-            /// <param name="headers">Request headers</param>
-            /// <param name="data">Raw request body</param>
-            /// <param name="authentificationProvider">Authentification provider</param>
-            /// <param name="cancellationToken">Task cancellation token</param>
-            /// <returns>Request status and raw response body</returns>
+        /// <summary>
+        ///     Basic POST method: posts data and returns status and body
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="data">Raw request body</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns>Request status and raw response body</returns>
         public static Task<RequestResult<string>> PostRawAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -302,18 +302,18 @@ namespace ITCC.HTTP.Client
 
         #endregion
 
-            #region delete
+        #region delete
 
-            /// <summary>
-            ///     Basic DELETE method: sends data and returns status and body
-            /// </summary>
-            /// <param name="partialUri">Uri part after server address/fqdn and port</param>
-            /// <param name="parameters">Request parameters after `?`</param>
-            /// <param name="headers">Request headers</param>
-            /// <param name="data">Raw request body</param>
-            /// <param name="authentificationProvider">Authentification provider</param>
-            /// <param name="cancellationToken">Task cancellation token</param>
-            /// <returns>Request status and raw response body</returns>
+        /// <summary>
+        ///     Basic DELETE method: sends data and returns status and body
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="data">Raw request body</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns>Request status and raw response body</returns>
         public static Task<RequestResult<string>> DeleteRawAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
