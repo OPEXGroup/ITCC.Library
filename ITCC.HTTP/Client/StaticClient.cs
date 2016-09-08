@@ -50,11 +50,8 @@ namespace ITCC.HTTP.Client
             Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-        {
-            return RegularClient.PerformRequestAsync(method, partialUri, parameters, headers, bodyArg,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.PerformRequestAsync(method, partialUri, parameters, headers, bodyArg,
                 requestBodySerializer, responseBodyDeserializer, authentificationProvider, outputStream, RegularClient.AllowedRedirectCount, cancellationToken);
-        }
 
         #endregion
 
@@ -74,14 +71,11 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.GetRawAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.GetRawAsync(partialUri,
                 parameters,
                 headers,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Methods sends GET and tries to deserialize body
@@ -100,15 +94,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-        {
-            return RegularClient.GetDeserializedAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.GetDeserializedAsync(partialUri,
                 parameters,
                 headers,
                 bodyDeserializer,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Method tries to deserialize response as json
@@ -125,14 +116,11 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-        {
-            return RegularClient.GetAsync<TResult>(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.GetAsync<TResult>(partialUri,
                 parameters,
                 headers,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Downloads file by uri into specified location
@@ -152,16 +140,13 @@ namespace ITCC.HTTP.Client
             string fileName = null,
             bool allowRewrite = true,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.GetFileAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.GetFileAsync(partialUri,
                 parameters,
                 headers,
                 fileName,
                 allowRewrite,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         #endregion
 
@@ -183,15 +168,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return PostRawAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => PostRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Posts object and returns deserialized json response
@@ -211,15 +193,12 @@ namespace ITCC.HTTP.Client
             object data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-            where TResult : class
-        {
-            return RegularClient.PostAsync<TResult>(partialUri,
+            where TResult : class => RegularClient.PostAsync<TResult>(partialUri,
                 parameters,
                 headers,
                 data,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Posts file's content to specified uri
@@ -236,15 +215,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.PostFileAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PostFileAsync(partialUri,
                 parameters,
                 headers,
                 filePath,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         #endregion
 
@@ -266,15 +242,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.PutRawAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PutRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         /// <summary>
         ///     Puts file's content to specified uri
@@ -290,15 +263,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.PutFileAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PutFileAsync(partialUri,
                 parameters,
                 headers,
                 filePath,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         #endregion
 
@@ -320,15 +290,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return RegularClient.DeleteRawAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.DeleteRawAsync(partialUri,
                 parameters,
                 headers,
                 data,
                 authentificationProvider,
                 cancellationToken);
-        }
 
         #endregion
 

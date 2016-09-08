@@ -287,21 +287,19 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Get,
-                partialUri,
-                parameters,
-                headers,
-                null,
-                null,
-                null,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, string>(
+                    HttpMethod.Get,
+                    partialUri,
+                    parameters,
+                    headers,
+                    null,
+                    null,
+                    null,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Methods sends GET and tries to deserialize body
@@ -321,21 +319,19 @@ namespace ITCC.HTTP.Client
             Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-        {
-            return PerformRequestAsync<string, TResult>(
-                HttpMethod.Get,
-                partialUri,
-                parameters,
-                headers,
-                null,
-                null,
-                bodyDeserializer,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, TResult>(
+                    HttpMethod.Get,
+                    partialUri,
+                    parameters,
+                    headers,
+                    null,
+                    null,
+                    bodyDeserializer,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Method tries to deserialize response as json
@@ -353,21 +349,19 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-        {
-            return PerformRequestAsync<string, TResult>(
-                HttpMethod.Get,
-                partialUri,
-                parameters,
-                headers,
-                null,
-                null,
-                JsonConvert.DeserializeObject<TResult>,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, TResult>(
+                    HttpMethod.Get,
+                    partialUri,
+                    parameters,
+                    headers,
+                    null,
+                    null,
+                    JsonConvert.DeserializeObject<TResult>,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Downloads file by uri into specified location
@@ -450,21 +444,19 @@ namespace ITCC.HTTP.Client
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Post,
-                partialUri,
-                parameters,
-                headers,
-                data,
-                null,
-                null,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, string>(
+                    HttpMethod.Post,
+                    partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    null,
+                    null,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Posts object and returns deserialized json response
@@ -483,23 +475,20 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             object data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-            where TResult : class
-        {
-            return PerformRequestAsync(
-                HttpMethod.Post,
-                partialUri,
-                parameters,
-                headers,
-                data,
-                JsonConvert.SerializeObject,
-                JsonConvert.DeserializeObject<TResult>,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+                => PerformRequestAsync(
+                    HttpMethod.Post,
+                    partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    JsonConvert.SerializeObject,
+                    JsonConvert.DeserializeObject<TResult>,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Posts file's content to specified uri
@@ -568,21 +557,19 @@ namespace ITCC.HTTP.Client
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Put,
-                partialUri,
-                parameters,
-                headers,
-                data,
-                null,
-                null,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, string>(
+                    HttpMethod.Put,
+                    partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    null,
+                    null,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         /// <summary>
         ///     Puts file's content to specified uri
@@ -650,21 +637,19 @@ namespace ITCC.HTTP.Client
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return PerformRequestAsync<string, string>(
-                HttpMethod.Delete,
-                partialUri,
-                parameters,
-                headers,
-                data,
-                null,
-                null,
-                authentificationProvider,
-                null,
-                AllowedRedirectCount,
-                cancellationToken
-                );
-        }
+                => PerformRequestAsync<string, string>(
+                    HttpMethod.Delete,
+                    partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    null,
+                    null,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
 
         #endregion
 
@@ -692,15 +677,9 @@ namespace ITCC.HTTP.Client
 
         #region log
 
-        private void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("HTTP CLIENT", level, message);
-        }
+        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP CLIENT", level, message);
 
-        private void LogException(LogLevel level, Exception exception)
-        {
-            Logger.LogException("HTTP CLIENT", level, exception);
-        }
+        private void LogException(LogLevel level, Exception exception) => Logger.LogException("HTTP CLIENT", level, exception);
 
         /// <summary>
         ///     FOR DEBUG ONLY
