@@ -71,11 +71,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.GetRawAsync(partialUri,
-                parameters,
-                headers,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.GetRawAsync(partialUri,
+                    parameters,
+                    headers,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Methods sends GET and tries to deserialize body
@@ -94,12 +95,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.GetDeserializedAsync(partialUri,
-                parameters,
-                headers,
-                bodyDeserializer,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+                => RegularClient.GetDeserializedAsync(partialUri,
+                    parameters,
+                    headers,
+                    bodyDeserializer,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Method tries to deserialize response as json
@@ -116,11 +118,12 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.GetAsync<TResult>(partialUri,
-                parameters,
-                headers,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+                => RegularClient.GetAsync<TResult>(partialUri,
+                    parameters,
+                    headers,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Downloads file by uri into specified location
@@ -140,13 +143,14 @@ namespace ITCC.HTTP.Client
             string fileName = null,
             bool allowRewrite = true,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.GetFileAsync(partialUri,
-                parameters,
-                headers,
-                fileName,
-                allowRewrite,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.GetFileAsync(partialUri,
+                    parameters,
+                    headers,
+                    fileName,
+                    allowRewrite,
+                    authentificationProvider,
+                    cancellationToken);
 
         #endregion
 
@@ -192,13 +196,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             object data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-            where TResult : class => RegularClient.PostAsync<TResult>(partialUri,
-                parameters,
-                headers,
-                data,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+                => RegularClient.PostAsync<TResult>(partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Posts file's content to specified uri
@@ -215,12 +219,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PostFileAsync(partialUri,
-                parameters,
-                headers,
-                filePath,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.PostFileAsync(partialUri,
+                    parameters,
+                    headers,
+                    filePath,
+                    authentificationProvider,
+                    cancellationToken);
 
         #endregion
 
@@ -242,12 +247,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PutRawAsync(partialUri,
-                parameters,
-                headers,
-                data,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.PutRawAsync(partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    authentificationProvider,
+                    cancellationToken);
 
         /// <summary>
         ///     Puts file's content to specified uri
@@ -263,12 +269,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string filePath = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.PutFileAsync(partialUri,
-                parameters,
-                headers,
-                filePath,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.PutFileAsync(partialUri,
+                    parameters,
+                    headers,
+                    filePath,
+                    authentificationProvider,
+                    cancellationToken);
 
         #endregion
 
@@ -290,12 +297,13 @@ namespace ITCC.HTTP.Client
             IDictionary<string, string> headers = null,
             string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) => RegularClient.DeleteRawAsync(partialUri,
-                parameters,
-                headers,
-                data,
-                authentificationProvider,
-                cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                => RegularClient.DeleteRawAsync(partialUri,
+                    parameters,
+                    headers,
+                    data,
+                    authentificationProvider,
+                    cancellationToken);
 
         #endregion
 
@@ -436,7 +444,7 @@ namespace ITCC.HTTP.Client
         /// <summary>
         ///     Headers' names. Their values will be replaced with non-critical info
         /// </summary>
-        public static List<string> LogProhibitedHeaders  => RegularClient.LogProhibitedHeaders;
+        public static List<string> LogProhibitedHeaders => RegularClient.LogProhibitedHeaders;
 
         private static readonly object ClientLock = new object();
 
