@@ -1,3 +1,7 @@
+## 1.0.1 (2016-09-08)
+
+* **Fix**:  `StaticClient::PostRawAsync` fixed (recursion was wrong)
+
 ## 1.0.0 (2016-08-23)
 
 * **New**:  Build configurations for different platforms (finally :) )  
