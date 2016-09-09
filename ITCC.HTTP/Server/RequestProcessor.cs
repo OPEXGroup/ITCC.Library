@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using ITCC.HTTP.Common;
+using ITCC.HTTP.Enums;
 
 namespace ITCC.HTTP.Server
 {
@@ -24,5 +25,10 @@ namespace ITCC.HTTP.Server
         ///     Request SubUri
         /// </summary>
         public string SubUri;
+
+        /// <summary>
+        ///     Caching policy
+        /// </summary>
+        public CachePolicy CachePolicy = CachePolicy.PrivateCache;
     }
 }

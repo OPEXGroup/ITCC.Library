@@ -122,6 +122,10 @@ namespace ITCC.HTTP.Server
         ///     Warning will be given if request handle workes for more milliseconds. Negatime values mean infinity
         /// </summary>
         public double RequestMaxServeTime { get; set; } = -1;
+        /// <summary>
+        ///     If true, private cache will be used by default
+        /// </summary>
+        public bool CacheEnabled { get; set; } = false;
 
         public bool IsEnough()
         {

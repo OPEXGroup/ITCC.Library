@@ -1,7 +1,9 @@
-﻿// #define STRESS_TEST
+﻿#define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -16,17 +18,28 @@ using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
+    using Server = ITCC.HTTP.Server.StaticServer<AccountMock>;
     internal class TokenStore
     {
         public string Token { get; set; }
     }
 
+    internal class AccountMock : IEquatable<AccountMock>
+    {
+        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+
+        public override string ToString() => Guid;
+
+        public bool Equals(AccountMock other)
+        {
+            Logger.LogEntry("COMPARE", LogLevel.Trace, $"Comparing {Guid} to {other.Guid}");
+            return Guid == other.Guid;
+        }
+    }
+    
     internal class Program
     {
-        private static void Main(string[] args)
-        {
-            MainAsync().GetAwaiter().GetResult();
-        }
+        private static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
         private static async Task MainAsync()
         {
@@ -56,7 +69,7 @@ namespace ITCC.HTTP.Testing
                     {"Accept-Encoding", "gzip"}
                 });
 #else
-            const int requestsPerStep = 10000;
+            const int requestsPerStep = 10;
             const int stepCount = 10;
             const int requestCount = requestsPerStep * stepCount;
             double totalElapsed = 0;
@@ -100,7 +113,7 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.Debug;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -108,7 +121,7 @@ namespace ITCC.HTTP.Testing
 
         private static void StartServer()
         {
-            StaticServer<object>.Start(new HttpServerConfiguration<object>
+            Server.Start(new HttpServerConfiguration<AccountMock>
             {
                 BodyEncoder = new BodyEncoder
                 {
@@ -141,12 +154,22 @@ namespace ITCC.HTTP.Testing
                 },
                 FilesLocation = @"C:\Users\b0-0b",
                 FilesPreprocessingEnabled = false,
-                FilesPreprocessorThreads = -1
+                FilesPreprocessorThreads = -1,
+                Authorizer = async (request, processor)
+                =>
+                {
+                    await Task.Delay(50);
+                    return await Task.FromResult(new AuthorizationResult<AccountMock>(new AccountMock
+                    {
+                        Guid = new Random().Next(1, 5).ToString()
+                    }, AuthorizationStatus.Ok));
+                },
+                CacheEnabled = true
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Handler = async (o, request) =>
                 {
                     int delay;
@@ -175,9 +198,9 @@ namespace ITCC.HTTP.Testing
                 SubUri = "delay"
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Method = HttpMethod.Get,
                 SubUri = "bigdata",
                 Handler = (account, request) =>
@@ -191,23 +214,27 @@ namespace ITCC.HTTP.Testing
                         builder.Append(str);
                     }
                     return Task.FromResult(new HandlerResult(HttpStatusCode.OK, builder.ToString()));
-                }
+                },
+                CachePolicy = CachePolicy.PublicCache
             });
 
-            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            Server.AddRequestProcessor(new RequestProcessor<AccountMock>
             {
-                AuthorizationRequired = false,
+                AuthorizationRequired = true,
                 Method = HttpMethod.Get,
                 SubUri = "token",
-                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore { Token = "Hello111" }))
+                Handler = async (account, request) =>
+                {
+                    await Task.Delay(100);
+                    return
+                        await Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore {Token = "Hello111"}));
+                },
+                CachePolicy = CachePolicy.PrivateCache
             });
 
-            StaticServer<object>.AddStaticRedirect("test", "delay");
+            Server.AddStaticRedirect("test", "delay");
         }
 
-        private static void StopServer()
-        {
-            StaticServer<object>.Stop();
-        }
+        private static void StopServer() => Server.Stop();
     }
 }

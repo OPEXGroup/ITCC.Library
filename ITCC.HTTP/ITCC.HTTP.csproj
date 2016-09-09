@@ -88,6 +88,7 @@
     <Compile Include="Client\StaticClient.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
+    <Compile Include="Enums\CachePolicy.cs" />
     <Compile Include="Enums\FileOperationStatus.cs" />
     <Compile Include="Enums\FileType.cs" />
     <Compile Include="Enums\Protocol.cs" />
@@ -95,9 +96,12 @@
     <Compile Include="Enums\ServerStartStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Client\CertificateController.cs" />
+    <Compile Include="Server\AccountProcessorPair.cs" />
     <Compile Include="Server\AuthentificationResult.cs" />
     <Compile Include="Server\AuthorizationResult.cs" />
     <Compile Include="Server\BodyEncoder.cs" />
+    <Compile Include="Server\CacheController.cs" />
+    <Compile Include="Server\CacheEqualityComparer.cs" />
     <Compile Include="Server\FileSection.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Server\Files\Preprocess\FilePreprocessController.cs" />

@@ -24,7 +24,8 @@ namespace ITCC.HTTP.Server
     /// <summary>
     ///     Represents static (and so, singleton HTTP(S) server
     /// </summary>
-    public static class StaticServer<TAccount> where TAccount : class
+    public static class StaticServer<TAccount>
+        where TAccount : class, IEquatable<TAccount>
     {
         #region main
         public static ServerStartStatus Start(HttpServerConfiguration<TAccount> configuration)
@@ -60,6 +61,7 @@ namespace ITCC.HTTP.Server
                     return ServerStartStatus.BadParameters;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
+                _cacheEnabled = configuration.CacheEnabled;
 
                 StartListenerThread(configuration);
                 _started = true;
@@ -246,15 +248,9 @@ namespace ITCC.HTTP.Server
 
         #region log
 
-        private static void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("HTTP SERVER", level, message);
-        }
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP SERVER", level, message);
 
-        private static void LogException(LogLevel level, Exception ex)
-        {
-            Logger.LogException("HTTP SERVER", level, ex);
-        }
+        private static void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP SERVER", level, ex);
 
         #endregion
 
@@ -329,8 +325,17 @@ namespace ITCC.HTTP.Server
                         }
                         else
                         {
-                            var handleResult =
-                                await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                            HandlerResult handleResult;
+                            if (_cacheEnabled)
+                            {
+                                handleResult =
+                                    await CacheController<TAccount>.Process(context, authResult.Account, requestProcessor);
+                            }
+                            else
+                            {
+                                handleResult =
+                                    await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
+                            }
                             ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
                         }
                         break;
@@ -375,6 +380,7 @@ namespace ITCC.HTTP.Server
         }
 
         private static double _requestMaxServeTime;
+        private static bool _cacheEnabled;
         #endregion
 
         #region service
@@ -768,7 +774,7 @@ namespace ITCC.HTTP.Server
             var queryString = string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}"));
             var separator = string.IsNullOrEmpty(queryString) ? string.Empty : "?";
             var url = absolutePath ? request.Url.ToString() : request.Url.LocalPath;
-            builder.AppendLine($"{request.HttpMethod} {url} HTTP/{request.ProtocolVersion}{separator}{queryString}");
+            builder.AppendLine($"{request.HttpMethod} {url}{separator}{queryString} HTTP/{request.ProtocolVersion}");
 
             foreach (var key in request.Headers.AllKeys)
             {
