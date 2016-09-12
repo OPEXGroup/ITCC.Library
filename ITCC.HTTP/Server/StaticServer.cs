@@ -772,10 +772,9 @@ namespace ITCC.HTTP.Server
 
             foreach (var key in request.Headers.AllKeys)
             {
-                if (ResponseFactory.LogProhibitedHeaders.Contains(key))
-                    builder.AppendLine($"{key}: {Constants.RemovedLogString}");
-                else
-                    builder.AppendLine($"{key}: {request.Headers[key]}");
+                builder.AppendLine(ResponseFactory.LogProhibitedHeaders.Contains(key)
+                    ? $"{key}: {Constants.RemovedLogString}"
+                    : $"{key}: {request.Headers[key]}");
             }
 #if TRACE
             if (!request.HasEntityBody)
@@ -783,13 +782,15 @@ namespace ITCC.HTTP.Server
 
             if (!IsFilesRequest(request))
             {
-                using (var reader = new StreamReader(request.InputStream, _requestEncoding, true, 4096, true))
-                {
-                    var bodyString = reader.ReadToEnd();
-                    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
-                    builder.AppendLine(bodyString);
-                }
-                request.InputStream.Position = 0;
+                // TODO: FIXME
+                builder.AppendLine("<Text content");
+                //using (var reader = new StreamReader(request.InputStream, _requestEncoding, true, 4096, true))
+                //{
+                //    var bodyString = reader.ReadToEnd();
+                //    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
+                //    builder.AppendLine(bodyString);
+                //}
+                // request.InputStream.Position = 0;
             }
             else
             {
