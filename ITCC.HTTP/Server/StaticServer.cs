@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -270,7 +271,7 @@ namespace ITCC.HTTP.Server
                 _statistics?.AddRequest(request);
                 if (Logger.Level >= LogLevel.Debug)
                     LogMessage(LogLevel.Debug,
-                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(request)}");
+                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(context)}");
 
                 foreach (var checker in ServiceHandlers.Keys)
                 {
@@ -445,7 +446,7 @@ namespace ITCC.HTTP.Server
         private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context.Request, true)), Formatting.None, converter);
+            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context, true)), Formatting.None, converter);
             ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
             return Task.CompletedTask;
@@ -759,8 +760,10 @@ namespace ITCC.HTTP.Server
             return parts.Any(p => p == "gzip");
         }
 
-        private static string SerializeHttpRequest(HttpListenerRequest request, bool absolutePath = false)
+        private static string SerializeHttpRequest(HttpListenerContext context, bool absolutePath = false)
         {
+            var request = context.Request;
+
             if (request == null)
                 return null;
 
@@ -776,26 +779,33 @@ namespace ITCC.HTTP.Server
                     ? $"{key}: {Constants.RemovedLogString}"
                     : $"{key}: {request.Headers[key]}");
             }
-#if TRACE
+
             if (!request.HasEntityBody)
                 return builder.ToString();
 
+            builder.AppendLine();
+#if TRACE
             if (!IsFilesRequest(request))
             {
-                // TODO: FIXME
-                builder.AppendLine("<Text content");
-                //using (var reader = new StreamReader(request.InputStream, _requestEncoding, true, 4096, true))
-                //{
-                //    var bodyString = reader.ReadToEnd();
-                //    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
-                //    builder.AppendLine(bodyString);
-                //}
-                // request.InputStream.Position = 0;
+                var memoryStream = new MemoryStream();
+                request.InputStream.CopyTo(memoryStream);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                using (var reader = new StreamReader(memoryStream, _requestEncoding, true, 4096, true))
+                {
+                    var bodyString = reader.ReadToEnd();
+                    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
+                    builder.AppendLine(bodyString);
+                }
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                request.GetType().InvokeMember("m_RequestStream", BindingFlags.SetField | BindingFlags.Instance | BindingFlags.NonPublic, null, request, new object[] { memoryStream });
             }
             else
             {
                 builder.AppendLine("<Binary content>");
             }
+#else
+            builder.AppendLine(!IsFilesRequest(request) ? "<Text content>" : "<Binary content>");
 #endif
             return builder.ToString();
         }
