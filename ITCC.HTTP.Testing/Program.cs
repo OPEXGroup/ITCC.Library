@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -191,6 +192,23 @@ namespace ITCC.HTTP.Testing
                         builder.Append(str);
                     }
                     return Task.FromResult(new HandlerResult(HttpStatusCode.OK, builder.ToString()));
+                }
+            });
+
+            StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>
+            {
+                AuthorizationRequired = false,
+                Method = HttpMethod.Post,
+                SubUri = "postdata",
+                Handler = async (account, request) =>
+                {
+                    using (var reader = new StreamReader(request.InputStream, Encoding.UTF8))
+                    {
+                        var content = await reader.ReadToEndAsync();
+                        Logger.LogEntry("HANDLER", LogLevel.Info, content);
+                    }
+
+                    return new HandlerResult(HttpStatusCode.OK, null);
                 }
             });
 
