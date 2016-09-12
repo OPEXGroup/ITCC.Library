@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TRACE
+    #define ITCC_LOG_REQUEST_BODIES
+#endif
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -784,7 +788,7 @@ namespace ITCC.HTTP.Server
                 return builder.ToString();
 
             builder.AppendLine();
-#if TRACE
+#if ITCC_LOG_REQUEST_BODIES
             if (!IsFilesRequest(request))
             {
                 var memoryStream = new MemoryStream();
