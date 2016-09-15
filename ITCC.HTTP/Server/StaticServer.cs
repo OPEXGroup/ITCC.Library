@@ -401,7 +401,7 @@ namespace ITCC.HTTP.Server
             {
                 return false;
             }
-            if (request.Url.LocalPath.Trim('/').StartsWith("login"))
+            if (UriMatchesString(request.Url, "login"))
             {
                 return true;
             }
@@ -430,17 +430,7 @@ namespace ITCC.HTTP.Server
 
         #region ping
         private static bool IsPingRequest(HttpListenerRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-            if (request.QueryString["ping"] != null)
-            {
-                return true;
-            }
-            return request.Url.LocalPath.Trim('/') == "ping";
-        }
+            => request != null && UriMatchesString(request.Url, "ping");
 
         private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
@@ -467,7 +457,7 @@ namespace ITCC.HTTP.Server
             {
                 return false;
             }
-            return request.Url.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
+            return UriMatchesString(request.Url, "statistics") && StatisticsEnabled;
         }
 
         private static async Task HandleStatistics(HttpListenerContext context, Stopwatch requestStopwatch)
@@ -735,7 +725,7 @@ namespace ITCC.HTTP.Server
                 }
             }
 
-            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => localUri == requestProcessor.SubUri.Trim('/')).ToList();
+            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => UriMatchesString(request.Url, requestProcessor.SubUri)).ToList();
             if (processorsForUri.Count == 0)
                 return null;
             var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
@@ -812,6 +802,13 @@ namespace ITCC.HTTP.Server
         private static Encoding _requestEncoding = Encoding.UTF8;
         private static bool _autoGzipCompression;
         private static List<string> _logProhibitedQueryParams;
+
+        #endregion
+
+        #region utils
+
+        private static bool UriMatchesString(Uri uri, string str)
+            => string.Equals(uri.LocalPath.Trim('/'), str.Trim('/'), StringComparison.OrdinalIgnoreCase);
 
         #endregion
     }
