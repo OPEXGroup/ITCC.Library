@@ -1,3 +1,7 @@
+## 1.0.3 (2016-09-15)
+
+* **Edit**: Make URIs case-insensitive is `StaticServer`
+
 ## 1.0.2 (2016-09-12)
 
 * **Fix**:  Request logging fixed in `StaticServer`.  
