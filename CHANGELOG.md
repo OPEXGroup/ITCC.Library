@@ -1,3 +1,9 @@
+## 1.0.2 (2016-09-12)
+
+* **Fix**:  Request logging fixed in `StaticServer`.  
+    * This way uses reflection and private field access. This causes possible lack of portability and backward/forward compatibility  
+    * **Note**: this is a hack. Request logging will be used only if **`TRACE`** preprocessor constant is defined. It is not recommended for production usage for now  
+
 ## 1.0.1 (2016-09-08)
 
 * **Fix**:  `StaticClient::PostRawAsync` fixed (recursion was wrong)

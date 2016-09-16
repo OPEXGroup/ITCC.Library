@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TRACE
+    #define ITCC_LOG_REQUEST_BODIES
+#endif
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -270,7 +275,7 @@ namespace ITCC.HTTP.Server
                 _statistics?.AddRequest(request);
                 if (Logger.Level >= LogLevel.Debug)
                     LogMessage(LogLevel.Debug,
-                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(request)}");
+                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(context)}");
 
                 foreach (var checker in ServiceHandlers.Keys)
                 {
@@ -401,7 +406,7 @@ namespace ITCC.HTTP.Server
             {
                 return false;
             }
-            if (request.Url.LocalPath.Trim('/').StartsWith("login"))
+            if (UriMatchesString(request.Url, "login"))
             {
                 return true;
             }
@@ -430,22 +435,12 @@ namespace ITCC.HTTP.Server
 
         #region ping
         private static bool IsPingRequest(HttpListenerRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-            if (request.QueryString["ping"] != null)
-            {
-                return true;
-            }
-            return request.Url.LocalPath.Trim('/') == "ping";
-        }
+            => request != null && UriMatchesString(request.Url, "ping");
 
         private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             var converter = new PingJsonConverter();
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context.Request, true)), Formatting.None, converter);
+            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context, true)), Formatting.None, converter);
             ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
             return Task.CompletedTask;
@@ -467,7 +462,7 @@ namespace ITCC.HTTP.Server
             {
                 return false;
             }
-            return request.Url.LocalPath.Trim('/') == "statistics" && StatisticsEnabled;
+            return UriMatchesString(request.Url, "statistics") && StatisticsEnabled;
         }
 
         private static async Task HandleStatistics(HttpListenerContext context, Stopwatch requestStopwatch)
@@ -735,7 +730,7 @@ namespace ITCC.HTTP.Server
                 }
             }
 
-            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => localUri == requestProcessor.SubUri.Trim('/')).ToList();
+            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => UriMatchesString(request.Url, requestProcessor.SubUri)).ToList();
             if (processorsForUri.Count == 0)
                 return null;
             var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
@@ -759,8 +754,10 @@ namespace ITCC.HTTP.Server
             return parts.Any(p => p == "gzip");
         }
 
-        private static string SerializeHttpRequest(HttpListenerRequest request, bool absolutePath = false)
+        private static string SerializeHttpRequest(HttpListenerContext context, bool absolutePath = false)
         {
+            var request = context.Request;
+
             if (request == null)
                 return null;
 
@@ -772,29 +769,37 @@ namespace ITCC.HTTP.Server
 
             foreach (var key in request.Headers.AllKeys)
             {
-                if (ResponseFactory.LogProhibitedHeaders.Contains(key))
-                    builder.AppendLine($"{key}: {Constants.RemovedLogString}");
-                else
-                    builder.AppendLine($"{key}: {request.Headers[key]}");
+                builder.AppendLine(ResponseFactory.LogProhibitedHeaders.Contains(key)
+                    ? $"{key}: {Constants.RemovedLogString}"
+                    : $"{key}: {request.Headers[key]}");
             }
-#if TRACE
+
             if (!request.HasEntityBody)
                 return builder.ToString();
 
+            builder.AppendLine();
+#if ITCC_LOG_REQUEST_BODIES
             if (!IsFilesRequest(request))
             {
-                using (var reader = new StreamReader(request.InputStream, _requestEncoding, true, 4096, true))
+                var memoryStream = new MemoryStream();
+                request.InputStream.CopyTo(memoryStream);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                using (var reader = new StreamReader(memoryStream, _requestEncoding, true, 4096, true))
                 {
                     var bodyString = reader.ReadToEnd();
                     bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
                     builder.AppendLine(bodyString);
                 }
-                request.InputStream.Position = 0;
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                request.GetType().InvokeMember("m_RequestStream", BindingFlags.SetField | BindingFlags.Instance | BindingFlags.NonPublic, null, request, new object[] { memoryStream });
             }
             else
             {
                 builder.AppendLine("<Binary content>");
             }
+#else
+            builder.AppendLine(!IsFilesRequest(request) ? "<Text content>" : "<Binary content>");
 #endif
             return builder.ToString();
         }
@@ -812,6 +817,13 @@ namespace ITCC.HTTP.Server
         private static Encoding _requestEncoding = Encoding.UTF8;
         private static bool _autoGzipCompression;
         private static List<string> _logProhibitedQueryParams;
+
+        #endregion
+
+        #region utils
+
+        private static bool UriMatchesString(Uri uri, string str)
+            => string.Equals(uri.LocalPath.Trim('/'), str.Trim('/'), StringComparison.OrdinalIgnoreCase);
 
         #endregion
     }
