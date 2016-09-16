@@ -1,4 +1,4 @@
-﻿namespace ITCC.HTTP.SslConfigUtil.Core
+﻿namespace ITCC.HTTP.SslConfigUtil.Core.Enums
 {
     internal enum LoadAssemblyStatus
     {

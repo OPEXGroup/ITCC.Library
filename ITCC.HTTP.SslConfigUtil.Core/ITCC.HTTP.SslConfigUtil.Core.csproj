@@ -46,10 +46,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyLoader.cs" />
-    <Compile Include="BindingResult.cs" />
+    <Compile Include="Binder.cs" />
+    <Compile Include="CheckBindingResult.cs" />
+    <Compile Include="Enums\BindingResult.cs" />
     <Compile Include="CertificateController.cs" />
-    <Compile Include="FindCertificateStatus.cs" />
-    <Compile Include="LoadAssemblyStatus.cs" />
+    <Compile Include="Enums\CheckBindingStatus.cs" />
+    <Compile Include="Enums\ExecuteCommandStatus.cs" />
+    <Compile Include="Enums\FindCertificateStatus.cs" />
+    <Compile Include="Enums\LoadAssemblyStatus.cs" />
+    <Compile Include="ExecuteCommandResult.cs" />
+    <Compile Include="GetAssemblyGuidResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

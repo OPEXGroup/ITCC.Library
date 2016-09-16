@@ -1,4 +1,4 @@
-﻿namespace ITCC.HTTP.SslConfigUtil.Core
+﻿namespace ITCC.HTTP.SslConfigUtil.Core.Enums
 {
     public enum BindingResult
     {
@@ -11,7 +11,7 @@
         InvalidIpAddress,
         InvalidPortValue,
         InvalidCertificateCn,
-
+        InvalidSubjectnameFormat,
 
         SslCertificateNotFound,
 

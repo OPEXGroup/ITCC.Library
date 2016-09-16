@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Text;
-using System.Xml;
 using ITCC.HTTP.SslConfigUtil.Core;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
@@ -46,8 +45,8 @@ namespace ITCC.HTTP.SslConfigUtil.Console
 
             //System.Console.WriteLine(bindResult);
 
-            CertificateController.Bind(@"C:\Users\black\Source\Repos\ITCC.Library\ITCC.HTTP\bin\Debug\ITCC.HTTP.dll", @"my.domain", @"127.0.0.1", @"80", true);
-
+            var res = Binder.Bind(@"C:\Users\black\Source\Repos\ITCC.Library\ITCC.HTTP\bin\Debug\ITCC.HTTP.dll", @"ololo.my.domain", @"127.0.0.1", @"50505", true);
+            System.Console.WriteLine(res);
             System.Console.ReadLine();
             return 0;
         }

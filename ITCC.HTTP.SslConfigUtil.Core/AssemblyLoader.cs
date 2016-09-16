@@ -2,17 +2,13 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.SslConfigUtil.Core
 {
     internal static class AssemblyLoader
     {
-        public struct GetAssemblyGuidResult
-        {
-            public LoadAssemblyStatus Status;
-            public string Guid;
-        }
         public static GetAssemblyGuidResult GetAssemblyGuid(string assymblyFilePath)
         {
             LogDebug("Loading started.");
@@ -76,7 +72,6 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 return new GetAssemblyGuidResult { Status = LoadAssemblyStatus.UnknownError };
             }
         }
-
         private static void LogDebug(string message) => Logger.LogEntry("AssemblyLoader", LogLevel.Debug, message);
         private static void LogException(Exception exception) => Logger.LogException("AssemblyLoader", LogLevel.Debug, exception);
     }
