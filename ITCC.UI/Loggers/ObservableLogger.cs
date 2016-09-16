@@ -16,7 +16,7 @@ namespace ITCC.UI.Loggers
             if (args.Level > Level)
                 return;
             
-            _uiThreadRunner.Invoke(() => { LogEntryCollection.Add(new LogEntryEventArgsViewModel(args)); });
+            _uiThreadRunner.Invoke(() => { LogEntryCollection.AddLast(new LogEntryEventArgsViewModel(args)); });
         }
         #endregion
 
@@ -24,18 +24,18 @@ namespace ITCC.UI.Loggers
         public ObservableLogger(int capacity, UiThreadRunner uiThreadRunner)
         {
             Level = Logger.Level;
-            LogEntryCollection = new BoundedObservableCollection<LogEntryEventArgsViewModel>(capacity);
+            LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
             _uiThreadRunner = uiThreadRunner;
         }
 
         public ObservableLogger(LogLevel level, int capacity, UiThreadRunner uiThreadRunner)
         {
             Level = level;
-            LogEntryCollection = new BoundedObservableCollection<LogEntryEventArgsViewModel>(capacity);
+            LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
             _uiThreadRunner = uiThreadRunner;
         }
 
-        public BoundedObservableCollection<LogEntryEventArgsViewModel> LogEntryCollection { get; }
+        public ObservableRingBuffer<LogEntryEventArgsViewModel> LogEntryCollection { get; }
 
         #endregion
 
