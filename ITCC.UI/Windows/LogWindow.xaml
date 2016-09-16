@@ -39,7 +39,7 @@
                       VerticalScrollBarVisibility="Visible"
                       utils:ScrollViewerExtensions.AlwaysScrollToEnd="True">
             <DataGrid x:Name="LogDataGrid"
-                      HorizontalAlignment="Left"
+                      HorizontalAlignment="Stretch"
                       Margin="0,0,0,0"
                       VerticalAlignment="Top"
                       AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"

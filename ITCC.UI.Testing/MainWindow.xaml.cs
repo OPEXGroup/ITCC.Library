@@ -38,10 +38,15 @@ namespace ITCC.UI.Testing
             
             Logger.LogEntry("Test", LogLevel.Info, "Opened");
 
-            for (var i = 0; i < 1500; ++i)
+            for (int j = 0; j < 15; j++)
             {
-                Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
+                for (var i = 0; i < 100; ++i)
+                {
+                    Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
+                }
+                Thread.Sleep(1);
             }
+            
         }
 
         private LogWindow _logWindow;
