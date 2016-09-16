@@ -8,8 +8,20 @@ namespace ITCC.UI.Utils
     public class ObservableRingBuffer<T> : INotifyCollectionChanged, IEnumerable<T>
         where T: class
     {
+        #region INotifyCollectionChanged
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
+        public void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
+        #endregion
+
+        #region IEnumerable
+        public IEnumerator<T> GetEnumerator() => new BufferEnumerator(_innerList);
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        #endregion
+
+        #region public
         public ObservableRingBuffer(int capacity)
         {
             if (capacity < 1)
@@ -17,10 +29,6 @@ namespace ITCC.UI.Utils
 
             Capacity = capacity;
         }
-
-        public IEnumerator<T> GetEnumerator() => new BufferEnumerator(_innerList);
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void AddLast(T item)
         {
@@ -32,7 +40,7 @@ namespace ITCC.UI.Utils
 
         public int Capacity { get; }
 
-        public void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
+        #endregion
 
         #region private
 
