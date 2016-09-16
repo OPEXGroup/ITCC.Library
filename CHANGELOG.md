@@ -1,3 +1,7 @@
+## 1.0.4 (2016-09-16)
+
+* **Edit**: `LogWindow` rendering optimized (linked-list usage, internal buffer)  
+
 ## 1.0.3 (2016-09-15)
 
 * **Edit**: Make URIs case-insensitive is `StaticServer`
