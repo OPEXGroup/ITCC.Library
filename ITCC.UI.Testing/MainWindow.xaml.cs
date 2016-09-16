@@ -38,7 +38,7 @@ namespace ITCC.UI.Testing
             
             Logger.LogEntry("Test", LogLevel.Info, "Opened");
 
-            for (var i = 0; i < 50; ++i)
+            for (var i = 0; i < 1500; ++i)
             {
                 Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
             }

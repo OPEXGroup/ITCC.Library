@@ -15,7 +15,8 @@ namespace ITCC.UI.Utils
         #endregion
 
         #region IEnumerable
-        public IEnumerator<T> GetEnumerator() => new BufferEnumerator(_innerList);
+
+        public IEnumerator<T> GetEnumerator() => _innerList.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -33,7 +34,7 @@ namespace ITCC.UI.Utils
         public void AddLast(T item)
         {
             _innerList.AddLast(item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, _innerList.Count - 1));
             if (_innerList.Count == Capacity)
                 TruncateStart();
         }
@@ -47,45 +48,11 @@ namespace ITCC.UI.Utils
         private void TruncateStart()
         {
             var first = _innerList.First.Value;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, first, 0));
             _innerList.RemoveFirst();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, first));
         }
 
         private readonly LinkedList<T> _innerList = new LinkedList<T>();
-
-        private class BufferEnumerator : IEnumerator<T>
-        {
-            public BufferEnumerator(LinkedList<T> list)
-            {
-                _list = list;
-                _listNode = _list.First;
-            }
-
-            public void Dispose()
-            {
-                
-            }
-
-            public bool MoveNext()
-            {
-                if (_listNode == null)
-                    return false;
-                _listNode = _listNode.Next;
-                return _listNode != null;
-            }
-
-            public void Reset()
-            {
-                _listNode = _list.First;
-            }
-
-            public T Current => _listNode.Value;
-
-            object IEnumerator.Current => Current;
-
-            private LinkedListNode<T> _listNode;
-            private readonly LinkedList<T> _list;
-        }
 
         #endregion
     }
