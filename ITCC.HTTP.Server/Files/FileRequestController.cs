@@ -39,6 +39,8 @@ namespace ITCC.HTTP.Server.Files
             await HandleFileRequest(context);
             completionCallback(context, stopwatch);
         }
+
+        public string Name => "Files";
         #endregion
 
         #region config

@@ -51,6 +51,8 @@ namespace ITCC.HTTP.Server.Service
             completionCallback(context, stopwatch);
         }
 
+        public string Name => "Statistics";
+
         #endregion
 
         #region public

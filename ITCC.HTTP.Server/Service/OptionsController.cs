@@ -52,6 +52,8 @@ namespace ITCC.HTTP.Server.Service
             completionCallback(context, stopwatch);
             return Task.CompletedTask;
         }
+
+        public string Name => "Options";
         #endregion
 
         #region public

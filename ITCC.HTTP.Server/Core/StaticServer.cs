@@ -282,6 +282,7 @@ namespace ITCC.HTTP.Server.Core
                     ServiceRequestProcessors.FirstOrDefault(sp => sp.RequestIsSuitable(context.Request));
                 if (serviceProcessor != null)
                 {
+                    LogMessage(LogLevel.Debug, $"Service {serviceProcessor.Name} requested");
                     await serviceProcessor.HandleRequest(context, stopWatch, OnResponseReady);
                     return;
                 }

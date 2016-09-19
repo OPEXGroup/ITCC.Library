@@ -21,6 +21,8 @@ namespace ITCC.HTTP.Server.Service
             completionCallback(context, stopwatch);
             return Task.CompletedTask;
         }
+
+        public string Name => "Ping";
         #endregion
     }
 }

@@ -13,5 +13,7 @@ namespace ITCC.HTTP.Server.Interfaces
         bool RequestIsSuitable(HttpListenerRequest request);
 
         Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback);
+
+        string Name { get; }
     }
 }

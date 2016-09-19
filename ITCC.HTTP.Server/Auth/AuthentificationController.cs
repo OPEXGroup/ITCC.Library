@@ -38,6 +38,8 @@ namespace ITCC.HTTP.Server.Auth
             ResponseFactory.BuildResponse(context, authResult);
             completionCallback(context, stopwatch);
         }
+
+        public string Name => "Authentification";
         #endregion
 
         #region public
