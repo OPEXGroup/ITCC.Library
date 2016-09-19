@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
@@ -21,11 +22,18 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using System.IO;
+using ITCC.HTTP.SslConfigUtil.Core.Views;
 
 namespace ITCC.HTTP.SslConfigUtil.Core
 {
-    internal static class CertificateController
+    public static class CertificateController
     {
+        public static IEnumerable<CertificateView> GetCertificates()
+        {
+            var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+            personalCertStote.Open(OpenFlags.ReadOnly);
+            return personalCertStote.Certificates.Cast<X509Certificate2>().Where(certificate => certificate.Verify() && certificate.IsValid()).Select(CertificateView.FromCert).ToList();
+        }
         internal static FindCertificateStatus FindBySubjectName(string subjectName, out X509Certificate2 certificate)
         {
             try

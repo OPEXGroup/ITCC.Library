@@ -45,8 +45,9 @@ namespace ITCC.HTTP.SslConfigUtil.Console
 
             //System.Console.WriteLine(bindResult);
 
-            var res = Binder.Bind(@"C:\Users\black\Source\Repos\ITCC.Library\ITCC.HTTP\bin\Debug\ITCC.HTTP.dll", @"ololo.my.domain", @"127.0.0.1", @"50505", true);
-            System.Console.WriteLine(res);
+            //var res = Binder.Bind(@"C:\Users\black\Source\Repos\ITCC.Library\ITCC.HTTP\bin\Debug\ITCC.HTTP.dll", @"ololo.my.domain", @"127.0.0.1", @"50505", true);
+            //System.Console.WriteLine(res);
+            
             System.Console.ReadLine();
             return 0;
         }

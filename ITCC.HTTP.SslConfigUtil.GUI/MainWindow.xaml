@@ -1,0 +1,150 @@
+﻿<Window x:Class="ITCC.HTTP.SslConfigUtil.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ITCC.HTTP.SslConfigUtil.GUI"
+        xmlns:views="clr-namespace:ITCC.HTTP.SslConfigUtil.Core.Views;assembly=ITCC.HTTP.SslConfigUtil.Core"
+        mc:Ignorable="d"
+        Title="SSL configuration util" Height="500" Width="525">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5"></Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                Value="{Binding RelativeSource={RelativeSource Self},
+                    Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"></Setter>
+            <Setter Property="Padding" Value="10,0,10,0"></Setter>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="5"></Setter>
+        </Style>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Foreground" Value="DodgerBlue"></Setter>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="Margin" Value="5"></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="25">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="25"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="2"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Grid.Column="0" Grid.Row="0" Content="Assembly path"></Label>
+        <Grid Grid.Column="2" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="AssemblyPathTextbox"></TextBox>
+            <Button Grid.Column="1" x:Name="BrowseAssembly" Content="Browse" Click="BrowseAssembly_OnClick"></Button>
+        </Grid>
+        <Label Grid.Column="0" Grid.Row="1" Content="IP address"></Label>
+        <TextBox Grid.Column="2" Grid.Row="1" x:Name="IpAddressTextBox" Width="150" HorizontalAlignment="Left">
+            <TextBox.Text>
+                <Binding Path="IpAddress">
+                    <Binding.ValidationRules>
+                        <DataErrorValidationRule></DataErrorValidationRule>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Label Grid.Column="0" Grid.Row="2" Content="Port"></Label>
+        <TextBox Grid.Column="2" Grid.Row="2" x:Name="PortTextBox" Width="100" HorizontalAlignment="Left">
+            <TextBox.Text>
+                <Binding Path="Port">
+                    <Binding.ValidationRules>
+                        <DataErrorValidationRule></DataErrorValidationRule>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <RadioButton Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3"
+                     Content="Choose existing certificate from store" 
+                     Checked="ChooseFromStore_OnChecked"></RadioButton>
+        <ComboBox x:Name="CertificatesComboBox"
+                   Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" 
+                  ItemsSource="{Binding Path=CertificateCollection, Mode=OneTime}" 
+                  IsEnabled="False"
+                      HorizontalContentAlignment="Stretch">
+            <ComboBox.ItemTemplate>
+                <DataTemplate DataType="views:CertificateView">
+                    <local:CertificateViewControl 
+                        IssuedTo="{Binding Path=SubjectName, Mode=OneTime}"
+                        IssuedBy="{Binding Path=Issuer, Mode=OneTime}"
+                        ValidUntil="{Binding Path=NotAfter, Mode=OneTime}">
+                    </local:CertificateViewControl>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <RadioButton Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3" 
+                     Content="Choose existing certificate from file" 
+                     Checked="ChooseFromFile_OnChecked">
+        </RadioButton>
+        <Grid x:Name="FromFileGrid" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" IsEnabled="False">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Row="0" Grid.Column="0" x:Name="CertificatePathTextbox"></TextBox>
+            <Button Grid.Row="0" Grid.Column="1" x:Name="BrowseCertificate" Content="Browse" Click="BrowseCertificate_OnClick"></Button>
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Password"></Label>
+                <PasswordBox Grid.Column="1"></PasswordBox>
+            </Grid>
+        </Grid>
+        <RadioButton Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" 
+                     Content="Create self-signed certificate for this SubjectName" 
+                     Checked="CreateNew_OnChecked">
+        </RadioButton>
+        <TextBox Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" 
+                 x:Name="SubjectNameTextBox" 
+                 IsEnabled="False">
+            <TextBox.Text>
+                <Binding Path="SubjectName">
+                    <Binding.ValidationRules>
+                        <DataErrorValidationRule></DataErrorValidationRule>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Button Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3" 
+                HorizontalAlignment="Center" 
+                Content="Bind"
+                Click="BindButton_OnClick"></Button>
+        <ProgressBar x:Name="ProgressBar"
+                     Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="3" 
+                     IsIndeterminate="True" Visibility="Collapsed"></ProgressBar>
+        <TextBlock Grid.Column="0" Grid.Row="11" Grid.ColumnSpan="3"></TextBlock>
+    </Grid>
+</Window>

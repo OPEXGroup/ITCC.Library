@@ -57,6 +57,7 @@
     <Compile Include="ExecuteCommandResult.cs" />
     <Compile Include="GetAssemblyGuidResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\CertificateView.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">

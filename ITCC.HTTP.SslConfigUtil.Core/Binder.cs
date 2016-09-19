@@ -15,9 +15,10 @@ namespace ITCC.HTTP.SslConfigUtil.Core
     {
         private static string SetCertArgs(string appGuid, string certThumbprint, IPAddress ipAddress, ushort port)
             => $"http add sslcert ipport={ipAddress}:{port} certhash={certThumbprint} appid={{{appGuid}}}";
-
         private static string CheckFreeArgs(IPAddress ipAddress, ushort port)
             => $"http show sslcert ipport={ipAddress}:{port}";
+        private static string RemoveBindingArgs(IPAddress ipAddress, ushort port)
+            => $"http delete sslcert ipport={ipAddress}:{port}";
 
         public static BindingResult Bind(string assemblyPath, string subjectName, string ipAddress, string port,
             bool createSelfSignedCert)
