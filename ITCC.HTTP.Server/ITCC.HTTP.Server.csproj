@@ -69,6 +69,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -77,8 +78,55 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Auth\AuthentificationResult.cs" />
+    <Compile Include="Auth\AuthorizationResult.cs" />
+    <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Core\BodyEncoder.cs" />
+    <Compile Include="Enums\AuthorizationStatus.cs" />
+    <Compile Include="Enums\FileOperationStatus.cs" />
+    <Compile Include="Enums\FileType.cs" />
+    <Compile Include="Enums\ServerStartStatus.cs" />
+    <Compile Include="Files\FileSection.cs" />
+    <Compile Include="Files\FileRequestController.cs" />
+    <Compile Include="Files\FileRequestControllerConfiguration.cs" />
+    <Compile Include="Files\FileTypeSelector.cs" />
+    <Compile Include="Files\IOHelper.cs" />
+    <Compile Include="Files\MimeTypes.cs" />
+    <Compile Include="Files\Preprocess\BaseFilePreprocessTask.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessController.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessorThread.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessTaskFactory.cs" />
+    <Compile Include="Files\Preprocess\ImagePreprocessTask.cs" />
+    <Compile Include="Files\Preprocess\VideoPreprocessTask.cs" />
+    <Compile Include="Files\Requests\BaseFileRequest.cs" />
+    <Compile Include="Files\Requests\DefaultFileRequest.cs" />
+    <Compile Include="Files\Requests\FileRequestFactory.cs" />
+    <Compile Include="Files\Requests\ImageRequest.cs" />
+    <Compile Include="Files\Requests\RequestRange.cs" />
+    <Compile Include="Files\Requests\VideoRequest.cs" />
+    <Compile Include="Core\HandlerResult.cs" />
+    <Compile Include="Core\HttpServerConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Core\RequestProcessor.cs" />
+    <Compile Include="Core\RequestProcessorSelectionResult.cs" />
+    <Compile Include="Core\ResponseFactory.cs" />
+    <Compile Include="Service\PingResponse.cs" />
+    <Compile Include="Service\ServerStatistics.cs" />
+    <Compile Include="Core\StaticServer.cs" />
+    <Compile Include="Utils\CommonHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Name>ITCC.Logging.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

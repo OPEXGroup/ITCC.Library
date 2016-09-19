@@ -104,6 +104,18 @@
       <Project>{e0d80db9-1d0e-4fdc-ba31-4d0deb76bb56}</Project>
       <Name>ITCC.Geocoding</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.Client\ITCC.HTTP.Client.csproj">
+      <Project>{BC039125-94D3-49C6-9BC0-1B5692F95ECB}</Project>
+      <Name>ITCC.HTTP.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
+      <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
+      <Name>ITCC.HTTP.Server</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.HTTP\ITCC.HTTP.csproj">
       <Project>{77016ad7-9655-4918-832c-d26a767e29b4}</Project>
       <Name>ITCC.HTTP</Name>

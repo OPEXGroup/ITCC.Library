@@ -67,8 +67,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -77,10 +82,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="CertificateController.cs" />
+    <Compile Include="Common\Delegates.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegularClient.cs" />
+    <Compile Include="StaticClient.cs" />
+    <Compile Include="Utils\RequestResult.cs" />
+    <Compile Include="Utils\UriHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Prebuild.ps1" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Name>ITCC.Logging.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>SET script=PreBuild.ps1
+SET "scripthpath="$(ProjectDir)%25script%25"
+ECHO "$(ProjectDir)"
+ECHO %25scripthpath%25
+Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
+exit 0</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -83,50 +83,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\RegularClient.cs" />
-    <Compile Include="Client\RequestResult.cs" />
-    <Compile Include="Client\StaticClient.cs" />
-    <Compile Include="Common\Delegates.cs" />
-    <Compile Include="Enums\AuthorizationStatus.cs" />
-    <Compile Include="Enums\FileOperationStatus.cs" />
-    <Compile Include="Enums\FileType.cs" />
-    <Compile Include="Enums\Protocol.cs" />
-    <Compile Include="Enums\ServerResponseStatus.cs" />
-    <Compile Include="Enums\ServerStartStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Client\CertificateController.cs" />
-    <Compile Include="Server\AuthentificationResult.cs" />
-    <Compile Include="Server\AuthorizationResult.cs" />
-    <Compile Include="Server\BodyEncoder.cs" />
-    <Compile Include="Server\FileSection.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Server\Files\Preprocess\FilePreprocessController.cs" />
-    <Compile Include="Server\Files\FileRequestController.cs" />
-    <Compile Include="Server\Files\FileTypeSelector.cs" />
-    <Compile Include="Server\Files\Preprocess\BaseFilePreprocessTask.cs" />
-    <Compile Include="Server\Files\Preprocess\FilePreprocessorThread.cs" />
-    <Compile Include="Server\Files\Preprocess\FilePreprocessTaskFactory.cs" />
-    <Compile Include="Server\Files\FileRequestControllerConfiguration.cs" />
-    <Compile Include="Server\Files\Preprocess\ImagePreprocessTask.cs" />
-    <Compile Include="Server\Files\Preprocess\VideoPreprocessTask.cs" />
-    <Compile Include="Server\Files\Requests\BaseFileRequest.cs" />
-    <Compile Include="Server\Files\Requests\DefaultFileRequest.cs" />
-    <Compile Include="Server\Files\Requests\FileRequestFactory.cs" />
-    <Compile Include="Server\Files\Requests\ImageRequest.cs" />
-    <Compile Include="Server\Files\Requests\RequestRange.cs" />
-    <Compile Include="Server\Files\Requests\VideoRequest.cs" />
-    <Compile Include="Server\HandlerResult.cs" />
-    <Compile Include="Server\HttpServerConfiguration.cs" />
-    <Compile Include="Server\Files\MimeTypes.cs" />
-    <Compile Include="Server\RequestProcessor.cs" />
-    <Compile Include="Server\RequestProcessorSelectionResult.cs" />
-    <Compile Include="Server\ResponseFactory.cs" />
-    <Compile Include="Server\ServerStatistics.cs" />
-    <Compile Include="Server\StaticServer.cs" />
-    <Compile Include="Utils\CommonHelper.cs" />
-    <Compile Include="Server\Files\IOHelper.cs" />
-    <Compile Include="Utils\PingResponse.cs" />
-    <Compile Include="Utils\UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">

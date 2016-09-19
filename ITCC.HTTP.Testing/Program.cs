@@ -9,11 +9,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
-using ITCC.HTTP.Enums;
-using ITCC.HTTP.Server;
+using ITCC.HTTP.Common.Enums;
+using ITCC.HTTP.Server.Core;
+using ITCC.HTTP.Server.Files;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
-using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
