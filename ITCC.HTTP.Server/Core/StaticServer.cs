@@ -233,6 +233,7 @@ namespace ITCC.HTTP.Server.Core
         private static void CleanUp()
         {
             InnerRequestProcessors.Clear();
+            InnerStaticRedirectionTable.Clear();
             _listener = null;
             ServiceUris.Clear();
         }
@@ -395,9 +396,6 @@ namespace ITCC.HTTP.Server.Core
 
         #endregion
 
-        private static Delegates.Authorizer<TAccount> _authorizer;
-
-
         #region statistics
 
         public static bool StatisticsEnabled => _statisticsController.StatisticsEnabled;
@@ -552,6 +550,8 @@ namespace ITCC.HTTP.Server.Core
                 IsRedirect = false
             };
         }
+
+        private static Delegates.Authorizer<TAccount> _authorizer;
 
         public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);
         public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
