@@ -99,11 +99,9 @@ namespace ITCC.HTTP.Server.Core
 
         private static void PrepareStatistics(HttpServerConfiguration<TAccount> configuration)
         {
-            if (configuration.StatisticsEnabled)
-            {
-                _statisticsController = new StatisticsController<TAccount>(new ServerStatistics<TAccount>(), configuration.StatisticsAuthorizer);
-            }
-            _statisticsController = new StatisticsController<TAccount>(null, null);
+            _statisticsController = configuration.StatisticsEnabled
+                ? new StatisticsController<TAccount>(new ServerStatistics<TAccount>(), configuration.StatisticsAuthorizer)
+                : new StatisticsController<TAccount>(null, null);
         }
 
         private static void ConfigureResponseBuilding(HttpServerConfiguration<TAccount> configuration)

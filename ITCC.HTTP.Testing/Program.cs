@@ -122,6 +122,7 @@ namespace ITCC.HTTP.Testing
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
                 },
+                LogProhibitedQueryParams = new List<string> { "password"},
                 LogProhibitedHeaders = new List<string> { "Authorization" },
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
