@@ -191,10 +191,6 @@ namespace ITCC.HTTP.Server.Service
             _sslProtocolCounter.AddOrUpdate(protocol, 1, (key, value) => value + 1);
         }
 
-        private bool HasGoodStatusCode(HttpListenerResponse response)
-        {
-            // Little hack, but...
-            return response.StatusCode/100 < 4;
-        }
+        private bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode/100 < 4;
     }
 }

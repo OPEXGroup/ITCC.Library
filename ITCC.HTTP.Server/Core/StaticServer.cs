@@ -11,17 +11,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using ITCC.HTTP.Common;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Common;
 using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files;
+using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.Server.Service;
 using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
@@ -59,9 +56,12 @@ namespace ITCC.HTTP.Server.Core
             {
                 PrepareStatistics(configuration);
 
+                _optionsController = new OptionsController<TAccount>(InnerRequestProcessors);
+                _pingController = new PingController();
+
                 Protocol = configuration.Protocol;
                 _authorizer = configuration.Authorizer;
-                _authentificator = configuration.Authentificator;
+                _authentificationController = new AuthentificationController(configuration.Authentificator);
 
                 ConfigureResponseBuilding(configuration);
 
@@ -71,23 +71,21 @@ namespace ITCC.HTTP.Server.Core
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
 
                 StartListenerThread(configuration);
+                StartServices(configuration);
                 _started = true;
-                ServiceUris.AddRange(configuration.GetReservedUris());
-                if (ServiceUris.Any())
-                    LogMessage(LogLevel.Debug, $"Reserved sections:\n{string.Join("\n", ServiceUris)}");
 
                 return ServerStartStatus.Ok;
             }
             catch (SocketException)
             {
                 LogMessage(LogLevel.Critical, $"Error binding to port {configuration.Port}. Is it in use?");
-                FileRequestController<TAccount>.Stop();
+                _fileRequestController.Stop();
                 return ServerStartStatus.BindingError;
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Critical, ex);
-                FileRequestController<TAccount>.Stop();
+                _fileRequestController.Stop();
                 return ServerStartStatus.UnknownError;
             }
             finally
@@ -103,14 +101,9 @@ namespace ITCC.HTTP.Server.Core
         {
             if (configuration.StatisticsEnabled)
             {
-                StatisticsEnabled = true;
-                _statistics = new ServerStatistics<TAccount>();
-                _statisticsAuthorizer = configuration.StatisticsAuthorizer;
-                return;
+                _statisticsController = new StatisticsController<TAccount>(new ServerStatistics<TAccount>(), configuration.StatisticsAuthorizer);
             }
-            StatisticsEnabled = false;
-            _statistics = null;
-            _statisticsAuthorizer = null;
+            _statisticsController = new StatisticsController<TAccount>(null, null);
         }
 
         private static void ConfigureResponseBuilding(HttpServerConfiguration<TAccount> configuration)
@@ -119,13 +112,13 @@ namespace ITCC.HTTP.Server.Core
                 ResponseFactory.LogBodyReplacePatterns.AddRange(configuration.LogBodyReplacePatterns);
             if (configuration.LogProhibitedHeaders != null)
                 ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
-            _logProhibitedQueryParams = configuration.LogProhibitedQueryParams ?? new List<string>();
 
             ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
-            _requestEncoding = configuration.BodyEncoder.Encoding;
-            _autoGzipCompression = configuration.BodyEncoder.AutoGzipCompression;
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
+            CommonHelper.SetSerializationLimitations(configuration.LogProhibitedQueryParams,
+                configuration.LogProhibitedHeaders,
+                configuration.BodyEncoder.Encoding);
 
             if (configuration.ServerName != null)
             {
@@ -135,25 +128,22 @@ namespace ITCC.HTTP.Server.Core
 
         private static bool StartFileProcessing(HttpServerConfiguration<TAccount> configuration)
         {
-            FilesEnabled = configuration.FilesEnabled;
-            FilesBaseUri = configuration.FilesBaseUri;
+            _fileRequestController = new FileRequestController<TAccount>();
 
-            if (FilesEnabled)
+            return _fileRequestController.Start(new FileRequestControllerConfiguration<TAccount>
             {
-                return FileRequestController<TAccount>.Start(new FileRequestControllerConfiguration<TAccount>
-                {
-                    ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency,
-                    FaviconPath = configuration.FaviconPath,
-                    FilesAuthorizer = configuration.FilesAuthorizer,
-                    FileSections = configuration.FileSections,
-                    FilesLocation = configuration.FilesLocation,
-                    FilesNeedAuthorization = configuration.FilesNeedAuthorization,
-                    FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
-                    FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
-                },
-                _statistics);
-            }
-            return true;
+                FilesEnabled = configuration.FilesEnabled,
+                FilesBaseUri = configuration.FilesBaseUri,
+                ExistingFilesPreprocessingFrequency = configuration.ExistingFilesPreprocessingFrequency,
+                FaviconPath = configuration.FaviconPath,
+                FilesAuthorizer = configuration.FilesAuthorizer,
+                FileSections = configuration.FileSections,
+                FilesLocation = configuration.FilesLocation,
+                FilesNeedAuthorization = configuration.FilesNeedAuthorization,
+                FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
+                FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
+            },
+            _statisticsController.Statistics);
         }
 
         private static void StartListenerThread(HttpServerConfiguration<TAccount> configuration)
@@ -191,12 +181,25 @@ namespace ITCC.HTTP.Server.Core
             _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
         }
 
+        private static void StartServices(HttpServerConfiguration<TAccount> configuration)
+        {
+            ServiceUris.AddRange(configuration.GetReservedUris());
+            if (ServiceUris.Any())
+                LogMessage(LogLevel.Debug, $"Reserved sections:\n{string.Join("\n", ServiceUris)}");
+
+            ServiceRequestProcessors.Add(_optionsController);
+            ServiceRequestProcessors.Add(_fileRequestController);
+            ServiceRequestProcessors.Add(_statisticsController);
+            ServiceRequestProcessors.Add(_pingController);
+            ServiceRequestProcessors.Add(_authentificationController);
+        }
+
         public static void Stop()
         {
             if (!_started)
                 return;
             if (FilesEnabled)
-                FileRequestController<TAccount>.Stop();
+                _fileRequestController.Stop();
             lock (OperationLock)
             {
                 if (_operationInProgress)
@@ -255,15 +258,9 @@ namespace ITCC.HTTP.Server.Core
 
         #region log
 
-        private static void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("HTTP SERVER", level, message);
-        }
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP SERVER", level, message);
 
-        private static void LogException(LogLevel level, Exception ex)
-        {
-            Logger.LogException("HTTP SERVER", level, ex);
-        }
+        private static void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP SERVER", level, ex);
 
         #endregion
 
@@ -276,18 +273,17 @@ namespace ITCC.HTTP.Server.Core
             var stopWatch = Stopwatch.StartNew();
             try
             {
-                _statistics?.AddRequest(request);
+                _statisticsController.Statistics?.AddRequest(request);
                 if (Logger.Level >= LogLevel.Debug)
                     LogMessage(LogLevel.Debug,
-                        $"Request from {request.RemoteEndPoint}.\n{SerializeHttpRequest(context)}");
+                        $"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context)}");
 
-                foreach (var checker in ServiceHandlers.Keys)
+                var serviceProcessor =
+                    ServiceRequestProcessors.FirstOrDefault(sp => sp.RequestIsSuitable(context.Request));
+                if (serviceProcessor != null)
                 {
-                    if (checker.Invoke(request))
-                    {
-                        await ServiceHandlers[checker].Invoke(context, stopWatch).ConfigureAwait(false);
-                        return;
-                    }
+                    await serviceProcessor.HandleRequest(context, stopWatch, OnResponseReady);
+                    return;
                 }
 
                 var requestProcessorSelectionResult = SelectRequestProcessor(request);
@@ -325,7 +321,7 @@ namespace ITCC.HTTP.Server.Core
                     authResult = new AuthorizationResult<TAccount>(null, AuthorizationStatus.NotRequired);
                 }
 
-                _statistics?.AddAuthResult(authResult);
+                _statisticsController.Statistics?.AddAuthResult(authResult);
                 switch (authResult.Status)
                 {
                     case AuthorizationStatus.NotRequired:
@@ -340,11 +336,11 @@ namespace ITCC.HTTP.Server.Core
                         {
                             var handleResult =
                                 await requestProcessor.Handler.Invoke(authResult.Account, request).ConfigureAwait(false);
-                            ResponseFactory.BuildResponse(context, handleResult, false, RequestEnablesGzip(request));
+                            ResponseFactory.BuildResponse(context, handleResult);
                         }
                         break;
                     default:
-                        ResponseFactory.BuildResponse(context, authResult, RequestEnablesGzip(request));
+                        ResponseFactory.BuildResponse(context, authResult);
                         break;
                 }
                 OnResponseReady(context, stopWatch);
@@ -365,7 +361,7 @@ namespace ITCC.HTTP.Server.Core
                 LogMessage(LogLevel.Debug, $"Response for {context.Request.RemoteEndPoint} ready.");
                 requestStopwatch.Stop();
                 var elapsedMilliseconds = requestStopwatch.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-                _statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), elapsedMilliseconds);
+                _statisticsController.Statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), elapsedMilliseconds);
                 if (_requestMaxServeTime > 0 && _requestMaxServeTime < elapsedMilliseconds)
                 {
                     LogMessage(LogLevel.Warning, $"Request /{GetNormalizedRequestUri(context)} from {context.Request.RemoteEndPoint} took {elapsedMilliseconds} milliseconds to process!");
@@ -388,245 +384,63 @@ namespace ITCC.HTTP.Server.Core
 
         #region service
 
-        private static readonly Dictionary<Delegates.ServiceRequestChecker, Delegates.ServiceRequestHandler> ServiceHandlers = new Dictionary<Delegates.ServiceRequestChecker, Delegates.ServiceRequestHandler>
-        {
-            { IsOptionsRequest, HandleOptions },
-            { IsLoginRequest, Authentificate },
-            { IsPingRequest, HandlePing },
-            { IsStatisticsRequest, HandleStatistics },
-            { IsFilesRequest, HandleFileRequest },
-            { IsFaviconRequest, HandleFavicon }
-        };
+        private static FileRequestController<TAccount> _fileRequestController;
+        private static OptionsController<TAccount> _optionsController;
+        private static PingController _pingController;
+        private static AuthentificationController _authentificationController;
+        private static StatisticsController<TAccount> _statisticsController;
+
+        private static readonly List<IServiceController> ServiceRequestProcessors = new List<IServiceController>();
 
         private static readonly List<string> ServiceUris = new List<string>();
 
         #endregion
 
-        #region auth
-
-        private static bool IsLoginRequest(HttpListenerRequest request)
-        {
-            if (request == null || _authentificator == null)
-            {
-                return false;
-            }
-            if (UriMatchesString(request.Url, "login"))
-            {
-                return true;
-            }
-            return request.QueryString["login"] != null && request.QueryString["password"] != null;
-        }
-
-        private static async Task Authentificate(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            AuthentificationResult authResult;
-            var request = context.Request;
-            if (_authentificator != null)
-                authResult = await _authentificator.Invoke(request);
-            else
-                authResult = new AuthentificationResult(null, HttpStatusCode.NotFound);
-            if (authResult == null)
-                throw new InvalidOperationException("Authentificator fault: null result");
-            ResponseFactory.BuildResponse(context, authResult, RequestEnablesGzip(request));
-            OnResponseReady(context, requestStopwatch);
-        }
-
-        private static Delegates.Authentificator _authentificator;
-
         private static Delegates.Authorizer<TAccount> _authorizer;
 
-        #endregion
-
-        #region ping
-        private static bool IsPingRequest(HttpListenerRequest request)
-            => request != null && UriMatchesString(request.Url, "ping");
-
-        private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            var responseBody = new PingResponse(SerializeHttpRequest(context, true));
-            ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, false, RequestEnablesGzip(context.Request));
-            OnResponseReady(context, requestStopwatch);
-            return Task.CompletedTask;
-        }
-
-        #endregion
 
         #region statistics
 
-        public static bool StatisticsEnabled { get; private set; }
+        public static bool StatisticsEnabled => _statisticsController.StatisticsEnabled;
 
-        private static ServerStatistics<TAccount> _statistics;
+        public static string GetStatistics() => _statisticsController.Statistics?.Serialize();
 
-        private static Delegates.StatisticsAuthorizer _statisticsAuthorizer;
-
-        private static bool IsStatisticsRequest(HttpListenerRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-            return UriMatchesString(request.Url, "statistics") && StatisticsEnabled;
-        }
-
-        private static async Task HandleStatistics(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            var response = context.Response;
-            if (_statisticsAuthorizer != null)
-            {
-                if (await _statisticsAuthorizer.Invoke(context.Request))
-                {
-                    var responseBody = _statistics?.Serialize();
-                    ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true);
-                    response.ContentType = "text/plain";
-                }
-                else
-                {
-                    ResponseFactory.BuildResponse(context, HttpStatusCode.Forbidden, null);
-                }
-            }
-            else
-            {
-                var responseBody = _statistics?.Serialize();
-                ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
-                response.ContentType = "text/plain";
-            }
-
-            OnResponseReady(context, requestStopwatch);
-        }
-
-        public static string GetStatistics() => _statistics?.Serialize();
-
-        #endregion
-
-        #region options
-
-        private static bool IsOptionsRequest(HttpListenerRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-            return request.HttpMethod.ToUpper() == "OPTIONS";
-        }
-
-        private static Task HandleOptions(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            var allowValues = new List<string>();
-            var request = context.Request;
-            if (!IsLoginRequest(request) && !IsPingRequest(request) && !IsStatisticsRequest(request))
-            {
-                foreach (var requestProcessor in InnerRequestProcessors)
-                {
-                    if (request.Url.LocalPath.Trim('/') == requestProcessor.SubUri)
-                    {
-                        allowValues.Add(requestProcessor.Method.Method);
-                        if (requestProcessor.Method == HttpMethod.Get)
-                            allowValues.Add("HEAD");
-                    }
-                }
-            }
-            else
-            {
-                allowValues.Add("GET");
-                allowValues.Add("HEAD");
-            }
-
-
-            if (allowValues.Any())
-            {
-                ResponseFactory.BuildResponse(context, HttpStatusCode.OK, null, null, false, RequestEnablesGzip(request));
-                context.Response.AddHeader("Allow", string.Join(", ", allowValues));
-            }
-            else
-            {
-                ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
-            }
-
-            OnResponseReady(context, requestStopwatch);
-            return Task.CompletedTask;
-        }
-
-        #endregion
-
-        #region favicon
-
-        private static bool IsFaviconRequest(HttpListenerRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-            return request.Url.LocalPath.Trim('/').ToLower() == "favicon.ico";
-        }
-
-        private static async Task HandleFavicon(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            await FileRequestController<TAccount>.HandleFavicon(context);
-            OnResponseReady(context, requestStopwatch);
-        }
         #endregion
 
         #region files
 
-        public static bool FilesEnabled { get; private set; }
+        public static bool FilesEnabled => _fileRequestController.FilesEnabled;
 
-        public static string FilesLocation => FileRequestController<TAccount>.FilesLocation;
+        public static string FilesLocation => _fileRequestController.FilesLocation;
 
-        public static string FilesBaseUri { get; private set; }
+        public static string FilesBaseUri => _fileRequestController.FilesBaseUri;
 
-        public static bool FilesNeedAuthorization => FileRequestController<TAccount>.FilesNeedAuthorization;
+        public static bool FilesNeedAuthorization => _fileRequestController.FilesNeedAuthorization;
 
-        public static List<FileSection> FileSections => FileRequestController<TAccount>.FileSections;
-
-        private static bool IsFilesRequest(HttpListenerRequest request)
-        {
-            if (request == null || !FilesEnabled)
-            {
-                return false;
-            }
-            return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
-        }
-
-        private static async Task HandleFileRequest(HttpListenerContext context, Stopwatch requestStopwatch)
-        {
-            await FileRequestController<TAccount>.HandleFileRequest(context);
-            OnResponseReady(context, requestStopwatch);
-        }
+        public static List<FileSection> FileSections => _fileRequestController.FileSections;
 
         public static bool FileExists(string sectionName, string filename)
-        {
-            if (!FilesEnabled)
-                return false;
-            return FileRequestController<TAccount>.FileExists(sectionName, filename);
-        }
+            => FilesEnabled && _fileRequestController.FileExists(sectionName, filename);
 
         public static Stream GetFileStream(string sectionName, string filename)
-        {
-            if (!FilesEnabled)
-                return null;
-            return FileRequestController<TAccount>.GetFileStream(sectionName, filename);
-        }
+            => !FilesEnabled ? null : _fileRequestController.GetFileStream(sectionName, filename);
 
         public static async Task<string> GetFileString(string sectionName, string filename)
         {
             if (!FilesEnabled)
                 return null;
-            return await FileRequestController<TAccount>.GetFileString(sectionName, filename);
+            return await _fileRequestController.GetFileString(sectionName, filename);
         }
 
         public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
         {
             if (!FilesEnabled)
                 return FileOperationStatus.FilesNotEnabled;
-            return await FileRequestController<TAccount>.AddFile(sectionName, filename, content);
+            return await _fileRequestController.AddFile(sectionName, filename, content);
         }
 
         public static FileOperationStatus DeleteFile(string sectionName, string filename)
-        {
-            if (!FilesEnabled)
-                return FileOperationStatus.FilesNotEnabled;
-            return FileRequestController<TAccount>.DeleteFile(sectionName, filename);
-        }
+            => !FilesEnabled ? FileOperationStatus.FilesNotEnabled : _fileRequestController.DeleteFile(sectionName, filename);
 
         #endregion
 
@@ -657,12 +471,7 @@ namespace ITCC.HTTP.Server.Core
 
         public static bool AddRequestProcessorRange(
             IEnumerable<RequestProcessor<TAccount>> requestProcessors)
-        {
-            if (requestProcessors == null)
-                return true;
-
-            return requestProcessors.All(AddRequestProcessor);
-        }
+            => requestProcessors != null && requestProcessors.All(AddRequestProcessor);
 
         public static bool AddStaticRedirect(string fromUri, string toUri)
         {
@@ -733,7 +542,7 @@ namespace ITCC.HTTP.Server.Core
                 }
             }
 
-            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => UriMatchesString(request.Url, requestProcessor.SubUri)).ToList();
+            var processorsForUri = InnerRequestProcessors.Where(requestProcessor => CommonHelper.UriMatchesString(request.Url, requestProcessor.SubUri)).ToList();
             if (processorsForUri.Count == 0)
                 return null;
             var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
@@ -745,88 +554,12 @@ namespace ITCC.HTTP.Server.Core
             };
         }
 
-        private static bool RequestEnablesGzip(HttpListenerRequest request)
-        {
-            if (!_autoGzipCompression)
-                return false;
-            if (request == null)
-                return false;
-            if (!request.Headers.AllKeys.Contains("Accept-Encoding"))
-                return false;
-            var parts = request.Headers["Accept-Encoding"].Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            return parts.Any(p => p == "gzip");
-        }
-
-        private static string SerializeHttpRequest(HttpListenerContext context, bool absolutePath = false)
-        {
-            var request = context.Request;
-
-            if (request == null)
-                return null;
-
-            var builder = new StringBuilder();
-            var queryString = string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}"));
-            var separator = string.IsNullOrEmpty(queryString) ? string.Empty : "?";
-            var url = absolutePath ? request.Url.ToString() : request.Url.LocalPath;
-            builder.AppendLine($"{request.HttpMethod} {url} HTTP/{request.ProtocolVersion}{separator}{queryString}");
-
-            foreach (var key in request.Headers.AllKeys)
-            {
-                builder.AppendLine(ResponseFactory.LogProhibitedHeaders.Contains(key)
-                    ? $"{key}: {Constants.RemovedLogString}"
-                    : $"{key}: {request.Headers[key]}");
-            }
-
-            if (!request.HasEntityBody)
-                return builder.ToString();
-
-            builder.AppendLine();
-#if ITCC_LOG_REQUEST_BODIES
-            if (!IsFilesRequest(request))
-            {
-                var memoryStream = new MemoryStream();
-                request.InputStream.CopyTo(memoryStream);
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                using (var reader = new StreamReader(memoryStream, _requestEncoding, true, 4096, true))
-                {
-                    var bodyString = reader.ReadToEnd();
-                    bodyString = ResponseFactory.LogBodyReplacePatterns.Aggregate(bodyString, (current, replacePattern) => Regex.Replace(current, replacePattern.Item1, replacePattern.Item2));
-                    builder.AppendLine(bodyString);
-                }
-
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                request.GetType().InvokeMember("m_RequestStream", BindingFlags.SetField | BindingFlags.Instance | BindingFlags.NonPublic, null, request, new object[] { memoryStream });
-            }
-            else
-            {
-                builder.AppendLine("<Binary content>");
-            }
-#else
-            builder.AppendLine(!IsFilesRequest(request) ? "<Text content>" : "<Binary content>");
-#endif
-            return builder.ToString();
-        }
-
-        private static string QueryParamValueForLog(HttpListenerRequest request, string paramName) => _logProhibitedQueryParams.Contains(paramName)
-            ? Constants.RemovedLogString
-            : request.QueryString[paramName];
-
         public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);
         public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
 
         private static readonly List<RequestProcessor<TAccount>> InnerRequestProcessors =
             new List<RequestProcessor<TAccount>>();
         private static readonly ConcurrentDictionary<string, string> InnerStaticRedirectionTable = new ConcurrentDictionary<string, string>();
-        private static Encoding _requestEncoding = Encoding.UTF8;
-        private static bool _autoGzipCompression;
-        private static List<string> _logProhibitedQueryParams;
-
-        #endregion
-
-        #region utils
-
-        private static bool UriMatchesString(Uri uri, string str)
-            => string.Equals(uri.LocalPath.Trim('/'), str.Trim('/'), StringComparison.OrdinalIgnoreCase);
 
         #endregion
     }

@@ -25,10 +25,7 @@ namespace ITCC.HTTP.Testing
 
     internal class Program
     {
-        private static void Main(string[] args)
-        {
-            MainAsync().GetAwaiter().GetResult();
-        }
+        private static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
         private static async Task MainAsync()
         {

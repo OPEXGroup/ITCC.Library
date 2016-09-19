@@ -73,6 +73,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Auth\AuthentificationController.cs" />
     <Compile Include="Auth\AuthentificationResult.cs" />
     <Compile Include="Auth\AuthorizationResult.cs" />
     <Compile Include="Common\Delegates.cs" />
@@ -101,13 +102,17 @@
     <Compile Include="Files\Requests\VideoRequest.cs" />
     <Compile Include="Core\HandlerResult.cs" />
     <Compile Include="Core\HttpServerConfiguration.cs" />
+    <Compile Include="Interfaces\IServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RequestProcessor.cs" />
     <Compile Include="Core\RequestProcessorSelectionResult.cs" />
     <Compile Include="Core\ResponseFactory.cs" />
+    <Compile Include="Service\OptionsController.cs" />
+    <Compile Include="Service\PingController.cs" />
     <Compile Include="Service\PingResponse.cs" />
     <Compile Include="Service\ServerStatistics.cs" />
     <Compile Include="Core\StaticServer.cs" />
+    <Compile Include="Service\StatisticsController.cs" />
     <Compile Include="Utils\CommonHelper.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,15 +30,15 @@ namespace ITCC.HTTP.Server.Core
             _encoder = encoder;
         }
 
-        public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult)
         {
             if (authentificationResult == null)
                 throw new ArgumentNullException(nameof(authentificationResult));
 
-            BuildResponse(context, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders, false, gzipResponse);
+            BuildResponse(context, authentificationResult.Status, authentificationResult.AccountView, authentificationResult.AdditionalHeaders);
         }
 
-        public static void BuildResponse<TAccount>(HttpListenerContext context, AuthorizationResult<TAccount> authorizationResult, bool gzipResponse = false)
+        public static void BuildResponse<TAccount>(HttpListenerContext context, AuthorizationResult<TAccount> authorizationResult)
             where TAccount : class
         {
             if (authorizationResult == null)
@@ -51,19 +51,18 @@ namespace ITCC.HTTP.Server.Core
             BuildResponse(context,
                 httpStatusCode,
                 (object)authorizationResult.Account ?? authorizationResult.ErrorDescription,
-                authorizationResult.AdditionalHeaders,
-                gzipResponse);
+                authorizationResult.AdditionalHeaders);
         }
 
-        public static void BuildResponse(HttpListenerContext context, HandlerResult handlerResult, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, HandlerResult handlerResult, bool alreadyEncoded = false)
         {
             if (handlerResult == null)
                 throw new ArgumentNullException(nameof(handlerResult));
 
-            BuildResponse(context, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded, gzipResponse);
+            BuildResponse(context, handlerResult.Status, handlerResult.Body, handlerResult.AdditionalHeaders, alreadyEncoded);
         }
 
-        public static void BuildResponse(HttpListenerContext context, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false, bool gzipResponse = false)
+        public static void BuildResponse(HttpListenerContext context, HttpStatusCode code, object body, IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
         {
             var httpResponse = context.Response;
             var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
@@ -102,6 +101,7 @@ namespace ITCC.HTTP.Server.Core
                 bodyString = body as string;
             }
 
+            var gzipResponse = RequestEnablesGzip(context.Request);
             if (gzipResponse)
             {
                 httpResponse.SendChunked = false;
@@ -191,6 +191,7 @@ namespace ITCC.HTTP.Server.Core
             return builder.ToString();
         }
 
+        
         public static bool LogResponseBodies = true;
         public static int ResponseBodyLogLimit = -1;
         public static readonly List<Tuple<string, string>> LogBodyReplacePatterns = new List<Tuple<string, string>>();
@@ -199,6 +200,17 @@ namespace ITCC.HTTP.Server.Core
         #endregion
 
         #region private
+        private static bool RequestEnablesGzip(HttpListenerRequest request)
+        {
+            if (!_encoder.AutoGzipCompression)
+                return false;
+            if (request == null)
+                return false;
+            if (!request.Headers.AllKeys.Contains("Accept-Encoding"))
+                return false;
+            var parts = request.Headers["Accept-Encoding"].Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            return parts.Any(p => p == "gzip");
+        }
 
         private static string SelectReasonPhrase(HttpStatusCode code) => ReasonPhrases.ContainsKey(code) ? ReasonPhrases[code] : "UNKNOWN REASON";
 

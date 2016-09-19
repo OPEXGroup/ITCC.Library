@@ -7,6 +7,14 @@ namespace ITCC.HTTP.Server.Files
         where TAccount : class 
     {
         /// <summary>
+        ///     If false, controller will do nothing
+        /// </summary>
+        public bool FilesEnabled { get; set; }
+        /// <summary>
+        ///     Files base uri
+        /// </summary>
+        public string FilesBaseUri { get; set; }
+        /// <summary>
         ///     File location on disk
         /// </summary>
         public string FilesLocation { get; set; }

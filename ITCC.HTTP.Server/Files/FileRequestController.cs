@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,19 +14,39 @@ using ITCC.HTTP.Server.Core;
 using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files.Preprocess;
 using ITCC.HTTP.Server.Files.Requests;
+using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.Server.Service;
 using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files
 {
-    internal static class FileRequestController<TAccount>
+    internal class FileRequestController<TAccount> : IServiceController
         where TAccount : class
     {
+        #region IServiceRequestProcessor
+        public bool RequestIsSuitable(HttpListenerRequest request)
+        {
+            if (request == null || !FilesEnabled)
+            {
+                return false;
+            }
+            return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
+        }
+
+        public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
+        {
+            await HandleFileRequest(context);
+            completionCallback(context, stopwatch);
+        }
+        #endregion
+
         #region config
 
-        public static bool Start(FileRequestControllerConfiguration<TAccount> configuration, ServerStatistics<TAccount> statistics)
+        public bool Start(FileRequestControllerConfiguration<TAccount> configuration, ServerStatistics<TAccount> statistics)
         {
+            FilesEnabled = configuration.FilesEnabled;
+            FilesBaseUri = configuration.FilesBaseUri;
             FilesLocation = configuration.FilesLocation;
             FaviconPath = configuration.FaviconPath;
             FilesNeedAuthorization = configuration.FilesNeedAuthorization;
@@ -41,7 +62,7 @@ namespace ITCC.HTTP.Server.Files
                 return false;
             }
 
-            if (FilesPreprocessingEnabled)
+            if (FilesPreprocessingEnabled && FilesEnabled)
             {
                 FilePreprocessController.Start(configuration.FilesPreprocessorThreads);
                 if (ExistingFilesPreprocessingFrequency > 0)
@@ -57,9 +78,9 @@ namespace ITCC.HTTP.Server.Files
             return true;
         }
 
-        public static void Stop()
+        public void Stop()
         {
-            if (FilesPreprocessingEnabled)
+            if (FilesPreprocessingEnabled && FilesEnabled)
             {
                 _preprocessTimer?.Stop();
                 FilePreprocessController.Stop();
@@ -67,22 +88,24 @@ namespace ITCC.HTTP.Server.Files
             _started = false;
         }
 
-        public static string FilesLocation { get; private set; }
-        public static string FaviconPath { get; private set; }
-        public static bool FilesNeedAuthorization { get; private set; }
-        public static List<FileSection> FileSections { get; private set; }
-        public static bool FilesPreprocessingEnabled { get; private set; }
-        public static double ExistingFilesPreprocessingFrequency { get; private set; }
+        public bool FilesEnabled { get; private set; }
+        public string FilesBaseUri { get; private set; }
+        public string FilesLocation { get; private set; }
+        public string FaviconPath { get; private set; }
+        public bool FilesNeedAuthorization { get; private set; }
+        public List<FileSection> FileSections { get; private set; }
+        public bool FilesPreprocessingEnabled { get; private set; }
+        public double ExistingFilesPreprocessingFrequency { get; private set; }
 
-        private static Delegates.FilesAuthorizer<TAccount> _filesAuthorizer;
-        private static ServerStatistics<TAccount> _statistics;
-        private static Timer _preprocessTimer;
-        private static bool _started;
+        private Delegates.FilesAuthorizer<TAccount> _filesAuthorizer;
+        private ServerStatistics<TAccount> _statistics;
+        private Timer _preprocessTimer;
+        private bool _started;
 
         #endregion
 
         #region public
-        public static async Task HandleFileRequest(HttpListenerContext context)
+        public async Task HandleFileRequest(HttpListenerContext context)
         {
             if (!_started)
             {
@@ -145,7 +168,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        public static async Task HandleFavicon(HttpListenerContext context)
+        public async Task HandleFavicon(HttpListenerContext context)
         {
             var response = context.Response;
             LogMessage(LogLevel.Trace, $"Favicon requested, path: {FaviconPath}");
@@ -163,7 +186,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        public static bool FileExists(string sectionName, string filename)
+        public bool FileExists(string sectionName, string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))
                 return false;
@@ -178,7 +201,7 @@ namespace ITCC.HTTP.Server.Files
             return File.Exists(filePath);
         }
 
-        public static Stream GetFileStream(string sectionName, string filename)
+        public Stream GetFileStream(string sectionName, string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))
                 return null;
@@ -193,7 +216,7 @@ namespace ITCC.HTTP.Server.Files
             return File.Exists(filePath) ? new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null;
         }
 
-        public static async Task<string> GetFileString(string sectionName, string filename)
+        public async Task<string> GetFileString(string sectionName, string filename)
         {
             var stream = GetFileStream(sectionName, filename);
             if (stream == null)
@@ -208,7 +231,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
+        public async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
         {
             if (string.IsNullOrWhiteSpace(filename))
                 return FileOperationStatus.BadParameters;
@@ -252,7 +275,7 @@ namespace ITCC.HTTP.Server.Files
             return FileOperationStatus.Ok;
         }
 
-        public static FileOperationStatus DeleteFile(string sectionName, string filename)
+        public FileOperationStatus DeleteFile(string sectionName, string filename)
         {
             var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
             if (section == null)
@@ -290,7 +313,7 @@ namespace ITCC.HTTP.Server.Files
 
         #region private
 
-        private static async Task HandleFileGetRequest(HttpListenerContext context, string filePath)
+        private async Task HandleFileGetRequest(HttpListenerContext context, string filePath)
         {
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
@@ -309,7 +332,7 @@ namespace ITCC.HTTP.Server.Files
             await fileRequest.BuildResponse(context);
         }
 
-        private static async Task HandleFilePostRequest(HttpListenerContext context, FileSection section, string filePath)
+        private async Task HandleFilePostRequest(HttpListenerContext context, FileSection section, string filePath)
         {
             if (File.Exists(filePath))
             {
@@ -342,7 +365,7 @@ namespace ITCC.HTTP.Server.Files
                 ResponseFactory.BuildResponse(context, HttpStatusCode.Created, null);
         }
 
-        private static void HandleFileDeleteRequest(HttpListenerContext context, string filePath)
+        private void HandleFileDeleteRequest(HttpListenerContext context, string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -366,7 +389,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        private static string ExtractFileName(string localPath)
+        private string ExtractFileName(string localPath)
         {
             if (localPath == null)
                 return null;
@@ -384,7 +407,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        private static FileSection ExtractFileSection(string localPath)
+        private FileSection ExtractFileSection(string localPath)
         {
             if (localPath == null)
                 return null;
@@ -403,7 +426,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        private static void PreprocessExistingFiles()
+        private void PreprocessExistingFiles()
         {
             foreach (var section in FileSections)
             {
@@ -420,15 +443,12 @@ namespace ITCC.HTTP.Server.Files
         #endregion
 
         #region log
-        private static void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("HTTP FILES", level, message);
-        }
+        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP FILES", level, message);
 
-        private static void LogException(LogLevel level, Exception ex)
-        {
-            Logger.LogException("HTTP FILES", level, ex);
-        }
+        private void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP FILES", level, ex);
+
         #endregion
+
+        
     }
 }

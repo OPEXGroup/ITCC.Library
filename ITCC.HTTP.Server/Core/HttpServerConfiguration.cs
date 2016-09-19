@@ -188,9 +188,6 @@ namespace ITCC.HTTP.Server.Core
             return result;
         } 
 
-        private void LogMessage(LogLevel level, string message)
-        {
-            Logger.LogEntry("SERVERCONFIG", level, message);
-        }
+        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("SERVERCONFIG", level, message);
     }
 }
