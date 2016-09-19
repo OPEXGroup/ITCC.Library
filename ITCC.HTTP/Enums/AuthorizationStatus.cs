@@ -26,7 +26,7 @@
         /// </summary>
         TooManyRequests,
 
-        // <summary>
+        /// <summary>
         ///     Internal server error occured during authentification
         /// </summary>
         InternalError
