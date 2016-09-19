@@ -439,9 +439,8 @@ namespace ITCC.HTTP.Server
 
         private static Task HandlePing(HttpListenerContext context, Stopwatch requestStopwatch)
         {
-            var converter = new PingJsonConverter();
-            var responseBody = JsonConvert.SerializeObject(new PingResponse(SerializeHttpRequest(context, true)), Formatting.None, converter);
-            ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true, RequestEnablesGzip(context.Request));
+            var responseBody = new PingResponse(SerializeHttpRequest(context, true));
+            ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, false, RequestEnablesGzip(context.Request));
             OnResponseReady(context, requestStopwatch);
             return Task.CompletedTask;
         }

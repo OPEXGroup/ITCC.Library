@@ -125,7 +125,6 @@
     <Compile Include="Server\StaticServer.cs" />
     <Compile Include="Utils\CommonHelper.cs" />
     <Compile Include="Server\Files\IOHelper.cs" />
-    <Compile Include="Utils\PingJsonConverter.cs" />
     <Compile Include="Utils\PingResponse.cs" />
     <Compile Include="Utils\UriHelper.cs" />
   </ItemGroup>

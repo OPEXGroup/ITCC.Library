@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace ITCC.HTTP.Utils
 {
@@ -12,5 +13,13 @@ namespace ITCC.HTTP.Utils
 
         public DateTime Time { get; set; }
         public string Request { get; set; }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"Time: {Time.ToString("s")}");
+            builder.AppendLine($"Request:\n{Request}");
+            return builder.ToString();
+        }
     }
 }

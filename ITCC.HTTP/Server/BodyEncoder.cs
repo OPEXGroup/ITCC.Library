@@ -14,12 +14,12 @@ namespace ITCC.HTTP.Server
         /// <summary>
         ///     Body serializer
         /// </summary>
-        public Delegates.BodySerializer Serializer { get; set; } = JsonConvert.SerializeObject;
+        public Delegates.BodySerializer Serializer { get; set; } = o => o.ToString();
 
         /// <summary>
         ///     Used for Content-Type header
         /// </summary>
-        public string ContentType { get; set; } = "application/json";
+        public string ContentType { get; set; } = "text/plain";
 
         /// <summary>
         ///     If true, gzip will be used every time client sends Accept-Encoding: gzip

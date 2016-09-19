@@ -111,13 +111,13 @@ namespace ITCC.HTTP.Testing
         {
             StaticServer<object>.Start(new HttpServerConfiguration<object>
             {
-                BodyEncoder = new BodyEncoder
-                {
-                    AutoGzipCompression = false,
-                    ContentType = "application/json",
-                    Encoding = Encoding.UTF8,
-                    Serializer = JsonConvert.SerializeObject
-                },
+                //BodyEncoder = new BodyEncoder
+                //{
+                //    AutoGzipCompression = false,
+                //    ContentType = "application/json",
+                //    Encoding = Encoding.UTF8,
+                //    Serializer = JsonConvert.SerializeObject
+                //},
                 Port = 8888,
                 Protocol = Protocol.Http,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
