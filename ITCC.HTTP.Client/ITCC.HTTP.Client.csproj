@@ -82,11 +82,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CertificateController.cs" />
+    <Compile Include="Core\CertificateController.cs" />
     <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Enums\ServerResponseStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegularClient.cs" />
-    <Compile Include="StaticClient.cs" />
+    <Compile Include="Core\RegularClient.cs" />
+    <Compile Include="Core\StaticClient.cs" />
     <Compile Include="Utils\RequestResult.cs" />
     <Compile Include="Utils\UriHelper.cs" />
   </ItemGroup>

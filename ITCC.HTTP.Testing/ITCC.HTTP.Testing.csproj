@@ -116,10 +116,6 @@
       <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
       <Name>ITCC.HTTP.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP\ITCC.HTTP.csproj">
-      <Project>{77016ad7-9655-4918-832c-d26a767e29b4}</Project>
-      <Name>ITCC.HTTP</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
+using ITCC.HTTP.Client.Core;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Core;
 using ITCC.HTTP.Server.Files;

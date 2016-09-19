@@ -2,16 +2,19 @@
 
 HTTP-клиенты. Не бросают исключений, сильно настраиваемы.
 
-#### `class RequestResult<TResult>`
+### Common
 
-Класс для представления результата запроса. Ключевые свойства:
+#### `static class Delegates`
+
+Здесь просто хранятся объявления делегатов
 
 ```
-TResult Result;                                     // Результат запроса (объекта)
-ServerResponseStatus Status;                        // Определяется по статус-коду ответа сервера (либо невозможности его получить)
-IDictionary<string, string> Headers { get; set; };  // Заголовки ответа
-Exception Exception { get; set;}                    // Исключение, возникшее при выполнении запроса.
+delegate bool AuthentificationDataAdder(HttpRequestMessage request); // Метод добавления данных авторизации к клиентскому запросу
+delegate TResult BodyDeserializer<out TResult>(string data); // Метод десериализации тела ответа от сервера 
+delegate string BodySerializer(object data); // Сериализация тела сообщения
 ```
+
+### Core
 
 #### `static class StaticClient`
 
@@ -155,3 +158,38 @@ bool PreserveAuthorizationOnRedirect { get; set; } = true;   // Использу
 #### `class RegularClient`
 
 Предоставляет тот же интефейс, что и `StaticClient`, но не является статическим.
+
+### Enums
+
+#### `enum ServerResponseStatus`
+
+Тип ответа сервера. Значения
+
+```
+Ok,                        // Все хорошо (200, 201, 202, 206)
+NothingToDo,               // Данных нет (204)
+Redirect,                  // Перенаправление (301, 302)  
+ClientError,               // Ошибка в клиентском запросе (400, 404, 405, 409, 413, 416)
+ServerError,               // Ошибка на сервере (500, 501)
+Unauthorized,              // Данные авторизации неверны или недостаточны (401)
+Forbidden,                 // Доступ запрещен для данного аккаунта (403)
+TooManyRequests,           // Слишком много запросов с данного аккаунта (429).
+IncompehensibleResponse,   // Ответ непонятен
+RequestCanceled,           // Запрос отменен клиентом до получения ответа
+RequestTimeout,            // Ответ не получен за заданное время
+ConnectionError,           // Ошибка сетевого соединения
+TemporaryUnavailable,      // Ресурс временно недоступен (503)
+```
+
+### Utils
+
+#### `class RequestResult<TResult>`
+
+Класс для представления результата запроса. Ключевые свойства:
+
+```
+TResult Result;                                     // Результат запроса (объекта)
+ServerResponseStatus Status;                        // Определяется по статус-коду ответа сервера (либо невозможности его получить)
+IDictionary<string, string> Headers { get; set; };  // Заголовки ответа
+Exception Exception { get; set;}                    // Исключение, возникшее при выполнении запроса.
+```

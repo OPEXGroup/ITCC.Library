@@ -1,4 +1,4 @@
-﻿namespace ITCC.HTTP.Common.Enums
+﻿namespace ITCC.HTTP.Client.Enums
 {
     /// <summary>
     ///     Enums for server response status

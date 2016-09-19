@@ -14,7 +14,7 @@ using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files.Preprocess;
 using ITCC.HTTP.Server.Files.Requests;
 using ITCC.HTTP.Server.Service;
-using ITCC.HTTP.Utils;
+using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files

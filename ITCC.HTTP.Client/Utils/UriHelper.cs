@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ITCC.HTTP.Utils
+namespace ITCC.HTTP.Client.Utils
 {
     /// <summary>
     ///     Contains static methods for uri processing

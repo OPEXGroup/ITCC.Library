@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace ITCC.HTTP.Client
+namespace ITCC.HTTP.Client.Core
 {
     internal static class CertificateController
     {

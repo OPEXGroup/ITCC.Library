@@ -1,30 +1,13 @@
 ﻿using System.Net.Http;
-using ITCC.HTTP.Common.Enums;
 using ITCC.Logging.Core;
 
-namespace ITCC.HTTP.Utils
+namespace ITCC.HTTP.Server.Utils
 {
     /// <summary>
     ///     Simple methods to deal with request/response statuses
     /// </summary>
     public static class CommonHelper
     {
-        /// <summary>
-        ///     Checks whether server response is good
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        public static bool IsGoodServerResponseStatus(ServerResponseStatus status)
-            => status == ServerResponseStatus.Ok || status == ServerResponseStatus.NothingToDo;
-
-        /// <summary>
-        ///     Checks whether server response is bad
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        public static bool IsBadServerResponseStatus(ServerResponseStatus status)
-            => !IsGoodServerResponseStatus(status);
-
         /// <summary>
         ///     Converts Griffin's http method notation to system enum
         /// </summary>

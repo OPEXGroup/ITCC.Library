@@ -9,7 +9,7 @@ using ITCC.HTTP.Client.Common;
 using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common.Enums;
 
-namespace ITCC.HTTP.Client
+namespace ITCC.HTTP.Client.Core
 {
     /// <summary>
     ///     Represents static Http client (no instances, single server)

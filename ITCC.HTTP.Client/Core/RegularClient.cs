@@ -10,14 +10,14 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client.Common;
+using ITCC.HTTP.Client.Enums;
 using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Common.Enums;
-using ITCC.HTTP.Utils;
 using ITCC.Logging.Core;
 using Newtonsoft.Json;
 
-namespace ITCC.HTTP.Client
+namespace ITCC.HTTP.Client.Core
 {
     public class RegularClient
     {

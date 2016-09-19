@@ -23,7 +23,7 @@ using ITCC.HTTP.Server.Common;
 using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Server.Service;
-using ITCC.HTTP.Utils;
+using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
 
 // ReSharper disable StaticMemberInGenericType

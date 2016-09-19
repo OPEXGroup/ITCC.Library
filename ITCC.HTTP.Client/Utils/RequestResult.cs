@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ITCC.HTTP.Common.Enums;
+using ITCC.HTTP.Client.Enums;
 
 namespace ITCC.HTTP.Client.Utils
 {

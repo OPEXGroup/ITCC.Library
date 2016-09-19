@@ -79,7 +79,6 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="Enums\Protocol.cs" />
-    <Compile Include="Enums\ServerResponseStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
