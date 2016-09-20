@@ -80,12 +80,19 @@ namespace ITCC.Logging.Reader.Core
 
         #region private
 
-        private Tuple<int, int> FindEntryBound(byte[] buffer, int bufferSize)
+        /// <summary>
+        ///     Looks for log entry bound (first symbol that is not in entry)
+        /// </summary>
+        /// <param name="buffer">Buffer for lookup</param>
+        /// <param name="bufferSize">Buffer size</param>
+        /// <returns>
+        ///     Tuple. First element is index and second is line termination symbol count (1 for \r or \n and 2 for \r\n)
+        /// </returns>
+        private static Tuple<int, int> FindEntryBound(byte[] buffer, int bufferSize)
         {
-            var result = BoundNotFound;
             for (var i = 0; i < bufferSize - 2; ++i)
             {
-                if (buffer[i] == '\r' && buffer[i + 1] == '[')
+                if ((buffer[i] == '\r' || buffer[i] == '\n') && buffer[i + 1] == '[')
                 {
                     return new Tuple<int, int>(i, 1);
                 }
