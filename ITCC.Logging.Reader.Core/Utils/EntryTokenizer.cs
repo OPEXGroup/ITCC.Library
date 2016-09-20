@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Globalization;
 using System.Text;
 using ITCC.Logging.Core;
 
@@ -26,16 +27,20 @@ namespace ITCC.Logging.Reader.Core.Utils
 
         private EntryTokenizer(byte[] segment)
         {
-            _segment = Encoding.UTF8.GetString(segment).ToCharArray();
-            _position = 0;
+            _segment = Encoding.UTF8.GetChars(segment);
+            LogMessage(LogLevel.Debug, $"Parsing string of length {_segment.Length}: {Encoding.UTF8.GetString(segment)}");
+            _position = 1;
         }
 
         private LogEntryEventArgs ParseEntry()
         {
+            if (!CheckNextSegmentExists())
+                return null;
+
             var dateString = ParseNextSegment();
             DateTime date;
             LogMessage(LogLevel.Trace, $"Date string: {dateString}");
-            if (!DateTime.TryParse(dateString, out date))
+            if (!DateTime.TryParseExact(dateString, "dd.MM.yyyy HH:mm:ss.fff", new DateTimeFormatInfo(), DateTimeStyles.AllowInnerWhite, out date))
             {
                 return null;
             }
@@ -44,6 +49,7 @@ namespace ITCC.Logging.Reader.Core.Utils
 
             var levelString = ParseNextSegment();
             var level = ParseLogLevel(levelString);
+            LogMessage(LogLevel.Trace, $"Loglevel string: {levelString}");
             if (level == LogLevel.None)
             {
                 return null;
@@ -53,6 +59,7 @@ namespace ITCC.Logging.Reader.Core.Utils
 
             Skip(ThreadMark);
             var threadString = ParseNextSegment();
+            LogMessage(LogLevel.Trace, $"Thread string: {threadString}");
             int threadId;
             if (!int.TryParse(threadString, out threadId))
             {
@@ -62,8 +69,10 @@ namespace ITCC.Logging.Reader.Core.Utils
                 return null;
 
             var scope = ParseNextSegment(false);
+            LogMessage(LogLevel.Trace, $"Scope string: {scope}");
 
             var message = ReadToEnd();
+            LogMessage(LogLevel.Trace, $"Message string: {message}");
 
             return LogEntryEventArgs.CreateFromRawData(date, level, threadId, scope, message);
         }
@@ -114,10 +123,11 @@ namespace ITCC.Logging.Reader.Core.Utils
             // Skip "] [" and go to next segment
             _position = newPosition + 3;
 
+            LogMessage(LogLevel.Trace, $"Start: {actualStart}. End: {actualEnd}");
             var actualLength = actualEnd - actualStart + 1;
             var buffer = new char[actualLength];
-            Array.Copy(_segment, buffer, actualLength);
-            return buffer.ToString();
+            Array.Copy(_segment, actualStart, buffer, 0, actualLength);
+            return new string(buffer);
         }
 
         private bool CheckNextSegmentExists()
@@ -133,15 +143,15 @@ namespace ITCC.Logging.Reader.Core.Utils
             // Now we have no [
             _position--;
             var builder = new StringBuilder();
-            builder.Append(_segment, _position, _segment.Length - 1);
+            builder.Append(_segment, _position, _segment.Length - _position);
             return builder.ToString();
         }
 
-        private  void Skip(string mark)
+        private void Skip(string mark)
         {
             var bytes = mark.ToCharArray();
             var i = 0;
-            while (_segment[_position + i] == bytes[i])
+            while (i < bytes.Length && _segment[_position + i] == bytes[i])
             {
                 i++;
             }

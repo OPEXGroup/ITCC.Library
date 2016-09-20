@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using ITCC.Logging.Core;
 using ITCC.Logging.Reader.Core.Utils;
 
@@ -34,7 +35,8 @@ namespace ITCC.Logging.Reader.Core
                 _fileEnded = false;
                 while (!_fileEnded)
                 {
-                    readBuffer.ReadStream(fileStream);
+                    var readCount = readBuffer.ReadStream(fileStream);
+                    LogMessage(LogLevel.Trace, $"Read {readCount} bytes");
                     _fileEnded = !readBuffer.IsFull;
                     if (_fileEnded)
                         LogMessage(LogLevel.Trace, $"Got only {readBuffer.Count} bytes out of {readBuffer.Capacity}");
@@ -43,14 +45,28 @@ namespace ITCC.Logging.Reader.Core
                     while (boundIndex != BoundNotFound)
                     {
                         entryBuffer.CopyFrom(readBuffer, boundIndex);
-                        var entry = EntryTokenizer.ParseEntry(entryBuffer.Data);
-                        yield return entry;
+                        var slice = new byte[entryBuffer.Count];
+                        Array.Copy(entryBuffer.Data, slice, entryBuffer.Count - 1);
+                        var entry = EntryTokenizer.ParseEntry(slice);
+                        if (entry != null)
+                        {
+                            yield return entry;
+                        }
+                        else
+                        {
+                            var str = Encoding.UTF8.GetString(slice);
+                            LogMessage(LogLevel.Warning, $"Failed to parse {str}");
+                        }
                         entryBuffer.Flush();
 
-                        readBuffer.TruncateStart(boundIndex);
+                        readBuffer.TruncateStart(boundIndex + 2);
                         boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
                     }
+
+                    entryBuffer.CopyFrom(readBuffer);
+                    readBuffer.Flush();
                 }
+                
                 LogMessage(LogLevel.Debug, "File ended");
             }
         }
@@ -63,12 +79,17 @@ namespace ITCC.Logging.Reader.Core
 
         private int FindEntryBound(byte[] buffer, int bufferSize)
         {
-            for (var i = 0; i < bufferSize - 1; ++i)
+            var result = BoundNotFound;
+            for (var i = 0; i < bufferSize - 2; ++i)
             {
-                if (buffer[i] == '\n' && buffer[i + 1] == '[')
-                    return i;
+                if (buffer[i] == '\r' && buffer[i + 1] == '\n' && buffer[i + 2] == '[')
+                {
+                    result = i;
+                    break;
+                }
             }
-            return BoundNotFound;
+            LogMessage(LogLevel.Trace, $"Next bound: {result}");
+            return result;
         }
 
         private void LogMessage(LogLevel level, string message) => Logger.LogEntry("LOGREADER", level, message);

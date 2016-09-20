@@ -52,6 +52,7 @@ namespace ITCC.Logging.Testing
                     }
 
                     PrintEntry(entry);
+                    Console.ReadLine();
                 }
             }
             catch (Exception ex)
@@ -79,7 +80,7 @@ namespace ITCC.Logging.Testing
         private static void InitLoggers()
         {
             Logger.Level = LogLevel.Trace;
-            Logger.RegisterReceiver(new ColouredConsoleLogger(LogLevel.Debug));
+            Logger.RegisterReceiver(new ColouredConsoleLogger(LogLevel.Trace));
 #if WRITE
             _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
 #endif
