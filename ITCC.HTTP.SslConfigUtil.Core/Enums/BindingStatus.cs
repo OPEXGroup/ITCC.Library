@@ -1,25 +1,17 @@
 ﻿namespace ITCC.HTTP.SslConfigUtil.Core.Enums
 {
-    public enum BindingResult
+    public enum BindingStatus
     {
         Unspecified,
-
         Ok,
-
-        AssemblyLoadFailed,
-
-        InvalidIpAddress,
-        InvalidPortValue,
-        InvalidCertificateCn,
+        InvalidParams,
         InvalidSubjectnameFormat,
-
+        SslCertFromFileError,
         SslCertificateNotFound,
-
         SslCertificateGenerationFailed,
-
+        SslCertificateExpired,
         PortIsAlreadyAssigned,
-        SslCertificateExpired
-
-
+        UnbindingError,
+        UnknownError
     }
 }

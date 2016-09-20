@@ -26,9 +26,9 @@ using ITCC.HTTP.SslConfigUtil.Core.Views;
 
 namespace ITCC.HTTP.SslConfigUtil.Core
 {
-    public static class CertificateController
+    internal static class CertificateController
     {
-        public static IEnumerable<CertificateView> GetCertificates()
+        internal static IEnumerable<CertificateView> GetCertificates()
         {
             var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
             personalCertStote.Open(OpenFlags.ReadOnly);
@@ -41,6 +41,25 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
                 personalCertStote.Open(OpenFlags.ReadWrite);
                 var result = personalCertStote.Certificates.Find(X509FindType.FindBySubjectName, subjectName, true);
+                var succeed = result.Count > 0;
+                certificate = succeed ? result[0] : null;
+                return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
+
+            }
+            catch (CryptographicException cryptographicException)
+            {
+                LogException(cryptographicException);
+                certificate = null;
+                return FindCertificateStatus.Error;
+            }
+        }
+        internal static FindCertificateStatus FindByThumbprint(string thumbtrint, out X509Certificate2 certificate)
+        {
+            try
+            {
+                var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+                personalCertStote.Open(OpenFlags.ReadWrite);
+                var result = personalCertStote.Certificates.Find(X509FindType.FindByThumbprint, thumbtrint, true);
                 var succeed = result.Count > 0;
                 certificate = succeed ? result[0] : null;
                 return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
@@ -97,25 +116,21 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 
             return stringBuilder.ToString();
         }
-        internal static bool InstallFromFile(string path, SecureString password, out X509Certificate2 cert)
+        internal static OpenCertificateStatus InstallFromFile(string path, SecureString password, out X509Certificate2 cert)
         {
             LogDebug("Certificate installation started");
+            cert = null;
+            if (!File.Exists(path))
+                return OpenCertificateStatus.NotFound;
 
-            try
-            {
-                cert = OpenFromFile(path, password);
-            }
-            catch (Exception)
-            {
-                cert = null;
-            }
+            cert = OpenFromFile(path, password);
+            if (cert == null)
+                return OpenCertificateStatus.InvalidPassword;
 
-            if (cert != null)
-                return VerifyAndInstall(cert);
-
-            LogError("Unable to import certificate from file");
-            return false;
+            return VerifyAndInstall(cert) ? OpenCertificateStatus.Ok : OpenCertificateStatus.InvalidCertificate;
         }
+
+        #region private
 
         private static bool InstallSelfSigned(string path, SecureString password, out X509Certificate2 cert)
         {
@@ -278,7 +293,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             var keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
             var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
-            
+
             certificateGenerator.SetPublicKey(subjectKeyPair.Public);
 
             // Generating the Certificate
@@ -288,19 +303,19 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 
             certificateGenerator.AddExtension(
                 X509Extensions.BasicConstraints,
-                true, 
+                true,
                 new BasicConstraints(false));
             certificateGenerator.AddExtension(
-                X509Extensions.KeyUsage, 
-                true, 
+                X509Extensions.KeyUsage,
+                true,
                 new KeyUsage(KeyUsage.DigitalSignature | KeyUsage.KeyEncipherment));
             certificateGenerator.AddExtension(
                 X509Extensions.ExtendedKeyUsage,
                 false,
                 ExtendedKeyUsage.GetInstance(new ExtendedKeyUsage(KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth)));
 
-           // selfsign certificate
-           var certificate = certificateGenerator.Generate(signatureFactory);
+            // selfsign certificate
+            var certificate = certificateGenerator.Generate(signatureFactory);
 
             // correcponding private key
             var info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(subjectKeyPair.Private);
@@ -309,7 +324,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             {
                 FriendlyName = $"{subjectName} self-signed"
             };
-            
+
             var seq = (Asn1Sequence)Asn1Object.FromByteArray(info.ParsePrivateKey().GetDerEncoded());
             if (seq.Count != 9)
                 throw new PemException("malformed sequence in RSA private key");
@@ -375,5 +390,8 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 password.AppendChar(c);
             return password;
         }
+
+        #endregion
+
     }
 }

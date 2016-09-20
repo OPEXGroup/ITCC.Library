@@ -47,16 +47,30 @@
   <ItemGroup>
     <Compile Include="AssemblyLoader.cs" />
     <Compile Include="Binder.cs" />
-    <Compile Include="CheckBindingResult.cs" />
-    <Compile Include="Enums\BindingResult.cs" />
+    <Compile Include="BindingParams.cs" />
+    <Compile Include="Enums\OpenCertificateStatus.cs" />
+    <Compile Include="Enums\ParseBaseParamsStatus.cs" />
+    <Compile Include="Enums\UnbindStatus.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\BindingResult.cs" />
+    <Compile Include="Utils\CheckBindingResult.cs" />
+    <Compile Include="Enums\BindingStatus.cs" />
     <Compile Include="CertificateController.cs" />
+    <Compile Include="Enums\BindType.cs" />
     <Compile Include="Enums\CheckBindingStatus.cs" />
     <Compile Include="Enums\ExecuteCommandStatus.cs" />
     <Compile Include="Enums\FindCertificateStatus.cs" />
     <Compile Include="Enums\LoadAssemblyStatus.cs" />
-    <Compile Include="ExecuteCommandResult.cs" />
-    <Compile Include="GetAssemblyGuidResult.cs" />
+    <Compile Include="Utils\EnumHelper.cs" />
+    <Compile Include="Utils\ExecuteCommandResult.cs" />
+    <Compile Include="Utils\GetAssemblyGuidResult.cs" />
+    <Compile Include="Utils\ParseParamsResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\UnbindResult.cs" />
     <Compile Include="Views\CertificateView.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

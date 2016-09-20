@@ -1,112 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ITCC.HTTP.SslConfigUtil.Core;
+using ITCC.HTTP.SslConfigUtil.Core.Enums;
+using ITCC.HTTP.SslConfigUtil.Core.Utils;
 using ITCC.HTTP.SslConfigUtil.Core.Views;
+using ITCC.HTTP.SslConfigUtil.GUI.Enums;
+using ITCC.HTTP.SslConfigUtil.GUI.Utils;
+using ITCC.Logging.Core;
+using ITCC.Logging.Core.Loggers;
+using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.HTTP.SslConfigUtil.GUI
 {
+   
+    
     public partial class MainWindow : Window
     {
-        private enum CertificateMode
-        {
-            Undefined,
-            FromStore,
-            FromFile,
-            SelfSigned
-        }
-        public ObservableCollection<CertificateView> CertificateCollection { get; } = new ObservableCollection<CertificateView>();
+        private readonly BackgroundWorker _bindBackgroundWorker;
+        private readonly BackgroundWorker _unbindBackgroundWorker;
+        public ObservableCollection<CertificateView> CertificateCollection { get; set; } = new ObservableCollection<CertificateView>();
         private readonly InputModel _input = new InputModel();
-        private CertificateMode _certificateMode = CertificateMode.Undefined;
-
+        private CertificateView _chosenCertificate;
+        private bool _unsafeBinding;
 
         public MainWindow()
         {
             InitializeComponent();
+            Logger.Level = LogLevel.Trace;
+            Logger.RegisterReceiver(new DebugLogger(), true);
+            _bindBackgroundWorker = (BackgroundWorker)FindResource("BindBackgroundWorker");
+            _unbindBackgroundWorker = (BackgroundWorker)FindResource("UnbindBackgroundWorker");
             CertificatesComboBox.DataContext = this;
-            foreach (var cert in CertificateController.GetCertificates())
-                CertificateCollection.Add(cert);
-
-            this.DataContext = _input;
-        }
-
-        private void ChooseFromStore_OnChecked(object sender, RoutedEventArgs e)
-        {
-            CertificatesComboBox.IsEnabled = true;
-            FromFileGrid.IsEnabled = false;
-            SubjectNameTextBox.IsEnabled = false;
-            _certificateMode = CertificateMode.FromStore;
-        }
-        private void ChooseFromFile_OnChecked(object sender, RoutedEventArgs e)
-        {
-            CertificatesComboBox.IsEnabled = false;
-            FromFileGrid.IsEnabled = true;
-            SubjectNameTextBox.IsEnabled = false;
-            _certificateMode = CertificateMode.FromFile;
-        }
-        private void CreateNew_OnChecked(object sender, RoutedEventArgs e)
-        {
-            CertificatesComboBox.IsEnabled = false;
-            FromFileGrid.IsEnabled = false;
-            SubjectNameTextBox.IsEnabled = true;
-            _certificateMode = CertificateMode.SelfSigned;
-        }
-
-        private async void BindButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine("Click started");
-            AssemblyPathTextbox.IsEnabled = false;
-            BrowseAssembly.IsEnabled = false;
-            IpAddressTextBox.IsEnabled = false;
-            PortTextBox.IsEnabled = false;
-            CertificatesComboBox.IsEnabled = false;
-            ProgressBar.Visibility = Visibility.Visible;
-
-            await Task.Factory.StartNew(() =>
+            DataContext = _input;
+            CertificatesComboBox.SelectionChanged += (sender, args) =>
             {
-                switch (_certificateMode)
-                {
-                    case CertificateMode.Undefined:
-                        break;
-                    case CertificateMode.FromStore:
-                        break;
-                    case CertificateMode.FromFile:
-                        break;
-                    case CertificateMode.SelfSigned:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            });
+                var control = sender as ComboBox;
+                if (control == null)
+                    throw new Exception();
 
-            AssemblyPathTextbox.IsEnabled = true;
-            BrowseAssembly.IsEnabled = true;
-            IpAddressTextBox.IsEnabled = true;
-            PortTextBox.IsEnabled = true;
-            CertificatesComboBox.IsEnabled = true;
-            ProgressBar.Visibility = Visibility.Collapsed;
+                var item = control.SelectedItem as CertificateView;
+                if (item == null)
+                    return;
+                
+                _chosenCertificate = item;
+                _input.CertificateChosen = true;
+            };
+            CertificatesComboBox.DropDownOpened += (sender, args) =>
+            {
 
-            Debug.WriteLine("Click ended");
+                var selectedThumbprint = _chosenCertificate?.Thumbprint;
+                CertificateCollection.Clear();
+                foreach (var cert in Binder.GetCertificateList())
+                    CertificateCollection.Add(cert);
+                if (selectedThumbprint == null)
+                    return;
+                var comboBox = sender as ComboBox;
+                if (comboBox != null)
+                    comboBox.SelectedItem =
+                        CertificateCollection.FirstOrDefault(x => x.Thumbprint == selectedThumbprint);
+            };
         }
 
+      
+        private void ChooseFromStore_OnChecked(object sender, RoutedEventArgs e) => _input.CertificateMode = CertificateMode.FromStore;
+        private void ChooseFromFile_OnChecked(object sender, RoutedEventArgs e) => _input.CertificateMode = CertificateMode.FromFile;
+        private void CreateNew_OnChecked(object sender, RoutedEventArgs e) => _input.CertificateMode = CertificateMode.SelfSigned;
         private void BrowseAssembly_OnClick(object sender, RoutedEventArgs e)
         {
-            var filePicker = new OpenFileDialog
+            var filePicker = new System.Windows.Forms.OpenFileDialog
             {
                 Title = "Select your aplication",
                 Multiselect = false,
@@ -132,10 +100,145 @@ namespace ITCC.HTTP.SslConfigUtil.GUI
                     throw new ArgumentOutOfRangeException();
             }
         }
-
         private void BrowseCertificate_OnClick(object sender, RoutedEventArgs e)
         {
+            var filePicker = new System.Windows.Forms.OpenFileDialog
+            {
+                Title = "Select certificate file",
+                Multiselect = false,
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "Certificate (.pfx) | *.pfx"
+            };
+            var result = filePicker.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+                CertificatePathTextbox.Text = filePicker.FileName;
+
+        }
+        private static SecureString ToSecureString(string unsecurePassword)
+        {
+            if (string.IsNullOrEmpty(unsecurePassword))
+                return null;
+
+            var password = new SecureString();
+            foreach (var c in unsecurePassword)
+                password.AppendChar(c);
+            return password;
+        }
+
+        private void BindButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            InputRootGrid.IsEnabled = false;
+            ButtonsGrid.IsEnabled = false;
+            ProgressBar.Visibility = Visibility.Visible;
+            ResultTextblock.Text = string.Empty;
+
+            _bindBackgroundWorker.RunWorkerAsync(new RunBindingParams
+            {
+                Mode = _input.CertificateMode,
+                AssemplyPath = AssemblyPathTextbox.Text,
+                Ip = _input.IpAddress,
+                Port = _input.Port,
+                SubjectName = _input.SubjectName,
+                Thumbprint = _chosenCertificate?.Thumbprint,
+                CertificatePath = CertificatePathTextbox.Text,
+                Password = ToSecureString(CertificatePasswordBox.Password),
+                UnsafeBinding = _unsafeBinding
+            });
+        }
+        private void BindBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BindingResult result;
+            var args = e.Argument as RunBindingParams;
+            if (args == null)
+                throw new ArgumentException();
+
+            switch (_input.CertificateMode)
+            {
+                case CertificateMode.FromStore:
+                    result = Binder.Bind(args.AssemplyPath, args.Ip, args.Port, new CertificateThumbprintBindingParams(args.Thumbprint),args.UnsafeBinding);
+                    break;
+                case CertificateMode.FromFile:
+                    result = Binder.Bind(args.AssemplyPath, args.Ip, args.Port, new CertificateFileBindingParams(args.CertificatePath, args.Password), args.UnsafeBinding);
+                    break;
+                case CertificateMode.SelfSigned:
+                    result = Binder.Bind(args.AssemplyPath, args.Ip, args.Port, new CertificateSubjectnameParams(args.SubjectName), args.UnsafeBinding);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            e.Result = result;
+        }
+        private void BindBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var result = e.Result as BindingResult;
+            if (result == null)
+                throw new Exception();
+
+            ResultTextblock.Text = EnumHelper.DisplayName(result.Status);
+            if (!string.IsNullOrEmpty(result.Reason))
+                ResultTextblock.Text += $"\n{result.Reason}";
+            ResultTextblock.Foreground = result.Status != BindingStatus.Ok ? new SolidColorBrush(Colors.DarkRed) : new SolidColorBrush(Colors.DarkGreen);
+
+            InputRootGrid.IsEnabled = true;
+            ButtonsGrid.IsEnabled = true;
+            ProgressBar.Visibility = Visibility.Collapsed;
+        }
+
+
+        private void UnbindButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            InputRootGrid.IsEnabled = false;
+            ButtonsGrid.IsEnabled = false;
+            ProgressBar.Visibility = Visibility.Visible;
+            ResultTextblock.Text = string.Empty;
+
+            _unbindBackgroundWorker.RunWorkerAsync(new RunUnbindingParams()
+            {
+                ApplicationPath = AssemblyPathTextbox.Text,
+                IpAddress = _input.IpAddress,
+                Port = _input.Port,
+                Unsafe = _unsafeBinding
+            });
+        }
+        private void UnbindBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var args = e.Argument as RunUnbindingParams;
+            if (args == null)
+                throw new ArgumentException();
+            e.Result = Binder.Unbind(args.ApplicationPath, args.IpAddress, args.Port, args.Unsafe);
+        }
+        private void UnbindBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var result = e.Result as UnbindResult;
+            if (result == null)
+                throw new Exception();
+
+            InputRootGrid.IsEnabled = true;
+            ButtonsGrid.IsEnabled = true;
+            ProgressBar.Visibility = Visibility.Collapsed;
+
+            ResultTextblock.Text = EnumHelper.DisplayName(result.Status);
             
+            ResultTextblock.Foreground = result.Status != UnbindStatus.Ok ? new SolidColorBrush(Colors.DarkRed) : new SolidColorBrush(Colors.DarkGreen);
+        }
+
+        private void UnsafeBinding_OnChecked(object sender, RoutedEventArgs e)
+        {
+            var warningDialog = MessageBox.Show("Safe binding prevents from occasionally binding rewrite. " +
+                                                "If you want to enable Unsafe binding MAKE SURE you enter correct ip address and password. " +
+                                                "Enable unsafe binding?", "Unsafe binding", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (warningDialog != MessageBoxResult.Yes)
+            {
+                UnsafeBindingCheckbox.IsChecked = false;
+                return;
+            }
+
+            _unsafeBinding = true;
+        }
+        private void UnsafeBinding_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            _unsafeBinding = false;
         }
     }
 }

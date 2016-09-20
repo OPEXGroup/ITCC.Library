@@ -41,6 +41,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -64,6 +67,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Utils\RunBindingParams.cs" />
+    <Compile Include="Utils\RunUnbindingParams.cs" />
     <Page Include="CertificateViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -79,7 +84,8 @@
     <Compile Include="CertificateViewControl.xaml.cs">
       <DependentUpon>CertificateViewControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="InputModel.cs" />
+    <Compile Include="Enums\CertificateMode.cs" />
+    <Compile Include="Utils\InputModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -118,24 +124,22 @@
       <Project>{01de0c5b-72d2-4622-9636-4f9257bd59d2}</Project>
       <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Name>ITCC.Logging.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
+      <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
+      <Name>ITCC.Logging.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\ssl-cert.png">
+    <Resource Include="Resources\ssl-cert.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\error.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Assets\ok.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Assets\warring.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <None Include="Resources\Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
