@@ -52,7 +52,7 @@ namespace ITCC.Logging.Testing
                     }
 
                     PrintEntry(entry);
-                    Console.ReadLine();
+                    //Console.ReadLine();
                 }
             }
             catch (Exception ex)

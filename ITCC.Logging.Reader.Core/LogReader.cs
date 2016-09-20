@@ -30,7 +30,6 @@ namespace ITCC.Logging.Reader.Core
             var readBuffer = new ByteBuffer(BufferSize);
             var entryBuffer = new ByteBuffer(EntryMaxSize);
 
-            var justStarted = true;
             LogMessage(LogLevel.Debug, $"Reading file {Filename} of size {new FileInfo(Filename).Length}");
             using (var fileStream = new FileStream(Filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -44,12 +43,12 @@ namespace ITCC.Logging.Reader.Core
                         LogMessage(LogLevel.Trace, $"Got only {readBuffer.Count} bytes out of {readBuffer.Capacity}");
 
                     var boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
-                    while (boundIndex != BoundNotFound)
+                    while (boundIndex.Item1 != BoundNotFound)
                     {
-                        entryBuffer.CopyFrom(readBuffer, boundIndex - 1);
+                        entryBuffer.CopyFrom(readBuffer, boundIndex.Item1 - 1);
                         var slice = new byte[entryBuffer.Count - 1];
                         Array.Copy(entryBuffer.Data, slice, entryBuffer.Count - 1);
-                        LogMessage(LogLevel.Info, $"First symbol: {(short)slice[0]}; Last symbol: {(short) slice[entryBuffer.Count - 2]}");
+                        LogMessage(LogLevel.Info, $"First symbol: {(char)slice[0]}; Last symbol: {(char)slice[entryBuffer.Count - 2]}");
                         var entry = EntryTokenizer.ParseEntry(slice);
                         if (entry != null)
                         {
@@ -62,7 +61,7 @@ namespace ITCC.Logging.Reader.Core
                         }
                         entryBuffer.Flush();
 
-                        readBuffer.TruncateStart(boundIndex + 2);
+                        readBuffer.TruncateStart(boundIndex.Item1 + boundIndex.Item2);
                         LogMessage(LogLevel.Trace, $"readBuffer starts with {(short) readBuffer.Data[0]}");
                         boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
                     }
@@ -81,19 +80,21 @@ namespace ITCC.Logging.Reader.Core
 
         #region private
 
-        private int FindEntryBound(byte[] buffer, int bufferSize)
+        private Tuple<int, int> FindEntryBound(byte[] buffer, int bufferSize)
         {
             var result = BoundNotFound;
             for (var i = 0; i < bufferSize - 2; ++i)
             {
-                if (buffer[i] == '\r' && buffer[i + 1] == '\n')
+                if (buffer[i] == '\r' && buffer[i + 1] == '[')
                 {
-                    result = i;
-                    break;
+                    return new Tuple<int, int>(i, 1);
+                }
+                if (buffer[i] == '\r' && buffer[i + 1] == '\n' && buffer[i + 2] == '[')
+                {
+                    return new Tuple<int, int>(i, 2);
                 }
             }
-            LogMessage(LogLevel.Trace, $"Next bound: {result}");
-            return result;
+            return new Tuple<int, int>(BoundNotFound, -1);
         }
 
         [Conditional("DEBUG")]

@@ -61,11 +61,14 @@ namespace ITCC.Logging.Reader.Core.Utils
         } 
 
         public int Capacity { get; }
+
         public int Count { get; private set; }
+
         public byte[] Data { get; }
 
         public int FreeSize => Capacity - Count;
         public bool IsFull => Count == Capacity;
+
         #endregion
     }
 }

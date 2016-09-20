@@ -1,7 +1,10 @@
 ﻿
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using ITCC.Logging.Core;
 
@@ -29,7 +32,7 @@ namespace ITCC.Logging.Reader.Core.Utils
         private EntryTokenizer(byte[] segment)
         {
             _segment = Encoding.UTF8.GetChars(segment);
-            LogMessage(LogLevel.Info, $"Parsing string of length {_segment.Length}: {Encoding.UTF8.GetString(segment)}");
+            LogMessage(LogLevel.Info, $"Parsing string of length {_segment.Length}: {ToLiteral(Encoding.UTF8.GetString(segment))}");
             _position = 1;
         }
 
@@ -157,6 +160,18 @@ namespace ITCC.Logging.Reader.Core.Utils
                 i++;
             }
             _position += i;
+        }
+
+        private static string ToLiteral(string input)
+        {
+            using (var writer = new StringWriter())
+            {
+                using (var provider = CodeDomProvider.CreateProvider("CSharp"))
+                {
+                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, null);
+                    return writer.ToString();
+                }
+            }
         }
 
         private static LogLevel ParseLogLevel(string representation)
