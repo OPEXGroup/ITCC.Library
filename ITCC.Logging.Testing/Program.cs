@@ -40,10 +40,24 @@ namespace ITCC.Logging.Testing
 #endif
 
 #if READ
-            var reader = new LogReader(FileName);
-            foreach (var entry in reader.ReadAsEnumerable())
+            try
             {
-                PrintEntry(entry);
+                var reader = new LogReader(FileName);
+                foreach (var entry in reader.ReadAsEnumerable())
+                {
+                    if (entry == null)
+                    {
+                        Logger.LogEntry("MAIN", LogLevel.Debug, "Failed to parse");
+                        continue;
+                    }
+
+                    PrintEntry(entry);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException("MAIN", LogLevel.Warning, ex);
+                throw;
             }
 #endif
 

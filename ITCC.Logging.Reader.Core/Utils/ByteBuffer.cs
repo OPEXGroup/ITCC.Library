@@ -53,7 +53,12 @@ namespace ITCC.Logging.Reader.Core.Utils
             Count = 0;
         }
 
-        public int ReadStream(Stream stream) => stream.Read(Data, Count, FreeSize);
+        public int ReadStream(Stream stream)
+        {
+            var readCount = stream.Read(Data, Count, FreeSize);
+            Count += readCount;
+            return readCount;
+        } 
 
         public int Capacity { get; }
         public int Count { get; private set; }

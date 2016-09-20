@@ -28,6 +28,7 @@ namespace ITCC.Logging.Reader.Core
             var readBuffer = new ByteBuffer(BufferSize);
             var entryBuffer = new ByteBuffer(EntryMaxSize);
 
+            LogMessage(LogLevel.Debug, $"Reading file {Filename} of size {new FileInfo(Filename).Length}");
             using (var fileStream = new FileStream(Filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 _fileEnded = false;

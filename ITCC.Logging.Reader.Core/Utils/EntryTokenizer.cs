@@ -26,7 +26,7 @@ namespace ITCC.Logging.Reader.Core.Utils
 
         private EntryTokenizer(byte[] segment)
         {
-            _segment = Encoding.UTF8.GetString(segment).ToCharArray(); ;
+            _segment = Encoding.UTF8.GetString(segment).ToCharArray();
             _position = 0;
         }
 
@@ -34,6 +34,7 @@ namespace ITCC.Logging.Reader.Core.Utils
         {
             var dateString = ParseNextSegment();
             DateTime date;
+            LogMessage(LogLevel.Trace, $"Date string: {dateString}");
             if (!DateTime.TryParse(dateString, out date))
             {
                 return null;
@@ -119,7 +120,13 @@ namespace ITCC.Logging.Reader.Core.Utils
             return buffer.ToString();
         }
 
-        private bool CheckNextSegmentExists() => _segment[_position - 1] == PartStart;
+        private bool CheckNextSegmentExists()
+        {
+            var exists = _segment[_position - 1] == PartStart;
+            if (! exists)
+                LogMessage(LogLevel.Trace, "Next segment does not exist");
+            return exists;
+        } 
 
         private string ReadToEnd()
         {
@@ -161,6 +168,8 @@ namespace ITCC.Logging.Reader.Core.Utils
                     return LogLevel.None;
             }
         }
+
+        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("TOKENIZER", level, message);
 
         private const string ThreadMark = @"THR ";
         private const char PartStart = '[';
