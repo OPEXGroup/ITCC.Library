@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging.Reader.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging.Reader.WPF", "ITCC.Logging.Reader.WPF\ITCC.Logging.Reader.WPF.csproj", "{1C9EAE3D-8491-44ED-B10D-779E08CA99D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCC.Logging.Testing", "ITCC.Logging.Testing\ITCC.Logging.Testing.csproj", "{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,18 @@ Global
 		{1C9EAE3D-8491-44ED-B10D-779E08CA99D8}.Release|x64.Build.0 = Release|x64
 		{1C9EAE3D-8491-44ED-B10D-779E08CA99D8}.Release|x86.ActiveCfg = Release|x86
 		{1C9EAE3D-8491-44ED-B10D-779E08CA99D8}.Release|x86.Build.0 = Release|x86
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|x64.ActiveCfg = Debug|x64
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|x64.Build.0 = Debug|x64
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|x86.ActiveCfg = Debug|x86
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Debug|x86.Build.0 = Debug|x86
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|x64.ActiveCfg = Release|x64
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|x64.Build.0 = Release|x64
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|x86.ActiveCfg = Release|x86
+		{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
