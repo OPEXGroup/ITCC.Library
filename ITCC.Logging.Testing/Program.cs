@@ -58,7 +58,6 @@ namespace ITCC.Logging.Testing
             catch (Exception ex)
             {
                 Logger.LogException("MAIN", LogLevel.Warning, ex);
-                throw;
             }
 #endif
 

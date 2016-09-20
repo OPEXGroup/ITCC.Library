@@ -30,25 +30,32 @@ namespace ITCC.Logging.Reader.Core
             var readBuffer = new ByteBuffer(BufferSize);
             var entryBuffer = new ByteBuffer(EntryMaxSize);
 
+            var totalRead = 0;
             LogMessage(LogLevel.Debug, $"Reading file {Filename} of size {new FileInfo(Filename).Length}");
             using (var fileStream = new FileStream(Filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 _fileEnded = false;
                 while (!_fileEnded)
                 {
+                    var offset = 0;
                     var readCount = readBuffer.ReadStream(fileStream);
-                    LogMessage(LogLevel.Trace, $"Read {readCount} bytes");
+                    totalRead += readCount;
+                    LogMessage(LogLevel.Trace, $"Read {readCount} bytes ({totalRead} total)");
                     _fileEnded = !readBuffer.IsFull;
                     if (_fileEnded)
                         LogMessage(LogLevel.Trace, $"Got only {readBuffer.Count} bytes out of {readBuffer.Capacity}");
 
                     var boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
+                    Console.WriteLine(boundIndex.Item1);
                     while (boundIndex.Item1 != BoundNotFound)
                     {
-                        entryBuffer.CopyFrom(readBuffer, boundIndex.Item1 - 1);
+                        entryBuffer.CopyFrom(readBuffer, boundIndex.Item1);
+                        offset += boundIndex.Item1 + boundIndex.Item2;
+                        LogMessage(LogLevel.Info, $"Current block offset: {offset}");
+                        readBuffer.TruncateStart(boundIndex.Item1 + boundIndex.Item2);
                         var slice = new byte[entryBuffer.Count - 1];
                         Array.Copy(entryBuffer.Data, slice, entryBuffer.Count - 1);
-                        LogMessage(LogLevel.Info, $"First symbol: {(char)slice[0]}; Last symbol: {(char)slice[entryBuffer.Count - 2]}");
+                        entryBuffer.Flush();
                         var entry = EntryTokenizer.ParseEntry(slice);
                         if (entry != null)
                         {
@@ -59,14 +66,12 @@ namespace ITCC.Logging.Reader.Core
                             var str = Encoding.UTF8.GetString(slice);
                             LogMessage(LogLevel.Warning, $"Failed to parse {str}");
                         }
-                        entryBuffer.Flush();
-
-                        readBuffer.TruncateStart(boundIndex.Item1 + boundIndex.Item2);
-                        LogMessage(LogLevel.Trace, $"readBuffer starts with {(short) readBuffer.Data[0]}");
+                        
                         boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
                     }
 
                     entryBuffer.CopyFrom(readBuffer);
+                    LogMessage(LogLevel.Info, $"Data left: {readBuffer.ToUtf8String()}");
                     readBuffer.Flush();
                 }
                 

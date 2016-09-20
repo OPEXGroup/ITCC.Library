@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace ITCC.Logging.Reader.Core.Utils
 {
@@ -58,7 +59,9 @@ namespace ITCC.Logging.Reader.Core.Utils
             var readCount = stream.Read(Data, Count, FreeSize);
             Count += readCount;
             return readCount;
-        } 
+        }
+
+        public string ToUtf8String() => Encoding.UTF8.GetString(Data, 0, Count);
 
         public int Capacity { get; }
 
