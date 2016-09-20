@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using ITCC.Logging.Core;
@@ -29,6 +30,7 @@ namespace ITCC.Logging.Reader.Core
             var readBuffer = new ByteBuffer(BufferSize);
             var entryBuffer = new ByteBuffer(EntryMaxSize);
 
+            var justStarted = true;
             LogMessage(LogLevel.Debug, $"Reading file {Filename} of size {new FileInfo(Filename).Length}");
             using (var fileStream = new FileStream(Filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -44,9 +46,10 @@ namespace ITCC.Logging.Reader.Core
                     var boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
                     while (boundIndex != BoundNotFound)
                     {
-                        entryBuffer.CopyFrom(readBuffer, boundIndex);
-                        var slice = new byte[entryBuffer.Count];
+                        entryBuffer.CopyFrom(readBuffer, boundIndex - 1);
+                        var slice = new byte[entryBuffer.Count - 1];
                         Array.Copy(entryBuffer.Data, slice, entryBuffer.Count - 1);
+                        LogMessage(LogLevel.Info, $"First symbol: {(short)slice[0]}; Last symbol: {(short) slice[entryBuffer.Count - 2]}");
                         var entry = EntryTokenizer.ParseEntry(slice);
                         if (entry != null)
                         {
@@ -60,6 +63,7 @@ namespace ITCC.Logging.Reader.Core
                         entryBuffer.Flush();
 
                         readBuffer.TruncateStart(boundIndex + 2);
+                        LogMessage(LogLevel.Trace, $"readBuffer starts with {(short) readBuffer.Data[0]}");
                         boundIndex = FindEntryBound(readBuffer.Data, readBuffer.Count);
                     }
 
@@ -82,7 +86,7 @@ namespace ITCC.Logging.Reader.Core
             var result = BoundNotFound;
             for (var i = 0; i < bufferSize - 2; ++i)
             {
-                if (buffer[i] == '\r' && buffer[i + 1] == '\n' && buffer[i + 2] == '[')
+                if (buffer[i] == '\r' && buffer[i + 1] == '\n')
                 {
                     result = i;
                     break;
@@ -92,6 +96,7 @@ namespace ITCC.Logging.Reader.Core
             return result;
         }
 
+        [Conditional("DEBUG")]
         private void LogMessage(LogLevel level, string message) => Logger.LogEntry("LOGREADER", level, message);
 
         private const int BufferSize = 4096;

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using ITCC.Logging.Core;
@@ -28,7 +29,7 @@ namespace ITCC.Logging.Reader.Core.Utils
         private EntryTokenizer(byte[] segment)
         {
             _segment = Encoding.UTF8.GetChars(segment);
-            LogMessage(LogLevel.Debug, $"Parsing string of length {_segment.Length}: {Encoding.UTF8.GetString(segment)}");
+            LogMessage(LogLevel.Info, $"Parsing string of length {_segment.Length}: {Encoding.UTF8.GetString(segment)}");
             _position = 1;
         }
 
@@ -179,6 +180,7 @@ namespace ITCC.Logging.Reader.Core.Utils
             }
         }
 
+        [Conditional("DEBUG")]
         private void LogMessage(LogLevel level, string message) => Logger.LogEntry("TOKENIZER", level, message);
 
         private const string ThreadMark = @"THR ";
