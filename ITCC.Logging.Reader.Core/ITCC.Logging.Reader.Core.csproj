@@ -76,8 +76,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\ReaderResult.cs" />
     <Compile Include="LogReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\ByteBuffer.cs" />
+    <Compile Include="Utils\EntryTokenizer.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
+      <Name>ITCC.Logging.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

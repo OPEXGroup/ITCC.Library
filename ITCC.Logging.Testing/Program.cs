@@ -1,9 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// #define WRITE
+#define READ
+
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.Logging.Core;
+using ITCC.Logging.Core.Interfaces;
+using ITCC.Logging.Reader.Core;
 using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.Logging.Testing
@@ -16,6 +19,7 @@ namespace ITCC.Logging.Testing
         {
             InitLoggers();
 
+#if WRITE
             const int outterCycleSize = 100;
             const int innerCycleSize = 1000;
 
@@ -32,18 +36,44 @@ namespace ITCC.Logging.Testing
             }
             Logger.LogEntry("MAIN", LogLevel.Info, "Done");
             Logger.FlushAll();
+            _fileLogger.Level = LogLevel.None;
+#endif
+
+#if READ
+            var reader = new LogReader(FileName);
+            foreach (var entry in reader.ReadAsEnumerable())
+            {
+                PrintEntry(entry);
+            }
+#endif
+
             await Task.Delay(1);
             Console.ReadLine();
         }
 
+        private static void PrintEntry(LogEntryEventArgs args)
+        {
+            Action<string> printAction = Console.WriteLine;
+
+            printAction($"DATE:           {args.Time}");
+            printAction($"LEVEL:          {args.Level}");
+            printAction($"THREAD:         {args.ThreadId}");
+            printAction($"SCOPE:          {args.Scope}");
+            printAction($"MESSAGE:        {args.Message}");
+        }
+
         private static void InitLoggers()
         {
-            Logger.Level = LogLevel.Info;
+            Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger(LogLevel.Debug));
-            Logger.RegisterReceiver(new BufferedFileLogger(@"C:\Test\test.log", LogLevel.Trace, true, 1000));
+#if WRITE
+            _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
+#endif
+            Logger.RegisterReceiver(_fileLogger);
             Console.OutputEncoding = Encoding.UTF8;
         }
 
-        
+        private static ILogReceiver _fileLogger;
+        private const string FileName = @"C:\Test\test.log";
     }
 }

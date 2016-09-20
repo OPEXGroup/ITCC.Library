@@ -95,6 +95,10 @@
       <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ITCC.Logging.Reader.Core\ITCC.Logging.Reader.Core.csproj">
+      <Project>{F40F3A35-170F-4E70-9E01-9BF4A950B6AF}</Project>
+      <Name>ITCC.Logging.Reader.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
       <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging.Windows</Name>

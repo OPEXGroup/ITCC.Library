@@ -20,11 +20,7 @@ namespace ITCC.Logging.Windows.Loggers
                 {
                     using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
                     {
-                        var stringBuilder = new StringBuilder();
-                        stringBuilder.Append(DateTime.Now);
-                        stringBuilder.Append(" ");
-                        stringBuilder.Append(args);
-                        streamWriter.WriteLine(stringBuilder.ToString());
+                        streamWriter.WriteLine(args.ToString());
                     }
                 }
             }
