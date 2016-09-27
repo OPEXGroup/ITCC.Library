@@ -107,7 +107,6 @@
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\ObservableRingBuffer.cs" />
     <Compile Include="Utils\PropertyHelper.cs" />
-    <Compile Include="Utils\ScrollViewerExtensions.cs" />
     <Compile Include="Utils\ValidationResult.cs" />
     <Compile Include="ViewModels\LogEntryEventArgsViewModel.cs" />
     <Compile Include="Windows\LogWindow.xaml.cs">

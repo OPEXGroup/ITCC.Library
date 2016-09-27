@@ -46,7 +46,7 @@
                   EnableColumnVirtualization="True"
                   EnableRowVirtualization="True"
                   IsReadOnly="True"
-                  utils:DataGridExtensions.AlwaysScrollToEnd="true"
+                  utils:DataGridExtensions.AlwaysScrollToEnd="True"
                   />
     </Grid>
 </Window>
