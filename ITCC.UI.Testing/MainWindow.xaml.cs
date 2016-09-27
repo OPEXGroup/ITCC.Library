@@ -41,7 +41,7 @@ namespace ITCC.UI.Testing
 
             for (int j = 0; j < 15; j++)
             {
-                for (var i = 0; i < 100; ++i)
+                for (var i = 0; i < 1; ++i)
                 {
                     Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
                 }

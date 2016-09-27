@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -62,10 +64,12 @@ namespace ITCC.UI.Windows
             Logger.Level = newLevel;
         }
 
-        private void LogWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private async void LogWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             var border = VisualTreeHelper.GetChild(LogDataGrid, 0) as Decorator;
             var scroll = border?.Child as ScrollViewer;
+            // A bit dirty hack but it works...
+            await Task.Delay(50);
             scroll?.SetAlwaysScrollToEnd(true);
         }
     }
