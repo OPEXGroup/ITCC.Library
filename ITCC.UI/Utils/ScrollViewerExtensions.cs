@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -65,8 +66,10 @@ namespace ITCC.UI.Utils
             if (Math.Abs(e.ExtentHeightChange) < Tolerance)
                 _autoScroll = Math.Abs(scroll.VerticalOffset - scroll.ScrollableHeight) < Tolerance;
 
-            if (_autoScroll && Math.Abs(e.ExtentHeightChange) > Tolerance)
-                scroll.ScrollToVerticalOffset(scroll.ExtentHeight);
+            if (!_autoScroll || !(Math.Abs(e.ExtentHeightChange) > Tolerance))
+                return;
+
+            scroll.ScrollToVerticalOffset(scroll.ExtentHeight);
         }
 
         private const double Tolerance = 0.01;

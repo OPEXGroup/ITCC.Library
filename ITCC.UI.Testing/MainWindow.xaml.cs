@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ITCC.Logging.Core;
@@ -40,7 +41,7 @@ namespace ITCC.UI.Testing
 
             for (int j = 0; j < 15; j++)
             {
-                for (var i = 0; i < 100; ++i)
+                for (var i = 0; i < 1; ++i)
                 {
                     Logger.LogEntry("Test", LogLevel.Trace, $"Sample message #{i}");
                 }
@@ -60,5 +61,7 @@ namespace ITCC.UI.Testing
                     Logger.LogEntry("TEST", LogLevel.Trace, $"Maybe thread #{i} (Actually {Thread.CurrentThread.ManagedThreadId})");
             });
         }
+
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e) => _logWindow?.Close();
     }
 }

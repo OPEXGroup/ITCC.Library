@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:utils="clr-namespace:ITCC.UI.Utils"
         mc:Ignorable="d"
-        Title="Application log">
+        Title="Application log"
+        Loaded="LogWindow_OnLoaded">
     <Grid Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,22 +33,19 @@
                       ToolTip="Текущий уровень логгирования на клиенте"
                       VerticalAlignment="Center"
                       SelectionChanged="LocalLogLevelComboBox_OnSelectionChanged"></ComboBox>
-
         </Grid>
 
-        <ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Visible"
-                      utils:ScrollViewerExtensions.AlwaysScrollToEnd="True">
-            <DataGrid x:Name="LogDataGrid"
-                      HorizontalAlignment="Stretch"
-                      Margin="0,0,0,0"
-                      VerticalAlignment="Top"
-                      AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"
-                      LoadingRow="LogDataGrid_OnLoadingRow"
-                      HorizontalContentAlignment="Stretch"
-                      VerticalScrollBarVisibility="Visible"
-                      IsReadOnly="True"
-                    />
-        </ScrollViewer>
+        <DataGrid x:Name="LogDataGrid"
+                  Grid.Row="1"
+                  HorizontalAlignment="Stretch"
+                  Margin="0,0,0,0"
+                  VerticalAlignment="Top"
+                  AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"
+                  LoadingRow="LogDataGrid_OnLoadingRow"
+                  HorizontalContentAlignment="Stretch"
+                  VerticalScrollBarVisibility="Visible"
+                  EnableColumnVirtualization="True"
+                  EnableRowVirtualization="True"
+                  IsReadOnly="True"/>
     </Grid>
 </Window>
