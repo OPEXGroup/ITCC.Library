@@ -1,3 +1,7 @@
+## 1.0.5 (2016-09-27)
+
+* **Edit**: `LogWindow` rendering optimized even more  
+
 ## 1.0.4 (2016-09-16)
 
 * **Edit**: `LogWindow` rendering optimized (linked-list usage, internal buffer)  
