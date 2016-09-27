@@ -102,11 +102,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utils\ConditionValidator.cs" />
-    <Compile Include="Utils\DataGridExtensions.cs" />
     <Compile Include="Utils\DataGridHelper.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\ObservableRingBuffer.cs" />
     <Compile Include="Utils\PropertyHelper.cs" />
+    <Compile Include="Utils\ScrollViewerExtensions.cs" />
     <Compile Include="Utils\ValidationResult.cs" />
     <Compile Include="ViewModels\LogEntryEventArgsViewModel.cs" />
     <Compile Include="Windows\LogWindow.xaml.cs">

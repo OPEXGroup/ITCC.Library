@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,7 +38,7 @@ namespace ITCC.UI.Windows
 
             var names = Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>().Select(EnumHelper.LogLevelName).ToList();
             LocalLogLevelComboBox.ItemsSource = names;
-            LocalLogLevelComboBox.SelectedValue = EnumHelper.LogLevelName(Logger.Level);
+            LocalLogLevelComboBox.SelectedValue = EnumHelper.LogLevelName(Logger.Level); 
         }
 
         private void LogDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e) => DataGridHelper.HandleAutoGeneratingColumn(sender, e);
@@ -59,6 +60,13 @@ namespace ITCC.UI.Windows
                 return;
             Logger.LogEntry("LOGGER", LogLevel.Debug, $"Changing loglevel from {Logger.Level} to {newLevel}");
             Logger.Level = newLevel;
+        }
+
+        private void LogWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var border = VisualTreeHelper.GetChild(LogDataGrid, 0) as Decorator;
+            var scroll = border?.Child as ScrollViewer;
+            scroll?.SetAlwaysScrollToEnd(true);
         }
     }
 }
