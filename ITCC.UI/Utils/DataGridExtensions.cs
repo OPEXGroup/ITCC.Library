@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,20 +14,20 @@ namespace ITCC.UI.Utils
             DependencyProperty.RegisterAttached("AlwaysScrollToEnd", typeof(bool), typeof(DataGridExtensions),
                 new PropertyMetadata(false, AlwaysScrollToEndChanged));
 
-        public static bool GetAlwaysScrollToEnd(this DataGrid scroll)
+        public static bool GetAlwaysScrollToEnd(this DataGrid dataGrid)
         {
-            if (scroll == null)
-                throw new ArgumentNullException(nameof(scroll));
+            if (dataGrid == null)
+                throw new ArgumentNullException(nameof(dataGrid));
 
-            return (bool)scroll.GetValue(AlwaysScrollToEndProperty);
+            return (bool)dataGrid.GetValue(AlwaysScrollToEndProperty);
         }
 
-        public static void SetAlwaysScrollToEnd(this DataGrid scroll, bool alwaysScrollToEnd)
+        public static void SetAlwaysScrollToEnd(this DataGrid dataGrid, bool alwaysScrollToEnd)
         {
-            if (scroll == null)
-                throw new ArgumentNullException(nameof(scroll));
+            if (dataGrid == null)
+                throw new ArgumentNullException(nameof(dataGrid));
 
-            scroll.SetValue(AlwaysScrollToEndProperty, alwaysScrollToEnd);
+            dataGrid.SetValue(AlwaysScrollToEndProperty, alwaysScrollToEnd);
         }
 
         #endregion
@@ -42,19 +43,15 @@ namespace ITCC.UI.Utils
 
             if (dataGrid.Items.Count == 0)
                 return;
-
             var border = VisualTreeHelper.GetChild(dataGrid, 0) as Decorator;
-            if (border == null)
-                return;
 
-            var scroll = border.Child as ScrollViewer;
+            var scroll = border?.Child as ScrollViewer;
             if (scroll == null)
                 return;
             var alwaysScrollToEnd = (e.NewValue != null) && (bool)e.NewValue;
             if (alwaysScrollToEnd)
             {
                 scroll.ScrollToEnd();
-                dataGrid.ScrollIntoView(dataGrid.Items[dataGrid.Items.Count - 1]);
                 scroll.ScrollChanged += ScrollChanged;
             }
             else
@@ -74,7 +71,9 @@ namespace ITCC.UI.Utils
                 _autoScroll = Math.Abs(scroll.VerticalOffset - scroll.ScrollableHeight) < Tolerance;
 
             if (_autoScroll && Math.Abs(e.ExtentHeightChange) > Tolerance)
+            {
                 scroll.ScrollToVerticalOffset(scroll.ExtentHeight);
+            }
         }
 
         private const double Tolerance = 0.01;

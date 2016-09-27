@@ -9,6 +9,6 @@ namespace ITCC.UI.Testing
     public partial class App : Application
     {
         private static readonly object DispactherQueueLock = new object();
-        public static void RunOnUiThread(Action action) => Current.Dispatcher.BeginInvoke(action);
+        public static void RunOnUiThread(Action action) => Current?.Dispatcher?.BeginInvoke(action);
     }
 }
