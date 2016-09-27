@@ -68,9 +68,13 @@ namespace ITCC.UI.Windows
         {
             var border = VisualTreeHelper.GetChild(LogDataGrid, 0) as Decorator;
             var scroll = border?.Child as ScrollViewer;
-            // A bit dirty hack but it works...
-            await Task.Delay(50);
-            scroll?.SetAlwaysScrollToEnd(true);
+            if (scroll != null)
+            {
+                scroll.CanContentScroll = false;
+                // A bit dirty hack but it works...
+                await Task.Delay(50);
+                scroll.SetAlwaysScrollToEnd(true);
+            }
         }
     }
 }

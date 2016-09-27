@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -53,13 +54,27 @@ namespace ITCC.UI.Testing
         private LogWindow _logWindow;
         private readonly ObservableLogger _observableLogger;
 
-        private void DeadlockTestButton_OnClick(object sender, RoutedEventArgs e)
+        private async void DeadlockTestButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Parallel.For(0, 6, i =>
+            var rnd = new Random();
+            for (var i = 0; i < 50; ++i)
             {
-                for (var j = 0; j < 50; ++j)
-                    Logger.LogEntry("TEST", LogLevel.Trace, $"Maybe thread #{i} (Actually {Thread.CurrentThread.ManagedThreadId})");
-            });
+                var str = System.Guid.NewGuid().ToString();
+                var emptyCount = rnd.Next(5);
+                for (var j = 0; j < emptyCount; ++j)
+                {
+                    str += "\n";
+                }
+                str += "END";
+                Logger.LogEntry("TEST", LogLevel.Trace, str);
+                await Task.Delay(20);
+            }
+
+            //Parallel.For(0, 6, i =>
+            //{
+            //    for (var j = 0; j < 50; ++j)
+            //        Logger.LogEntry("TEST", LogLevel.Trace, $"Maybe thread #{i} (Actually {Thread.CurrentThread.ManagedThreadId})");
+            //});
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e) => _logWindow?.Close();
