@@ -40,25 +40,26 @@ namespace ITCC.UI.Utils
                 throw new InvalidOperationException(
                     "The attached AlwaysScrollToEnd property can only be applied to DataGrid instances.");
 
-            if (dataGrid.Items.Count > 0)
+            if (dataGrid.Items.Count == 0)
+                return;
+
+            var border = VisualTreeHelper.GetChild(dataGrid, 0) as Decorator;
+            if (border == null)
+                return;
+
+            var scroll = border.Child as ScrollViewer;
+            if (scroll == null)
+                return;
+            var alwaysScrollToEnd = (e.NewValue != null) && (bool)e.NewValue;
+            if (alwaysScrollToEnd)
             {
-                var border = VisualTreeHelper.GetChild(dataGrid, 0) as Decorator;
-                if (border != null)
-                {
-                    var scroll = border.Child as ScrollViewer;
-                    if (scroll == null)
-                        return;
-                    var alwaysScrollToEnd = (e.NewValue != null) && (bool)e.NewValue;
-                    if (alwaysScrollToEnd)
-                    {
-                        scroll.ScrollToEnd();
-                        scroll.ScrollChanged += ScrollChanged;
-                    }
-                    else
-                    {
-                        scroll.ScrollChanged -= ScrollChanged;
-                    }
-                }
+                scroll.ScrollToEnd();
+                dataGrid.ScrollIntoView(dataGrid.Items[dataGrid.Items.Count - 1]);
+                scroll.ScrollChanged += ScrollChanged;
+            }
+            else
+            {
+                scroll.ScrollChanged -= ScrollChanged;
             }
         }
 

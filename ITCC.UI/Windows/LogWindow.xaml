@@ -32,26 +32,21 @@
                       ToolTip="Текущий уровень логгирования на клиенте"
                       VerticalAlignment="Center"
                       SelectionChanged="LocalLogLevelComboBox_OnSelectionChanged"></ComboBox>
-
         </Grid>
 
-        <!--<ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Visible"
-                      utils:ScrollViewerExtensions.AlwaysScrollToEnd="True">-->
-            <DataGrid x:Name="LogDataGrid"
-                      Grid.Row="1"
-                      HorizontalAlignment="Stretch"
-                      Margin="0,0,0,0"
-                      VerticalAlignment="Top"
-                      AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"
-                      LoadingRow="LogDataGrid_OnLoadingRow"
-                      HorizontalContentAlignment="Stretch"
-                      VerticalScrollBarVisibility="Visible"
-                      EnableColumnVirtualization="True"
-                      EnableRowVirtualization="True"
-                      IsReadOnly="True"
-                      utils:DataGridExtensions.AlwaysScrollToEnd="true"
-                    />
-        <!--</ScrollViewer>-->
+        <DataGrid x:Name="LogDataGrid"
+                  Grid.Row="1"
+                  HorizontalAlignment="Stretch"
+                  Margin="0,0,0,0"
+                  VerticalAlignment="Top"
+                  AutoGeneratingColumn="LogDataGrid_AutoGeneratingColumn"
+                  LoadingRow="LogDataGrid_OnLoadingRow"
+                  HorizontalContentAlignment="Stretch"
+                  VerticalScrollBarVisibility="Visible"
+                  EnableColumnVirtualization="True"
+                  EnableRowVirtualization="True"
+                  IsReadOnly="True"
+                  utils:DataGridExtensions.AlwaysScrollToEnd="true"
+                  />
     </Grid>
 </Window>
