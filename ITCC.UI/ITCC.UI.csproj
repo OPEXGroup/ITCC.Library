@@ -102,6 +102,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utils\ConditionValidator.cs" />
+    <Compile Include="Utils\DataGridExtensions.cs" />
     <Compile Include="Utils\DataGridHelper.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\ObservableRingBuffer.cs" />
