@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ITCC.UI.Testing"
         mc:Ignorable="d"
-        Title="Тестирование" Height="300" Width="300">
+        Title="Тестирование" Height="300" Width="300"
+        Closing="MainWindow_OnClosing">
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Padding" Value="2"></Setter>
