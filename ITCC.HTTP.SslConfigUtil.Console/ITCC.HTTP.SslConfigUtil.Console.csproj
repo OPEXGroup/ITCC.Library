@@ -54,7 +54,7 @@
     <Compile Include="Actions.cs" />
     <Compile Include="ArgsParsingResult.cs" />
     <Compile Include="ConsoleParams.cs" />
-    <Compile Include="ActionParameter.cs" />
+    <Compile Include="CommandParameter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -62,7 +62,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UtilAction.cs" />
+    <Compile Include="UtilCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

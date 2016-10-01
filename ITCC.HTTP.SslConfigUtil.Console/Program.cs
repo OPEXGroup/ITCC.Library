@@ -18,37 +18,6 @@ namespace ITCC.HTTP.SslConfigUtil.Console
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
             System.Console.OutputEncoding = Encoding.UTF8;
 
-            //var inputParamsParseResult = ParseArgs(args);
-            //if (!inputParamsParseResult.IsSucceed)
-            //{
-            //    System.Console.WriteLine($"Input params are incorrect: {inputParamsParseResult.FailReason}" +
-            //                             "\n\nRun program with -help parameter to know how to use this util.\n");
-            //    return -1;
-            //}
-
-            //if (inputParamsParseResult.ParamDictionary.ContainsKey("-help"))
-            //{
-            //    DisplayHelp();
-            //    return 0;
-            //}
-
-            //if (inputParamsParseResult.ParamDictionary.ContainsKey("-verbose"))
-            //    Logger.Level = LogLevel.Debug;
-
-            //var bindResult = CertificateController.Bind(
-            //    inputParamsParseResult.ParamDictionary["-assemblypath"],
-            //    inputParamsParseResult.ParamDictionary["-cn"],
-            //    inputParamsParseResult.ParamDictionary["-ip"],
-            //    inputParamsParseResult.ParamDictionary["-port"],
-            //    inputParamsParseResult.ParamDictionary.ContainsKey("-createCertificate")
-            //    );
-
-            //System.Console.WriteLine(bindResult);
-
-            //var res = Binder.Bind(@"C:\Users\black\Source\Repos\ITCC.Library\ITCC.HTTP\bin\Debug\ITCC.HTTP.dll", @"ololo.my.domain", @"127.0.0.1", @"50505", true);
-            //System.Console.WriteLine(res);
-            
-            System.Console.ReadLine();
             return 0;
         }
 
