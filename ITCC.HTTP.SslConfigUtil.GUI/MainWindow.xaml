@@ -1,0 +1,324 @@
+﻿<Window x:Class="ITCC.HTTP.SslConfigUtil.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=System"
+        xmlns:local="clr-namespace:ITCC.HTTP.SslConfigUtil.GUI"
+        xmlns:views="clr-namespace:ITCC.HTTP.SslConfigUtil.Core.Views;assembly=ITCC.HTTP.SslConfigUtil.Core"
+        mc:Ignorable="d"
+        Title="SSL Configuration Util" 
+        Height="600"
+        Width="525">
+    <Window.Resources>
+        <cm:BackgroundWorker x:Key="BindBackgroundWorker"
+                             WorkerReportsProgress="False"
+                             WorkerSupportsCancellation="False"
+                             DoWork="BindBackgroundWorker_DoWork" 
+                             RunWorkerCompleted="BindBackgroundWorker_RunWorkerCompleted">
+        </cm:BackgroundWorker>
+        <DataErrorValidationRule x:Key="DataErrorValidationRule" 
+                                 ValidationStep="UpdatedValue">
+        </DataErrorValidationRule>
+        <cm:BackgroundWorker x:Key="UnbindBackgroundWorker"
+                             WorkerReportsProgress="False" 
+                             WorkerSupportsCancellation="False"
+                             DoWork="UnbindBackgroundWorker_DoWork" 
+                             RunWorkerCompleted="UnbindBackgroundWorker_RunWorkerCompleted">
+        </cm:BackgroundWorker>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" 
+                    Value="5">
+            </Setter>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Validation.HasError" Value="True"/>
+                        <Condition Property="IsManipulationEnabled" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" >
+                    </Setter>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin"
+                    Value="5">
+            </Setter>
+            <Setter Property="Padding"
+                    Value="10,0,10,0">
+            </Setter>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" 
+                    Value="5">
+            </Setter>
+        </Style>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Foreground" 
+                    Value="DodgerBlue">
+            </Setter>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="Margin" 
+                    Value="5">
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+        <Grid x:Name="RootGrid" 
+              Margin="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid x:Name="InputRootGrid" 
+                  Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" 
+                       FontSize="20"
+                       Content="Application params">
+                </Label>
+                <Grid x:Name="ApplicationParamsGrid" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="25"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" 
+                           Grid.Row="0"
+                           Content="Assembly path">
+                    </Label>
+                    <Grid Grid.Column="2" 
+                          Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="AssemblyPathTextbox"
+                                 Grid.Column="0">
+                            <TextBox.Text>
+                                <Binding Path="AssemblyPath" 
+                                         Mode="TwoWay" 
+                                         UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <DataErrorValidationRule ValidationStep="UpdatedValue"></DataErrorValidationRule>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <Button x:Name="BrowseAssembly" 
+                                Grid.Column="1"
+                                Content="Browse" 
+                                Click="BrowseAssembly_OnClick">
+                        </Button>
+                    </Grid>
+                    <Label Grid.Column="0"
+                           Grid.Row="1"
+                           Content="IP address">
+                    </Label>
+                    <TextBox x:Name="IpAddressTextBox" 
+                             Grid.Column="2" 
+                             Grid.Row="1"
+                             Width="150" 
+                             HorizontalAlignment="Left">
+                        <TextBox.Text>
+                            <Binding Path="IpAddress" 
+                                     Mode="TwoWay" 
+                                     UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <DataErrorValidationRule ValidationStep="UpdatedValue"></DataErrorValidationRule>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Label Grid.Column="0" 
+                           Grid.Row="2"
+                           Content="Port">
+                    </Label>
+                    <TextBox x:Name="PortTextBox" 
+                             Grid.Column="2"
+                             Grid.Row="2" 
+                             Width="100"
+                             HorizontalAlignment="Left">
+                        <TextBox.Text>
+                            <Binding Path="Port"
+                                     Mode="TwoWay" 
+                                     UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <DataErrorValidationRule ValidationStep="UpdatedValue"></DataErrorValidationRule>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                </Grid>
+                <Label Grid.Row="2" 
+                       FontSize="20" 
+                       Content="Certificate params">
+                </Label>
+                <RadioButton x:Name="ChooseCertFromStoreRadioButton"
+                             Grid.Row="3"
+                             Grid.ColumnSpan="3"
+                             Content="Choose existing certificate from store" 
+                             Checked="ChooseFromStore_OnChecked">
+                </RadioButton>
+                <Grid x:Name="CertFromStoreSection" 
+                      Grid.Row="4" 
+                      IsEnabled="{Binding Path=ChooseCertFromStoreEnabled, Mode=TwoWay}">
+                    <ComboBox x:Name="CertificatesComboBox"
+                              ItemsSource="{Binding Path=CertificateCollection, Mode=TwoWay}" 
+                              HorizontalContentAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="views:CertificateView">
+                                <local:CertificateViewControl IssuedTo="{Binding Path=SubjectName, Mode=OneTime}"
+                                                              IssuedBy="{Binding Path=Issuer, Mode=OneTime}"
+                                                              ValidUntil="{Binding Path=NotAfter, Mode=OneTime}">
+                                </local:CertificateViewControl>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+                <RadioButton x:Name="ChooseCertFromFileRadioButton"
+                             Grid.Row="5"
+                             Content="Choose existing certificate from file" 
+                             Checked="ChooseFromFile_OnChecked">
+                </RadioButton>
+                <Grid x:Name="CertFromFileSection" 
+                      Grid.Row="6" 
+                      IsEnabled="{Binding Path=ChooseCertFromFileEnabled, Mode=TwoWay}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" 
+                           Grid.Column="0" 
+                           Content="Path">
+                    </Label>
+                    <TextBox x:Name="CertificatePathTextbox"
+                             Grid.Row="0"
+                             Grid.Column="1" >
+                        <TextBox.Text>
+                            <Binding Path="CertificatePath" 
+                                     Mode="TwoWay"
+                                     UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <DataErrorValidationRule ValidationStep="UpdatedValue"></DataErrorValidationRule>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Button x:Name="BrowseCertificate" 
+                            Grid.Row="0"
+                            Grid.Column="2" 
+                            Content="Browse" 
+                            Click="BrowseCertificate_OnClick">
+                    </Button>
+                    <Label Grid.Row="1"
+                           Grid.Column="0" 
+                           Content="Password">
+                    </Label>
+                    <PasswordBox x:Name="CertificatePasswordBox"
+                                 Grid.Row="1" 
+                                 Grid.Column="1">
+                    </PasswordBox>
+                </Grid>
+                <RadioButton x:Name="ChooseCertGenerationButton"
+                             Grid.Row="7"
+                             Content="Create self-signed certificate for this SubjectName" 
+                             Checked="CreateNew_OnChecked">
+                </RadioButton>
+                <Grid x:Name="CertGenerationSection" 
+                      Grid.Row="8" 
+                      IsEnabled="{Binding Path=ChooseCertGenerationEnabled, Mode=TwoWay}">
+                    <TextBox x:Name="SubjectNameTextBox">
+                        <TextBox.Text>
+                            <Binding Path="SubjectName"
+                                     Mode="TwoWay"
+                                     UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <DataErrorValidationRule ValidationStep="UpdatedValue"></DataErrorValidationRule>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                </Grid>
+            </Grid>
+            <Grid x:Name="ButtonsGrid"
+                  Grid.Row="1"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button  x:Name="BindButton"
+                         IsEnabled="{Binding Path=IsBindButtonEnabled, Mode=TwoWay}"
+                         Grid.Column="0" 
+                         Width="100" Height="25"
+                         Content="Create binding"
+                         Background="DodgerBlue" 
+                         Foreground="White"
+                         BorderThickness="0"
+                         Click="BindButton_OnClick">
+                </Button>
+                <Button x:Name="UnbindButton"
+                        IsEnabled="{Binding Path=IsUnbindButtonEnabled, Mode=TwoWay}"
+                        Grid.Column="1" 
+                        Content="Delete binding"
+                        Width="100" 
+                        Height="25"
+                        Background="Crimson"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Click="UnbindButton_OnClick">
+                </Button>
+                <CheckBox x:Name="UnsafeBindingCheckbox"
+                          Grid.Column="2" 
+                          Content="Unsafe"
+                          VerticalAlignment="Center" 
+                          Checked="UnsafeBinding_OnChecked"
+                          Unchecked="UnsafeBinding_OnUnchecked">
+                </CheckBox>
+            </Grid>
+            <Grid x:Name="ResultsGrid" 
+                  Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <ProgressBar x:Name="ProgressBar"
+                             Grid.Row="0" 
+                             IsIndeterminate="True" 
+                             Visibility="Collapsed">
+                </ProgressBar>
+                <TextBlock x:Name="ResultTextblock"
+                           TextWrapping="Wrap" 
+                           Grid.Row="1">
+                </TextBlock>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Window>
