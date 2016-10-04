@@ -9,11 +9,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
-using ITCC.HTTP.Enums;
-using ITCC.HTTP.Server;
+using ITCC.HTTP.Client.Core;
+using ITCC.HTTP.Common.Enums;
+using ITCC.HTTP.Server.Core;
+using ITCC.HTTP.Server.Files;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
-using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
@@ -24,10 +25,7 @@ namespace ITCC.HTTP.Testing
 
     internal class Program
     {
-        private static void Main(string[] args)
-        {
-            MainAsync().GetAwaiter().GetResult();
-        }
+        private static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
         private static async Task MainAsync()
         {
@@ -111,19 +109,20 @@ namespace ITCC.HTTP.Testing
         {
             StaticServer<object>.Start(new HttpServerConfiguration<object>
             {
-                BodyEncoder = new BodyEncoder
-                {
-                    AutoGzipCompression = false,
-                    ContentType = "application/json",
-                    Encoding = Encoding.UTF8,
-                    Serializer = JsonConvert.SerializeObject
-                },
+                //BodyEncoder = new BodyEncoder
+                //{
+                //    AutoGzipCompression = false,
+                //    ContentType = "application/json",
+                //    Encoding = Encoding.UTF8,
+                //    Serializer = JsonConvert.SerializeObject
+                //},
                 Port = 8888,
                 Protocol = Protocol.Http,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
                 },
+                LogProhibitedQueryParams = new List<string> { "password"},
                 LogProhibitedHeaders = new List<string> { "Authorization" },
                 ServerName = "ITCC Test",
                 StatisticsEnabled = true,
