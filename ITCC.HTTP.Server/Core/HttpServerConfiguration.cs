@@ -28,7 +28,12 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Used for https servers
         /// </summary>
-        public BindType CertificateBindType { get; set; } = BindType.Generate;
+        public BindType CertificateBindType { get; set; } = BindType.SubjectName;
+
+        /// <summary>
+        ///     Used for https servers
+        /// </summary>
+        public bool AllowGeneratedCertificates { get; set; } = false;
 
         /// <summary>
         ///     For Protocol = Https and CertificateBindType = FromFile

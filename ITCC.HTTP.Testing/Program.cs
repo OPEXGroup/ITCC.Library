@@ -13,8 +13,10 @@ using ITCC.HTTP.Client.Core;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Core;
 using ITCC.HTTP.Server.Files;
+using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
+using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
@@ -37,7 +39,7 @@ namespace ITCC.HTTP.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "http://localhost:8888";
+            StaticClient.ServerAddress = "https://localhost:8888";
             StaticClient.AllowUntrustedServerCertificates();
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
@@ -118,6 +120,8 @@ namespace ITCC.HTTP.Testing
                 //},
                 Port = 8888,
                 Protocol = Protocol.Https,
+                AllowGeneratedCertificates = true,
+                CertificateBindType = BindType.SubjectName,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")
@@ -141,7 +145,14 @@ namespace ITCC.HTTP.Testing
                 },
                 FilesLocation = @"C:\Users\b0-0b",
                 FilesPreprocessingEnabled = false,
-                FilesPreprocessorThreads = -1
+                FilesPreprocessorThreads = -1,
+                BodyEncoder =  new BodyEncoder
+                {
+                    AutoGzipCompression = true,
+                    ContentType = "application/json",
+                    Encoding = Encoding.UTF8,
+                    Serializer = o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
+                }
             });
 
             StaticServer<object>.AddRequestProcessor(new RequestProcessor<object>

@@ -264,7 +264,7 @@ namespace ITCC.HTTP.Server.Core
 
         private static bool BindCertificate(HttpServerConfiguration<TAccount> config)
         {
-            AssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+            AssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Port = config.Port.ToString();
             IpAddress = "0.0.0.0";
 
@@ -275,7 +275,7 @@ namespace ITCC.HTTP.Server.Core
                     bindingParams = new CertificateThumbprintBindingParams(config.CertificateThumbprint);
                     break;
                 case BindType.SubjectName:
-                    bindingParams = new CertificateSubjectnameParams(config.SubjectName, allowGenerated: false);
+                    bindingParams = new CertificateSubjectnameParams(config.SubjectName, config.AllowGeneratedCertificates);
                     break;
                 case BindType.FromFile:
                     bindingParams = new CertificateFileBindingParams(config.CertificateFilename, null);
