@@ -49,6 +49,9 @@ namespace ITCC.Logging.Core
             Exception = exception;
         }
 
+        public static LogEntryEventArgs CreateFromRawData(DateTime time, LogLevel level, int threadId, object scope,
+            string message) => new LogEntryEventArgs(time, level, threadId, scope, message);
+
         public string Representation => _representation ?? ToString();
 
         public override string ToString()
@@ -64,6 +67,16 @@ namespace ITCC.Logging.Core
                 _representation = "ERROR CREATING LOG ENTRY";
                 return _representation;
             }
+        }
+
+        private LogEntryEventArgs(DateTime time, LogLevel level, int threadId, object scope,
+            string message)
+        {
+            ThreadId = threadId;
+            Time = time;
+            Level = level;
+            Scope = scope;
+            Message = message;
         }
 
         private string LogLevelRepresentation(LogLevel level)
