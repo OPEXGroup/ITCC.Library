@@ -4,7 +4,6 @@
     {
         CertificateThumbprint,
         SubjectName,
-        Generate,
         FromFile
     }
 }

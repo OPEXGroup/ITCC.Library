@@ -120,6 +120,10 @@
       <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
       <Name>ITCC.HTTP.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.SslConfigUtil.Core\ITCC.HTTP.SslConfigUtil.Core.csproj">
+      <Project>{01de0c5b-72d2-4622-9636-4f9257bd59d2}</Project>
+      <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>

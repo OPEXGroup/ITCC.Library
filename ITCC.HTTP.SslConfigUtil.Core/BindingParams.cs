@@ -27,13 +27,15 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             Password = password;
         }
     }
-    public class CertificateSubjectnameParams
+    public class CertificateSubjectnameParams : BindingParams
     {
         public string SubjectName { get; set; }
+        public bool AllowGenerated { get; set; }
 
-        public CertificateSubjectnameParams(string subjectName)
+        public CertificateSubjectnameParams(string subjectName, bool allowGenerated = true)
         {
             SubjectName = subjectName;
+            AllowGenerated = allowGenerated;
         }
     }
 }

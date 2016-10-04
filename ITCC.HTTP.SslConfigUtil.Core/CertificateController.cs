@@ -34,7 +34,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             personalCertStote.Open(OpenFlags.ReadOnly);
             return personalCertStote.Certificates.Cast<X509Certificate2>().Where(certificate => certificate.Verify() && certificate.IsValid()).Select(CertificateView.FromCert).ToList();
         }
-        internal static FindCertificateStatus FindBySubjectName(string subjectName, out X509Certificate2 certificate)
+        internal static FindCertificateStatus TryFindBySubjectName(string subjectName, out X509Certificate2 certificate)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 return FindCertificateStatus.Error;
             }
         }
-        internal static bool GenerateCertificate(string subjectName, out X509Certificate2 cert)
+        internal static bool TryGenerateCertificate(string subjectName, out X509Certificate2 cert)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 
             return stringBuilder.ToString();
         }
-        internal static OpenCertificateStatus InstallFromFile(string path, SecureString password, out X509Certificate2 cert)
+        internal static OpenCertificateStatus TryInstallFromFile(string path, SecureString password, out X509Certificate2 cert)
         {
             LogDebug("Certificate installation started");
             cert = null;

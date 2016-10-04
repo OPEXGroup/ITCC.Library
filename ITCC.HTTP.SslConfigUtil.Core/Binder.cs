@@ -14,10 +14,64 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 {
     public static class Binder
     {
+        public static BindingResult Bind(string assemblyPath,
+            string ipAddressString,
+            string portString,
+            BindType bindType,
+            BindingParams bindingParams,
+            bool unsafeBinding = false)
+        {
+            switch (bindType)
+            {
+                case BindType.CertificateThumbprint:
+                    var thumbprintParams = bindingParams as CertificateThumbprintBindingParams;
+                    if (thumbprintParams == null)
+                    {
+                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateThumbprintBindingParams expected, got {bindingParams.GetType().Name}");
+                        return new BindingResult
+                        {
+                            Status = BindingStatus.InvalidParams,
+                            Reason = "Invalid params type"
+                        };
+                    }
+                    return Bind(assemblyPath, ipAddressString, portString, thumbprintParams, unsafeBinding);
+                case BindType.SubjectName:
+                    var subjectNameParams = bindingParams as CertificateSubjectnameParams;
+                    if (subjectNameParams == null)
+                    {
+                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateSubjectnameParams expected, got {bindingParams.GetType().Name}");
+                        return new BindingResult
+                        {
+                            Status = BindingStatus.InvalidParams,
+                            Reason = "Invalid params type"
+                        };
+                    }
+                    return Bind(assemblyPath, ipAddressString, portString, subjectNameParams, unsafeBinding);
+                case BindType.FromFile:
+                    var fileParams = bindingParams as CertificateFileBindingParams;
+                    if (fileParams == null)
+                    {
+                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateFileBindingParams expected, got {bindingParams.GetType().Name}");
+                        return new BindingResult
+                        {
+                            Status = BindingStatus.InvalidParams,
+                            Reason = "Invalid params type"
+                        };
+                    }
+                    return Bind(assemblyPath, ipAddressString, portString, fileParams, unsafeBinding);
+                default:
+                    return new BindingResult
+                    {
+                        Status = BindingStatus.InvalidParams,
+                        Reason = "Invalid bind type"
+                    };
+            }
+        }
+
         public static BindingResult Bind(string assemblyPath, string ipAddressString, string portString,
             CertificateThumbprintBindingParams bindingParams, bool unsafeBinding = false)
         {
-            Debug.WriteLine("Bind with existing cert started");
+            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with existing cert started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -39,7 +93,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
         public static BindingResult Bind(string assemblyPath, string ipAddressString, string portString,
             CertificateFileBindingParams bindingParams, bool unsafeBinding = false)
         {
-            Debug.WriteLine("Bind with cert file started");
+            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with cert file started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -49,7 +103,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 };
 
             X509Certificate2 certificate;
-            var openCertResult = CertificateController.InstallFromFile(bindingParams.Filepath, bindingParams.Password,
+            var openCertResult = CertificateController.TryInstallFromFile(bindingParams.Filepath, bindingParams.Password,
                 out certificate);
             if (openCertResult != OpenCertificateStatus.Ok)
                 return new BindingResult
@@ -60,10 +114,13 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 
             return Bind(basicParams.AssemblyGuid, basicParams.IpAddress, basicParams.Port, certificate, unsafeBinding);
         }
-        public static BindingResult Bind(string assemblyPath, string ipAddressString, string portString,
-            CertificateSubjectnameParams bindingParams, bool unsafeBinding = false)
+        public static BindingResult Bind(string assemblyPath,
+            string ipAddressString,
+            string portString,
+            CertificateSubjectnameParams bindingParams,
+            bool unsafeBinding = false)
         {
-            Debug.WriteLine("Bind with generation started");
+            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with generation started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -83,13 +140,21 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             }
 
             X509Certificate2 certificate;
-            var certificateLookupResult = CertificateController.FindBySubjectName(subjectName, out certificate);
+            var certificateLookupResult = CertificateController.TryFindBySubjectName(subjectName, out certificate);
             switch (certificateLookupResult)
             {
                 case FindCertificateStatus.Found:
                     break;
                 case FindCertificateStatus.NotFound:
-                    if (!CertificateController.GenerateCertificate(subjectName, out certificate))
+                    if (!bindingParams.AllowGenerated)
+                    {
+                        return new BindingResult
+                        {
+                            Status = BindingStatus.SslCertificateNotFound
+                        };
+                    }
+
+                    if (!CertificateController.TryGenerateCertificate(subjectName, out certificate))
                         return new BindingResult
                         {
                             Status = BindingStatus.SslCertificateGenerationFailed
@@ -117,7 +182,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
 
         #region private
         private static BindingResult Bind(string assemblyGuid, IPAddress ipAddress, ushort port,
-        X509Certificate2 certificate, bool unsafeBinding)
+            X509Certificate2 certificate, bool unsafeBinding)
         {
             var checkBindingResult = CheckBinding(ipAddress, port);
             switch (checkBindingResult.Status)

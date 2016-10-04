@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Common;
 using ITCC.HTTP.Server.Files;
+using ITCC.HTTP.SslConfigUtil.Core;
+using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Core
@@ -22,6 +24,21 @@ namespace ITCC.HTTP.Server.Core
         ///     Http/https
         /// </summary>
         public Protocol Protocol { get; set; }
+
+        /// <summary>
+        ///     Used for https servers
+        /// </summary>
+        public BindType CertificateBindType { get; set; } = BindType.Generate;
+
+        /// <summary>
+        ///     For Protocol = Https and CertificateBindType = FromFile
+        /// </summary>
+        public string CertificateFilename { get; set; }
+
+        /// <summary>
+        ///     For Protocol = Https and CertificateBindType = CertificateThumbprint
+        /// </summary>
+        public string CertificateThumbprint { get; set; }
 
         /// <summary>
         ///     Does server support file streaming?

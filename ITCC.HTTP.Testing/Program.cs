@@ -117,7 +117,7 @@ namespace ITCC.HTTP.Testing
                 //    Serializer = JsonConvert.SerializeObject
                 //},
                 Port = 8888,
-                Protocol = Protocol.Http,
+                Protocol = Protocol.Https,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", "$1REMOVED_FROM_LOG$3")

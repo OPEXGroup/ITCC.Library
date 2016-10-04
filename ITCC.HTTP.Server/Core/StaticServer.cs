@@ -21,6 +21,8 @@ using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.Server.Service;
 using ITCC.HTTP.Server.Utils;
+using ITCC.HTTP.SslConfigUtil.Core;
+using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
 
 // ReSharper disable StaticMemberInGenericType
@@ -69,6 +71,15 @@ namespace ITCC.HTTP.Server.Core
                     return ServerStartStatus.BadParameters;
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
+
+                if (Protocol == Protocol.Https)
+                {
+                    if (!BindCertificate(configuration))
+                    {
+                        LogMessage(LogLevel.Warning, "Binding failed");
+                        return ServerStartStatus.BindingError;
+                    }
+                }
 
                 StartListenerThread(configuration);
                 StartServices(configuration);
@@ -251,7 +262,42 @@ namespace ITCC.HTTP.Server.Core
 
         #region security
 
+        private static bool BindCertificate(HttpServerConfiguration<TAccount> config)
+        {
+            AssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+            Port = config.Port.ToString();
+            IpAddress = "0.0.0.0";
+
+            BindingParams bindingParams;
+            switch (config.CertificateBindType)
+            {
+                case BindType.CertificateThumbprint:
+                    bindingParams = new CertificateThumbprintBindingParams(config.CertificateThumbprint);
+                    break;
+                case BindType.SubjectName:
+                    bindingParams = new CertificateSubjectnameParams(config.SubjectName, allowGenerated: false);
+                    break;
+                case BindType.FromFile:
+                    bindingParams = new CertificateFileBindingParams(config.CertificateFilename, null);
+                    break;
+                default:
+                    return false;
+            }
+
+            var result = Binder.Bind(AssemblyPath, IpAddress, Port, config.CertificateBindType, bindingParams);
+            if (result.Status != BindingStatus.Ok)
+            {
+                LogMessage(LogLevel.Warning, result.Reason ?? "Binding failed");
+                return false;
+            }
+            return true;
+        }
+
         public static Protocol Protocol { get; private set; }
+
+        private static string IpAddress { get; set; }
+        private static string Port { get; set; }
+        private static string AssemblyPath { get; set; }
 
         #endregion
 
