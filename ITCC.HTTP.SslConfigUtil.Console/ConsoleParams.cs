@@ -6,56 +6,56 @@ namespace ITCC.HTTP.SslConfigUtil.Console
     public static class ConsoleParams
     {
         #region ParamList
-        internal static readonly List<ActionParameter> ParamList = new List<ActionParameter>
+        internal static readonly List<CommandParameter> ParamList = new List<CommandParameter>
         {
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-ip",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Target interface ip address. Use 0.0.0.0 for listening on all interfaces."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-port",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Port using for listen on"
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-assemblyPath",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Full path to server assebmly."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-cn",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"FQDN of service. Matching SSL certificate will be obtained from Localhost certificateStore. If certificate doesn't exist or is invalid - binding will be aborted. Use '-createCertificate' param to create self-signed certificate and use it."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-certPath",
                 IsFlag = false,
                 IsRequired = false,
                 Description = @"Full path to certificate file."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-createCertificate",
                 IsFlag = true,
                 Description = @"Creates self-signed certificate with specified CN."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-verbose",
                 IsFlag = true,
                 Description = @"Verbose output."
             },
-            new ActionParameter
+            new CommandParameter
             {
                 Name = "-help",
                 IsFlag = true,
