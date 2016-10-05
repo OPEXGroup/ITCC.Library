@@ -81,6 +81,11 @@ string SubjectName { get; set; }                                                
 ushort Port { get; set; }                                                         // Порт, на котором принимаем соединения
 Protocol Protocol { get; set; }                                                   // Используемый протокол
 
+public BindType CertificateBindType { get; set; } = BindType.SubjectName;         // Метод получения сервером TLS-сертификата для HTTPS-соединений
+public bool AllowGeneratedCertificates { get; set; } = false;                     // Параметр, показывающий, разрешается ли сгенерировать сертификат при отсутствии доверенного
+public string CertificateFilename { get; set; }                                   // Путь к файлу сертификата в случае, если способом его получения задано "из файла"
+public string CertificateThumbprint { get; set; }                                 // Отпечаток сертификата в случае, если он должен быть найден по отпечатку
+
 bool FilesEnabled { get; set; }                                                   // Поддерживает ли сервер работу с файлами
 string FilesLocation { get; set; }                                                // Расположение файлов на сервер
 string FilesBaseUri { get; set; }                                                 // URI (частичный, уникальный) для доступа к файлам. Файлы в итоге доступны по адресу <SubjectName>:<Port>/<FilesBaseUri>/<filename>
@@ -110,7 +115,6 @@ string FaviconPath { get; set; }                                                
 
 string ServerName { get; set; }                                                   // Имя сервера для заголовков Server:
 
-int BufferPoolSize { get; set; } = 100;                                           // Размер пула 64к-буферов для чтения из сокетов
 double RequestMaxServeTime { get; set; } = 1;                                     // Допустимое время обработки запроса (после него кидается предупреждение)
 ```
 
