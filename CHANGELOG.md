@@ -1,3 +1,14 @@
+## 2.0.0-rc1 (2016-10-05)
+
+* **New**:  `ITCC.HTTP.SslConfigUtil` added: core API, WPF GUI, basic console  
+* **New**:  Started to implement LogReader for structured log files reading  
+* **New**:  `SslConfigUtil` integrated into `StaticServer`  
+* **Edit**: `LogWindow` rendering improved drammatically  
+* **Edit**: `Newtonsoft.Json` removed from `Server` dependencies  
+* **Edit**: **BREAKING CHANGE**: `ITCC.HTTP` splitted  
+* **Edit**: **BREAKING CHANGE**: `ITCC.UI` renamed to `ITCC.WPF`  
+* **Edit**: `ItemsFilter` submodule added  
+
 ## 1.0.6 (2016-09-27)
 
 * **Fix**: `LogWindow` large messages display fix  
