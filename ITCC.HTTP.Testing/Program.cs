@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -10,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Client.Core;
+using ITCC.HTTP.Client.Enums;
+using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Core;
 using ITCC.HTTP.Server.Files;
@@ -101,7 +105,11 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+#if STRESS_TEST
+            Logger.Level = LogLevel.Info;
+#else
+            Logger.Level = LogLevel.Info;
+#endif
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -227,15 +235,12 @@ namespace ITCC.HTTP.Testing
                 AuthorizationRequired = false,
                 Method = HttpMethod.Get,
                 SubUri = "token",
-                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore { Token = "Hello111" }))
+                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.InternalServerError, new TokenStore { Token = "Hello111" }))
             });
 
             StaticServer<object>.AddStaticRedirect("test", "delay");
         }
 
-        private static void StopServer()
-        {
-            StaticServer<object>.Stop();
-        }
+        private static void StopServer() => StaticServer<object>.Stop();
     }
 }

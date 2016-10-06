@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Timers;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Enums;
 
@@ -12,10 +13,17 @@ namespace ITCC.HTTP.Server.Service
     internal class ServerStatistics<TAccount>
         where TAccount : class
     {
+        /// <summary>
+        ///     Milliseconds
+        /// </summary>
+        private const double MemortSamplingPeriod = 100;
+
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();
 
         private readonly object _requestMethodLock = new object();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _requestMethodCounters = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, int>> _internalErrorCounters = new ConcurrentDictionary<string, ConcurrentDictionary<int, int>>();
 
         private readonly ConcurrentDictionary<string, int> _requestSuccessCounters = new ConcurrentDictionary<string, int>();
 
@@ -25,11 +33,20 @@ namespace ITCC.HTTP.Server.Service
 
         private readonly ConcurrentDictionary<string, double> _requestFailTimeCounters = new ConcurrentDictionary<string, double>();
 
-        private readonly ConcurrentDictionary<SslProtocols, int> _sslProtocolCounter = new ConcurrentDictionary<SslProtocols, int>(); 
-
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
         private readonly DateTime _startTime = DateTime.Now;
+
+        private readonly Timer _memoryTimer;
+
+        private long _minMemory = long.MaxValue;
+        private long _maxMemory;
+        private long _currentMemory;
+        private double _totalMemory;
+        private long _memorySamples;
+
+
+        private readonly object _memoryLock = new object();
 
         private readonly object _counterLock = new object();
 
@@ -52,11 +69,31 @@ namespace ITCC.HTTP.Server.Service
 
         private long _requestCount;
 
+        public ServerStatistics()
+        {
+            _memoryTimer = new Timer(MemortSamplingPeriod);
+            _memoryTimer.Elapsed += MemoryTimerOnElapsed;
+            _memoryTimer.Start();
+        }
+
+        private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_memoryLock)
+            {
+                _memorySamples++;
+                var currentMemory = GC.GetTotalMemory(false);
+                _minMemory = Math.Min(_minMemory, currentMemory);
+                _maxMemory = Math.Max(_maxMemory, currentMemory);
+                _currentMemory = currentMemory;
+                _totalMemory += currentMemory;
+            }
+        }
+
         public string Serialize()
         {
             var builder = new StringBuilder();
 
-            builder.AppendLine($"Server started at {_startTime.ToString("s")} ({DateTime.Now.Subtract(_startTime)} ago)");
+            builder.AppendLine($"Server started at {_startTime:s} ({DateTime.Now.Subtract(_startTime)} ago)");
             builder.AppendLine();
 
             builder.AppendLine("Response code statistics:");
@@ -69,12 +106,6 @@ namespace ITCC.HTTP.Server.Service
             var authKeys = _authentificationResults.Keys.ToList();
             authKeys.Sort();
             authKeys.ForEach(k => builder.AppendLine($"\t{k, 12}: {_authentificationResults[k]}"));
-            builder.AppendLine();
-
-            builder.AppendLine("SSL statistics:");
-            var sslKeys = _sslProtocolCounter.Keys.ToList();
-            sslKeys.Sort();
-            sslKeys.ForEach(k => builder.AppendLine($"\t{k,12}: {_sslProtocolCounter[k]}"));
             builder.AppendLine();
 
             builder.AppendLine("Request statistics:");
@@ -119,8 +150,28 @@ namespace ITCC.HTTP.Server.Service
                     methodKeys.Sort();
                     methodKeys.ForEach(m => builder.AppendLine($"\t\t{m,-10}: {methodDict[m]}"));
                 });
+                builder.AppendLine();
             }
-            builder.AppendLine();
+
+            if (!_internalErrorCounters.IsEmpty)
+            {
+                builder.AppendLine("Internal error statistics:");
+                uris = _internalErrorCounters.Keys.ToList();
+                uris.Sort();
+                lock (_counterLock)
+                {
+                    uris.ForEach(u =>
+                    {
+                        var codeDict = _internalErrorCounters[u];
+                        builder.AppendLine($"\t{u}");
+                        var codes = codeDict.Keys.ToList();
+                        codes.Sort();
+                        codes.ForEach(c => builder.AppendLine($"\t\t{c,-4}: {codeDict[c]}"));
+                    });
+                }
+                builder.AppendLine();
+            }
+            
 
             if (_requestCount > 0)
             {
@@ -131,6 +182,20 @@ namespace ITCC.HTTP.Server.Service
                 builder.AppendLine($"\tMin     request time: {_minRequestTime, 10} ms");
                 builder.AppendLine($"\tTotal   request time: {_totalRequestTime, 10} ms");
                 builder.AppendLine($"\tSlowest request:      {_slowestRequest}");
+            }
+
+            if (_memorySamples > 0)
+            {
+                lock (_memoryLock)
+                {
+                    var averageMemory = _totalMemory/_memorySamples;
+                    const int bytesInMegabyte = 1024*1024;
+                    builder.AppendLine("Memory statistics:");
+                    builder.AppendLine($"\tMin: {(double)_minMemory / bytesInMegabyte, 8:F1} MB");
+                    builder.AppendLine($"\tMax: {(double)_maxMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tCur: {(double)_currentMemory / bytesInMegabyte,8:F1} MB");
+                }
             }
 
             return builder.ToString();
@@ -156,11 +221,25 @@ namespace ITCC.HTTP.Server.Service
             {
                 _requestSuccessTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
                 _requestSuccessCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+                return;
             }
-            else
+            _requestFailTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
+            _requestFailCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+            if (!IsInternalServerError(response))
+                return;
+                
+            lock (_counterLock)
             {
-                _requestFailTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
-                _requestFailCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+                var code = response.StatusCode;
+                if (!_internalErrorCounters.ContainsKey(uri))
+                {
+                    _internalErrorCounters[uri] = new ConcurrentDictionary<int, int>();
+                    _internalErrorCounters[uri].TryAdd(code, 1);
+                }
+                else
+                {
+                    _internalErrorCounters[uri].AddOrUpdate(code, 1, (key, value) => value + 1);
+                }
             }
         }
 
@@ -186,11 +265,7 @@ namespace ITCC.HTTP.Server.Service
             _authentificationResults.AddOrUpdate(authResult.Status, 1, (key, value) => value + 1);
         }
 
-        public void AddSslProtocol(SslProtocols protocol)
-        {
-            _sslProtocolCounter.AddOrUpdate(protocol, 1, (key, value) => value + 1);
-        }
-
-        private bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode/100 < 4;
+        private static bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode/100 < 4;
+        private static bool IsInternalServerError(HttpListenerResponse response) => response.StatusCode >= 500;
     }
 }
