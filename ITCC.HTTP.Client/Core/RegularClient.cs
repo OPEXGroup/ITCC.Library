@@ -249,7 +249,7 @@ namespace ITCC.HTTP.Client.Core
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    LogDebug($"Request {method.Method} /{partialUri} has been cancelled"););
+                    LogDebug($"Request {method.Method} /{partialUri} has been cancelled");
                     return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestCancelled, ocex);
                 }
                 LogDebug($"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");

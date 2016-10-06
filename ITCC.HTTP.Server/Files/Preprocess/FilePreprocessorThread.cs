@@ -46,7 +46,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     if (!task.Perform())
                         LogMessage(LogLevel.Warning, $"Task for file {task.FileName} ({task.FileType}) failed");
                     else
-                        LogDebug($"Task for file {task.FileName} ({task.FileType}) completed"););
+                        LogDebug($"Task for file {task.FileName} ({task.FileType}) completed");
                 }
                 catch (ThreadAbortException)
                 {
