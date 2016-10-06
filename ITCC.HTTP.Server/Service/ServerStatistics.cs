@@ -23,6 +23,8 @@ namespace ITCC.HTTP.Server.Service
         private readonly object _requestMethodLock = new object();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _requestMethodCounters = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, int>> _internalErrorCounters = new ConcurrentDictionary<string, ConcurrentDictionary<int, int>>();
+
         private readonly ConcurrentDictionary<string, int> _requestSuccessCounters = new ConcurrentDictionary<string, int>();
 
         private readonly ConcurrentDictionary<string, int> _requestFailCounters = new ConcurrentDictionary<string, int>();
@@ -30,8 +32,6 @@ namespace ITCC.HTTP.Server.Service
         private readonly ConcurrentDictionary<string, double> _requestSuccessTimeCounters = new ConcurrentDictionary<string, double>();
 
         private readonly ConcurrentDictionary<string, double> _requestFailTimeCounters = new ConcurrentDictionary<string, double>();
-
-        private readonly ConcurrentDictionary<SslProtocols, int> _sslProtocolCounter = new ConcurrentDictionary<SslProtocols, int>(); 
 
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
@@ -108,12 +108,6 @@ namespace ITCC.HTTP.Server.Service
             authKeys.ForEach(k => builder.AppendLine($"\t{k, 12}: {_authentificationResults[k]}"));
             builder.AppendLine();
 
-            builder.AppendLine("SSL statistics:");
-            var sslKeys = _sslProtocolCounter.Keys.ToList();
-            sslKeys.Sort();
-            sslKeys.ForEach(k => builder.AppendLine($"\t{k,12}: {_sslProtocolCounter[k]}"));
-            builder.AppendLine();
-
             builder.AppendLine("Request statistics:");
             var uris = _requestMethodCounters.Keys.ToList();
             uris.Sort();
@@ -156,8 +150,28 @@ namespace ITCC.HTTP.Server.Service
                     methodKeys.Sort();
                     methodKeys.ForEach(m => builder.AppendLine($"\t\t{m,-10}: {methodDict[m]}"));
                 });
+                builder.AppendLine();
             }
-            builder.AppendLine();
+
+            if (!_internalErrorCounters.IsEmpty)
+            {
+                builder.AppendLine("Internal error statistics:");
+                uris = _internalErrorCounters.Keys.ToList();
+                uris.Sort();
+                lock (_counterLock)
+                {
+                    uris.ForEach(u =>
+                    {
+                        var codeDict = _internalErrorCounters[u];
+                        builder.AppendLine($"\t{u}");
+                        var codes = codeDict.Keys.ToList();
+                        codes.Sort();
+                        codes.ForEach(c => builder.AppendLine($"\t\t{c,-4}: {codeDict[c]}"));
+                    });
+                }
+                builder.AppendLine();
+            }
+            
 
             if (_requestCount > 0)
             {
@@ -207,11 +221,25 @@ namespace ITCC.HTTP.Server.Service
             {
                 _requestSuccessTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
                 _requestSuccessCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+                return;
             }
-            else
+            _requestFailTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
+            _requestFailCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+            if (!IsInternalServerError(response))
+                return;
+                
+            lock (_counterLock)
             {
-                _requestFailTimeCounters.AddOrUpdate(uri, processingTime, (key, value) => value + processingTime);
-                _requestFailCounters.AddOrUpdate(uri, 1, (key, value) => value + 1);
+                var code = response.StatusCode;
+                if (!_internalErrorCounters.ContainsKey(uri))
+                {
+                    _internalErrorCounters[uri] = new ConcurrentDictionary<int, int>();
+                    _internalErrorCounters[uri].TryAdd(code, 1);
+                }
+                else
+                {
+                    _internalErrorCounters[uri].AddOrUpdate(code, 1, (key, value) => value + 1);
+                }
             }
         }
 
@@ -237,11 +265,7 @@ namespace ITCC.HTTP.Server.Service
             _authentificationResults.AddOrUpdate(authResult.Status, 1, (key, value) => value + 1);
         }
 
-        public void AddSslProtocol(SslProtocols protocol)
-        {
-            _sslProtocolCounter.AddOrUpdate(protocol, 1, (key, value) => value + 1);
-        }
-
-        private bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode/100 < 4;
+        private static bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode/100 < 4;
+        private static bool IsInternalServerError(HttpListenerResponse response) => response.StatusCode >= 500;
     }
 }

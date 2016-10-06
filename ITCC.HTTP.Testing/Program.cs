@@ -1,4 +1,4 @@
-﻿#define STRESS_TEST
+﻿// #define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
@@ -105,7 +105,11 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.None;
+#if STRESS_TEST
+            Logger.Level = LogLevel.Info;
+#else
+            Logger.Level = LogLevel.Info;
+#endif
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
@@ -231,15 +235,12 @@ namespace ITCC.HTTP.Testing
                 AuthorizationRequired = false,
                 Method = HttpMethod.Get,
                 SubUri = "token",
-                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.OK, new TokenStore { Token = "Hello111" }))
+                Handler = (account, request) => Task.FromResult(new HandlerResult(HttpStatusCode.InternalServerError, new TokenStore { Token = "Hello111" }))
             });
 
             StaticServer<object>.AddStaticRedirect("test", "delay");
         }
 
-        private static void StopServer()
-        {
-            StaticServer<object>.Stop();
-        }
+        private static void StopServer() => StaticServer<object>.Stop();
     }
 }
