@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Timers;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Enums;
 
@@ -12,6 +13,11 @@ namespace ITCC.HTTP.Server.Service
     internal class ServerStatistics<TAccount>
         where TAccount : class
     {
+        /// <summary>
+        ///     Milliseconds
+        /// </summary>
+        private const double MemortSamplingPeriod = 100;
+
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();
 
         private readonly object _requestMethodLock = new object();
@@ -30,6 +36,18 @@ namespace ITCC.HTTP.Server.Service
         private readonly ConcurrentDictionary<AuthorizationStatus, int> _authentificationResults = new ConcurrentDictionary<AuthorizationStatus, int>();
 
         private readonly DateTime _startTime = DateTime.Now;
+
+        private readonly Timer _memoryTimer;
+
+        private long _minMemory = long.MaxValue;
+
+        private long _maxMemory;
+
+        private double _totalMemory;
+
+        private long _memorySamples;
+
+        private readonly object _memoryLock = new object();
 
         private readonly object _counterLock = new object();
 
@@ -52,11 +70,30 @@ namespace ITCC.HTTP.Server.Service
 
         private long _requestCount;
 
+        public ServerStatistics()
+        {
+            _memoryTimer = new Timer(MemortSamplingPeriod);
+            _memoryTimer.Elapsed += MemoryTimerOnElapsed;
+            _memoryTimer.Start();
+        }
+
+        private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_memoryLock)
+            {
+                _memorySamples++;
+                var currentMemory = GC.GetTotalMemory(false);
+                _minMemory = Math.Min(_minMemory, currentMemory);
+                _maxMemory = Math.Max(_maxMemory, currentMemory);
+                _totalMemory += currentMemory;
+            }
+        }
+
         public string Serialize()
         {
             var builder = new StringBuilder();
 
-            builder.AppendLine($"Server started at {_startTime.ToString("s")} ({DateTime.Now.Subtract(_startTime)} ago)");
+            builder.AppendLine($"Server started at {_startTime:s} ({DateTime.Now.Subtract(_startTime)} ago)");
             builder.AppendLine();
 
             builder.AppendLine("Response code statistics:");
@@ -131,6 +168,19 @@ namespace ITCC.HTTP.Server.Service
                 builder.AppendLine($"\tMin     request time: {_minRequestTime, 10} ms");
                 builder.AppendLine($"\tTotal   request time: {_totalRequestTime, 10} ms");
                 builder.AppendLine($"\tSlowest request:      {_slowestRequest}");
+            }
+
+            if (_memorySamples > 0)
+            {
+                lock (_memoryLock)
+                {
+                    var averageMemory = _totalMemory/_memorySamples;
+                    const int bytesInMegabyte = 1024*1024;
+                    builder.AppendLine("Memory statistics:");
+                    builder.AppendLine($"\tMin: {(double)_minMemory / bytesInMegabyte, 8:F1} MB");
+                    builder.AppendLine($"\tMax: {(double)_maxMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB)");
+                }
             }
 
             return builder.ToString();
