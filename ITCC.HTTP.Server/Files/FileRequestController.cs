@@ -173,7 +173,7 @@ namespace ITCC.HTTP.Server.Files
         public async Task HandleFavicon(HttpListenerContext context)
         {
             var response = context.Response;
-            LogMessage(LogLevel.Trace, $"Favicon requested, path: {FaviconPath}");
+            LogTrace($"Favicon requested, path: {FaviconPath}");
             if (string.IsNullOrEmpty(FaviconPath) || !File.Exists(FaviconPath))
             {
                 ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
@@ -195,7 +195,7 @@ namespace ITCC.HTTP.Server.Files
             var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
             if (section == null)
             {
-                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                LogDebug($"Section {sectionName} not found");
                 return false;
             }
 
@@ -210,7 +210,7 @@ namespace ITCC.HTTP.Server.Files
             var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
             if (section == null)
             {
-                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                LogDebug($"Section {sectionName} not found");
                 return null;
             }
 
@@ -240,7 +240,7 @@ namespace ITCC.HTTP.Server.Files
             var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
             if (section == null)
             {
-                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                LogDebug($"Section {sectionName} not found");
                 return FileOperationStatus.NotFound;
             }
             if (content == null || !content.CanRead)
@@ -282,7 +282,7 @@ namespace ITCC.HTTP.Server.Files
             var section = FileSections.FirstOrDefault(s => s.Name == sectionName);
             if (section == null)
             {
-                LogMessage(LogLevel.Debug, $"Section {sectionName} not found");
+                LogDebug($"Section {sectionName} not found");
                 return FileOperationStatus.NotFound;
             }
 
@@ -292,7 +292,7 @@ namespace ITCC.HTTP.Server.Files
 
             if (!File.Exists(filePath))
             {
-                LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
+                LogDebug($"File {filePath} does not exist and cannot be deleted");
                 return FileOperationStatus.NotFound;
             }
 
@@ -319,7 +319,7 @@ namespace ITCC.HTTP.Server.Files
         {
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
-                LogMessage(LogLevel.Debug, $"File {filePath} was requested but is in progress");
+                LogDebug($"File {filePath} was requested but is in progress");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.ServiceUnavailable, null);
                 return;
             }
@@ -327,7 +327,7 @@ namespace ITCC.HTTP.Server.Files
             var fileRequest = FileRequestFactory.BuildRequest(filePath, context.Request);
             if (fileRequest == null) 
             {
-                LogMessage(LogLevel.Debug, $"Failed to build file request for {filePath}");
+                LogDebug($"Failed to build file request for {filePath}");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.BadRequest, null);
                 return;
             }
@@ -338,14 +338,14 @@ namespace ITCC.HTTP.Server.Files
         {
             if (File.Exists(filePath))
             {
-                LogMessage(LogLevel.Debug, $"File {filePath} already exists");
+                LogDebug($"File {filePath} already exists");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.Conflict, null);
                 return;
             }
             var fileContent = context.Request.InputStream;
             if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
             {
-                LogMessage(LogLevel.Debug, $"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
+                LogDebug($"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.RequestEntityTooLarge, null);
                 return;
             }
@@ -355,9 +355,9 @@ namespace ITCC.HTTP.Server.Files
                 file.Flush();
                 file.Close();
             }
-            GC.Collect();
-            LogMessage(LogLevel.Trace, $"Total memory: {GC.GetTotalMemory(true)}");
-            LogMessage(LogLevel.Debug, $"File {filePath} created");
+            GC.Collect(1);
+            LogTrace($"Total memory: {GC.GetTotalMemory(true)}");
+            LogDebug($"File {filePath} created");
             if (FilesPreprocessingEnabled)
             {
                 var code = FilePreprocessController.EnqueueFile(filePath) ? HttpStatusCode.Accepted : HttpStatusCode.Created;
@@ -371,7 +371,7 @@ namespace ITCC.HTTP.Server.Files
         {
             if (!File.Exists(filePath))
             {
-                LogMessage(LogLevel.Debug, $"File {filePath} does not exist and cannot be deleted");
+                LogDebug($"File {filePath} does not exist and cannot be deleted");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
                 return;
             }
@@ -400,7 +400,7 @@ namespace ITCC.HTTP.Server.Files
                 var result = localPath.Trim('/');
                 var slashIndex = result.LastIndexOf("/", StringComparison.Ordinal);
                 result = result.Remove(0, slashIndex + 1);
-                LogMessage(LogLevel.Debug, $"File requested: {result}");
+                LogDebug($"File requested: {result}");
                 return result;
             }
             catch (Exception)
@@ -419,7 +419,7 @@ namespace ITCC.HTTP.Server.Files
                 var slashIndex = sectionName.IndexOf("/", StringComparison.Ordinal);
                 var lastSlashIndex = sectionName.LastIndexOf("/", StringComparison.Ordinal);
                 sectionName = sectionName.Substring(slashIndex + 1, lastSlashIndex - slashIndex - 1);
-                LogMessage(LogLevel.Debug, $"Section requested: {sectionName}");
+                LogDebug($"Section requested: {sectionName}");
                 return FileSections.FirstOrDefault(s => s.Folder == sectionName);
             }
             catch (Exception)
@@ -445,9 +445,16 @@ namespace ITCC.HTTP.Server.Files
         #endregion
 
         #region log
-        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP FILES", level, message);
 
-        private void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP FILES", level, ex);
+        [Conditional("TRACE")]
+        private static void LogTrace(string message) => Logger.LogTrace("HTTP FILES", message);
+
+        [Conditional("DEBUG")]
+        private static void LogDebug(string message) => Logger.LogDebug("HTTP FILES", message);
+
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP FILES", level, message);
+
+        private static void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP FILES", level, ex);
 
         #endregion
 

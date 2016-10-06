@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,10 +80,23 @@ namespace ITCC.Logging.Core
             }
         }
 
-        public static bool AddBannedScopeRange(IEnumerable scopeRange)
-        {
-            return scopeRange.Cast<object>().All(AddBannedScope);
-        }
+        public static bool AddBannedScopeRange(IEnumerable scopeRange) => scopeRange.Cast<object>().All(AddBannedScope);
+
+        /// <summary>
+        ///     Logs message in DEBUG level if DEBUG is defined
+        /// </summary>
+        /// <param name="scope">Message scope</param>
+        /// <param name="message">Message text</param>
+        [Conditional("DEBUG")]
+        public static void LogDebug(object scope, string message) => LogEntry(scope, LogLevel.Debug, message);
+
+        /// <summary>
+        ///     Logs message in TRACE level if both DEBUG and TRACE are defined
+        /// </summary>
+        /// <param name="scope">Message scope</param>
+        /// <param name="message">Message text</param>
+        [Conditional("DEBUG")]
+        public static void LogTrace(object scope, string message) => LogTraceInner(scope, message);
 
         /// <summary>
         ///     Creates log notification
@@ -97,6 +111,24 @@ namespace ITCC.Logging.Core
             var eventArgs = new LogEntryEventArgs(scope, level, message);
             LogEntryEvent?.Invoke(scope, eventArgs);
         }
+
+        /// <summary>
+        ///     Logs exception in TRACE level if both DEBUG and TRACE are defined
+        /// </summary>
+        /// <param name="scope">Exception scope</param>
+        /// <param name="exception">Exception instance</param>
+        [Conditional("DEBUG")]
+        public static void LogExceptionTrace(object scope, Exception exception)
+            => LogExceptionTraceInner(scope, exception);
+
+        /// <summary>
+        ///     Logs message in DEBUG level if DEBUG is defined
+        /// </summary>
+        /// <param name="scope">Exception scope</param>
+        /// <param name="exception">Exception instance</param>
+        [Conditional("DEBUG")]
+        public static void LogExceptionDebug(object scope, Exception exception)
+            => LogException(scope, LogLevel.Debug, exception);
 
         /// <summary>
         ///     Logs exception
@@ -170,6 +202,22 @@ namespace ITCC.Logging.Core
         {
             _logLevel = LogLevel.Info;
         }
+
+        /// <summary>
+        ///     Used to acquire AND condition
+        /// </summary>
+        /// <param name="scope">Message scope</param>
+        /// <param name="message">Message text</param>
+        [Conditional("TRACE")]
+        private static void LogTraceInner(object scope, string message) => LogEntry(scope, LogLevel.Trace, message);
+
+        /// <summary>
+        ///     Used to acquire AND condition
+        /// </summary>
+        /// <param name="scope">Exception scope</param>
+        /// <param name="exception">Exception instance</param>
+        [Conditional("TRACE")]
+        private static void LogExceptionTraceInner(object scope, Exception exception) => LogException(scope, LogLevel.Trace, exception);
 
         private static readonly List<ILogReceiver> Receivers = new List<ILogReceiver>();
 
