@@ -93,9 +93,7 @@ namespace ITCC.HTTP.Server.Core
 
             if (body == null)
             {
-                if (Logger.Level >= LogLevel.Trace)
-                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace,
-                        $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
@@ -160,8 +158,7 @@ namespace ITCC.HTTP.Server.Core
                 } 
             }
 
-            if (Logger.Level >= LogLevel.Trace)
-                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
+            Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
         }
 
         public static string SerializeResponse(HttpListenerResponse response, string bodyString)

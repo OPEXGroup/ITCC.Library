@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -129,7 +130,7 @@ namespace ITCC.HTTP.Server.Files.Requests
 
             if (rangeValue.EndsWith("-"))
             {
-                LogMessage(LogLevel.Trace, "Start range requested");
+                LogTrace("Start range requested");
                 if (!long.TryParse(rangeValue.TrimEnd('-'), out rangeStart))
                     return false;
                 if (rangeStart < 0)
@@ -139,14 +140,14 @@ namespace ITCC.HTTP.Server.Files.Requests
             }
             if (rangeValue.StartsWith("-"))
             {
-                LogMessage(LogLevel.Trace, "End range requested");
+                LogTrace("End range requested");
                 // rangeEnd will be negative. This is correct
                 if (!long.TryParse(rangeValue, out rangeEnd))
                     return false;
                 Range = new RequestRange { RangeStart = null, RangeEnd = rangeEnd };
                 return true;
             }
-            LogMessage(LogLevel.Trace, "Middle range requested");
+            LogTrace("Middle range requested");
             var parts = rangeValue.Split('-');
             if (parts.Length != 2)
                 return false;
@@ -159,7 +160,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             // Here rangeEnd MUST be greater than start
             if (rangeEnd <= rangeStart)
                 return false;
-            LogMessage(LogLevel.Trace, $"Range built: {rangeStart}-{rangeEnd}");
+            LogTrace($"Range built: {rangeStart}-{rangeEnd}");
             Range = new RequestRange {RangeStart = rangeStart, RangeEnd = rangeEnd };
             return true;
         }
@@ -224,6 +225,10 @@ namespace ITCC.HTTP.Server.Files.Requests
         #endregion
 
         #region log
+
+        protected void LogTrace(string message) => Logger.LogTrace($"{FileType.ToString().ToUpper()} RQST", message);
+
+        protected void LogDebug(string message) => Logger.LogDebug($"{FileType.ToString().ToUpper()} RQST", message);
 
         protected void LogMessage(LogLevel level, string message) => Logger.LogEntry($"{FileType.ToString().ToUpper()} RQST", level, message);
 

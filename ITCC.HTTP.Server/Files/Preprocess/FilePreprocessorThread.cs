@@ -46,7 +46,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     if (!task.Perform())
                         LogMessage(LogLevel.Warning, $"Task for file {task.FileName} ({task.FileType}) failed");
                     else
-                        LogMessage(LogLevel.Debug, $"Task for file {task.FileName} ({task.FileType}) completed");
+                        LogDebug($"Task for file {task.FileName} ({task.FileType}) completed"););
                 }
                 catch (ThreadAbortException)
                 {
@@ -66,6 +66,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         #endregion
 
         #region log
+
+        private void LogDebug(string message) => Logger.LogDebug("FILE PROCESS", message);
 
         private void LogMessage(LogLevel level, string message) => Logger.LogEntry("FILE PROCESS", level, message);
 

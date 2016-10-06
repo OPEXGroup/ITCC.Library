@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -95,7 +96,7 @@ namespace ITCC.HTTP.Client.Core
             var fullUri = UriHelper.BuildFullUri(_serverAddress, partialUri, parameters);
             if (fullUri == null)
             {
-                LogMessage(LogLevel.Debug, $"Failed to build uri with addr={_serverAddress} and uri {partialUri}");
+                LogDebug($"Failed to build uri with addr={_serverAddress} and uri {partialUri}");
                 return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
             }
 
@@ -136,7 +137,7 @@ namespace ITCC.HTTP.Client.Core
                                     // We will be unable to serialize request body
                                     if (requestBodySerializer == null)
                                     {
-                                        LogMessage(LogLevel.Debug, "Unable to serialize request body");
+                                        LogDebug("Unable to serialize request body");
                                         return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
                                     }
                                     requestBody = requestBodySerializer(bodyArg);
@@ -150,9 +151,7 @@ namespace ITCC.HTTP.Client.Core
                             }
                         }
 
-                        if (Logger.Level >= LogLevel.Trace)
-                            LogMessage(LogLevel.Trace,
-                                $"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
+                        LogTrace($"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
                             var responseHeaders = response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key, httpResponseHeader => string.Join(";", httpResponseHeader.Value));
@@ -220,9 +219,7 @@ namespace ITCC.HTTP.Client.Core
 
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                            if (Logger.Level >= LogLevel.Trace)
-                                LogMessage(LogLevel.Trace,
-                                    $"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
+                            LogTrace($"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
                             if (responseBodyDeserializer != null)
                             {
                                 try
@@ -252,10 +249,10 @@ namespace ITCC.HTTP.Client.Core
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been cancelled");
+                    LogDebug($"Request {method.Method} /{partialUri} has been cancelled"););
                     return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestCancelled, ocex);
                 }
-                LogMessage(LogLevel.Debug, $"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");
+                LogDebug($"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");
                 return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestTimeout, ocex);
             }
             catch (HttpRequestException networkException)
@@ -679,9 +676,15 @@ namespace ITCC.HTTP.Client.Core
 
         #region log
 
-        private void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP CLIENT", level, message);
+        [Conditional("DEBUG")]
+        private static void LogTrace(string message) => Logger.LogTrace("HTTP CLIENT", message);
 
-        private void LogException(LogLevel level, Exception exception) => Logger.LogException("HTTP CLIENT", level, exception);
+        [Conditional("DEBUG")]
+        private static void LogDebug(string message) => Logger.LogDebug("HTTP CLIENT", message);
+
+        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP CLIENT", level, message);
+
+        private static void LogException(LogLevel level, Exception exception) => Logger.LogException("HTTP CLIENT", level, exception);
 
         /// <summary>
         ///     FOR DEBUG ONLY

@@ -171,7 +171,7 @@ namespace ITCC.HTTP.Server.Core
                     try
                     {
                         var context = _listener.GetContext();
-                        LogMessage(LogLevel.Debug, $"Client connected: {context.Request.RemoteEndPoint}");
+                        LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
                         Task.Run(async () => await OnMessage(context));
                     }
                     catch (ThreadAbortException)
@@ -194,7 +194,7 @@ namespace ITCC.HTTP.Server.Core
         {
             ServiceUris.AddRange(configuration.GetReservedUris());
             if (ServiceUris.Any())
-                LogMessage(LogLevel.Debug, $"Reserved sections:\n{string.Join("\n", ServiceUris)}");
+                LogDebug($"Reserved sections:\n{string.Join("\n", ServiceUris)}");
 
             ServiceRequestProcessors.Add(_optionsController);
             ServiceRequestProcessors.Add(_fileRequestController);
@@ -303,6 +303,12 @@ namespace ITCC.HTTP.Server.Core
 
         #region log
 
+        [Conditional("DEBUG")]
+        private static void LogTrace(string message) => Logger.LogTrace("HTTP SERVER", message);
+
+        [Conditional("DEBUG")]
+        private static void LogDebug(string message) => Logger.LogDebug("HTTP SERVER", message);
+
         private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP SERVER", level, message);
 
         private static void LogException(LogLevel level, Exception ex) => Logger.LogException("HTTP SERVER", level, ex);
@@ -319,15 +325,13 @@ namespace ITCC.HTTP.Server.Core
             try
             {
                 _statisticsController.Statistics?.AddRequest(request);
-                if (Logger.Level >= LogLevel.Debug)
-                    LogMessage(LogLevel.Debug,
-                        $"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context)}");
+                LogDebug($"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context)}");
 
                 var serviceProcessor =
                     ServiceRequestProcessors.FirstOrDefault(sp => sp.RequestIsSuitable(context.Request));
                 if (serviceProcessor != null)
                 {
-                    LogMessage(LogLevel.Debug, $"Service {serviceProcessor.Name} requested");
+                    LogDebug($"Service {serviceProcessor.Name} requested");
                     await serviceProcessor.HandleRequest(context, stopWatch, OnResponseReady);
                     return;
                 }
@@ -404,7 +408,7 @@ namespace ITCC.HTTP.Server.Core
         {
             try
             {
-                LogMessage(LogLevel.Debug, $"Response for {context.Request.RemoteEndPoint} ready.");
+                LogDebug($"Response for {context.Request.RemoteEndPoint} ready.");
                 requestStopwatch.Stop();
                 var elapsedMilliseconds = requestStopwatch.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
                 _statisticsController.Statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), elapsedMilliseconds);
@@ -413,7 +417,7 @@ namespace ITCC.HTTP.Server.Core
                     LogMessage(LogLevel.Warning, $"Request /{GetNormalizedRequestUri(context)} from {context.Request.RemoteEndPoint} took {elapsedMilliseconds} milliseconds to process!");
                 }
                 context.Response.Close();
-                LogMessage(LogLevel.Debug, $"Response for {context.Request.RemoteEndPoint} queued ({elapsedMilliseconds} milliseconds)");
+                LogDebug($"Response for {context.Request.RemoteEndPoint} queued ({elapsedMilliseconds} milliseconds)");
             }
             catch (HttpListenerException)
             {
