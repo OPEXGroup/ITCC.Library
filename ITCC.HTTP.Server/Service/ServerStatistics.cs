@@ -40,12 +40,11 @@ namespace ITCC.HTTP.Server.Service
         private readonly Timer _memoryTimer;
 
         private long _minMemory = long.MaxValue;
-
         private long _maxMemory;
-
+        private long _currentMemory;
         private double _totalMemory;
-
         private long _memorySamples;
+
 
         private readonly object _memoryLock = new object();
 
@@ -85,6 +84,7 @@ namespace ITCC.HTTP.Server.Service
                 var currentMemory = GC.GetTotalMemory(false);
                 _minMemory = Math.Min(_minMemory, currentMemory);
                 _maxMemory = Math.Max(_maxMemory, currentMemory);
+                _currentMemory = currentMemory;
                 _totalMemory += currentMemory;
             }
         }
@@ -179,7 +179,8 @@ namespace ITCC.HTTP.Server.Service
                     builder.AppendLine("Memory statistics:");
                     builder.AppendLine($"\tMin: {(double)_minMemory / bytesInMegabyte, 8:F1} MB");
                     builder.AppendLine($"\tMax: {(double)_maxMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB)");
+                    builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tCur: {(double)_currentMemory / bytesInMegabyte,8:F1} MB");
                 }
             }
 
