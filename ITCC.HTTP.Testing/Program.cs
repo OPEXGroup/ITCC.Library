@@ -1,8 +1,10 @@
-﻿// #define STRESS_TEST
+﻿#define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -10,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Client.Core;
+using ITCC.HTTP.Client.Enums;
+using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Core;
 using ITCC.HTTP.Server.Files;
@@ -101,7 +105,7 @@ namespace ITCC.HTTP.Testing
 
         private static bool InitializeLoggers()
         {
-            Logger.Level = LogLevel.Trace;
+            Logger.Level = LogLevel.None;
             Logger.RegisterReceiver(new ColouredConsoleLogger(), true);
 
             return true;
