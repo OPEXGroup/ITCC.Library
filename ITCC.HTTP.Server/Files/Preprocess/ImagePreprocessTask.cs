@@ -31,8 +31,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     originalHeight = img.Height;
                 }
 
-                LogMessage(LogLevel.Debug,
-                    $"Processing image {FileName}. Original resolution {(int) originalWidth}x{(int) originalHeight}");
+                LogDebug($"Processing image {FileName}. Original resolution {(int) originalWidth}x{(int) originalHeight}");
 
                 ImageFormat format;
                 var extension = IoHelper.GetExtension(FileName);

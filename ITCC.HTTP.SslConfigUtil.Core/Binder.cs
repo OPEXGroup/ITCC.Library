@@ -27,7 +27,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                     var thumbprintParams = bindingParams as CertificateThumbprintBindingParams;
                     if (thumbprintParams == null)
                     {
-                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateThumbprintBindingParams expected, got {bindingParams.GetType().Name}");
+                        Logger.LogDebug("Binder", $"CertificateThumbprintBindingParams expected, got {bindingParams.GetType().Name}");
                         return new BindingResult
                         {
                             Status = BindingStatus.InvalidParams,
@@ -39,7 +39,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                     var subjectNameParams = bindingParams as CertificateSubjectnameParams;
                     if (subjectNameParams == null)
                     {
-                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateSubjectnameParams expected, got {bindingParams.GetType().Name}");
+                        Logger.LogDebug("Binder", $"CertificateSubjectnameParams expected, got {bindingParams.GetType().Name}");
                         return new BindingResult
                         {
                             Status = BindingStatus.InvalidParams,
@@ -51,7 +51,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                     var fileParams = bindingParams as CertificateFileBindingParams;
                     if (fileParams == null)
                     {
-                        Logger.LogEntry("Binder", LogLevel.Debug, $"CertificateFileBindingParams expected, got {bindingParams.GetType().Name}");
+                        Logger.LogDebug("Binder", $"CertificateFileBindingParams expected, got {bindingParams.GetType().Name}");
                         return new BindingResult
                         {
                             Status = BindingStatus.InvalidParams,
@@ -71,7 +71,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
         public static BindingResult Bind(string assemblyPath, string ipAddressString, string portString,
             CertificateThumbprintBindingParams bindingParams, bool unsafeBinding = false)
         {
-            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with existing cert started");
+            Logger.LogDebug("Binder", "Bind with existing cert started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -93,7 +93,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
         public static BindingResult Bind(string assemblyPath, string ipAddressString, string portString,
             CertificateFileBindingParams bindingParams, bool unsafeBinding = false)
         {
-            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with cert file started");
+            Logger.LogDebug("Binder", "Bind with cert file started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -120,7 +120,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
             CertificateSubjectnameParams bindingParams,
             bool unsafeBinding = false)
         {
-            Logger.LogEntry("Binder", LogLevel.Debug, "Bind with generation started");
+            Logger.LogDebug("Binder", "Bind with generation started");
             var basicParams = ParseBaseParams(assemblyPath, ipAddressString, portString);
             if (basicParams.Status != ParseBaseParamsStatus.Ok)
                 return new BindingResult
@@ -211,7 +211,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            Logger.LogEntry("Binder", LogLevel.Debug, $"{ipAddress}:{port} is ready to bind");
+            Logger.LogDebug("Binder", $"{ipAddress}:{port} is ready to bind");
 
             var bindResult = TryBind(assemblyGuid, certificate.Thumbprint, ipAddress, port);
             return !bindResult ? new BindingResult { Status = BindingStatus.UnknownError } : new BindingResult { Status = BindingStatus.Ok };
@@ -250,7 +250,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 Logger.LogEntry("Binder", LogLevel.Error, $"Port value '{portString}' is invalid. Port must be a number between 1 and 65535");
                 return new ParseParamsResult { Status = ParseBaseParamsStatus.InvalidPortValue };
             }
-            Logger.LogEntry("Binder", LogLevel.Debug, $"Port: {port}");
+            Logger.LogDebug("Binder", $"Port: {port}");
 
             IPAddress ipAddress;
             if (!IPAddress.TryParse(ipAddressString, out ipAddress))
@@ -258,7 +258,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 Logger.LogEntry("Binder", LogLevel.Error, $"IpAddress value '{ipAddressString}' is invalid.");
                 return new ParseParamsResult { Status = ParseBaseParamsStatus.InvalidIpAddress };
             }
-            Logger.LogEntry("Binder", LogLevel.Debug, $"Ip address: {ipAddress}");
+            Logger.LogDebug("Binder", $"Ip address: {ipAddress}");
 
             var getAssemblyGuidResult = AssemblyLoader.GetAssemblyGuid(assemblyPath);
             if (getAssemblyGuidResult.Status != LoadAssemblyStatus.Ok)
@@ -266,7 +266,7 @@ namespace ITCC.HTTP.SslConfigUtil.Core
                 Logger.LogEntry("Binder", LogLevel.Error, $"Binding aborted because of assebmly loading failed: {getAssemblyGuidResult.Status}");
                 return new ParseParamsResult { Status = ParseBaseParamsStatus.AssemblyLoadFailed };
             }
-            Logger.LogEntry("Binder", LogLevel.Debug, $"AssemblyGuid: {getAssemblyGuidResult.Guid}");
+            Logger.LogDebug("Binder", $"AssemblyGuid: {getAssemblyGuidResult.Guid}");
 
             return new ParseParamsResult
             {
@@ -343,9 +343,9 @@ namespace ITCC.HTTP.SslConfigUtil.Core
         }
         private static bool TryBind(string guid, string thumbprint, IPAddress ipAddress, ushort port)
         {
-            Logger.LogEntry("Binder", LogLevel.Debug, "TryBind started");
+            Logger.LogDebug("Binder", "TryBind started");
             var executionResult = ExecuteCommand(AddBindingArgs(guid, thumbprint, ipAddress, port));
-            Logger.LogEntry("Binder", LogLevel.Debug, $"Command execurted, status={executionResult.ExitCode} output:\n{executionResult.Output}");
+            Logger.LogDebug("Binder", $"Command execurted, status={executionResult.ExitCode} output:\n{executionResult.Output}");
             if (executionResult.Status == ExecuteCommandStatus.Error)
                 return false;
 

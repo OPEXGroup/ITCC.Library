@@ -378,8 +378,7 @@ namespace ITCC.HTTP.Server.Core
                     case AuthorizationStatus.Ok:
                         if (requestProcessor.Handler == null)
                         {
-                            LogMessage(LogLevel.Debug,
-                                $"{request.HttpMethod} {request.Url.LocalPath} was requested, but no handler is provided");
+                            LogDebug($"{request.HttpMethod} {request.Url.LocalPath} was requested, but no handler is provided");
                             ResponseFactory.BuildResponse(context, HttpStatusCode.NotImplemented, null);
                         }
                         else

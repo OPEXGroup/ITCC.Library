@@ -229,7 +229,7 @@ namespace ITCC.HTTP.Client.Core
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogException(LogLevel.Debug, ex);
+                                    LogExceptionDebug(ex);
                                     return new RequestResult<TResult>(default(TResult),
                                         ServerResponseStatus.IncompehensibleResponse, responseHeaders);
                                 }
@@ -257,12 +257,12 @@ namespace ITCC.HTTP.Client.Core
             }
             catch (HttpRequestException networkException)
             {
-                LogException(LogLevel.Debug, networkException);
+                LogExceptionDebug(networkException);
                 return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ConnectionError, networkException);
             }
             catch (Exception exception)
             {
-                LogException(LogLevel.Debug, exception);
+                LogExceptionDebug(exception);
                 return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError, exception);
             }
         }
@@ -685,6 +685,8 @@ namespace ITCC.HTTP.Client.Core
         private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP CLIENT", level, message);
 
         private static void LogException(LogLevel level, Exception exception) => Logger.LogException("HTTP CLIENT", level, exception);
+
+        private static void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug("HTTP CLIENT", exception);
 
         /// <summary>
         ///     FOR DEBUG ONLY

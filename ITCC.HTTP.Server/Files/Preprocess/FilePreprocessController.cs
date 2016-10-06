@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ITCC.Logging.Core;
 
@@ -30,7 +31,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             {
                 return false;
             }
-            LogMessage(LogLevel.Debug, $"Preprocess task queued for {fileName} ({task.FileType})");
+            LogDebug($"Preprocess task queued for {fileName} ({task.FileType})"););
             TaskQueue.Enqueue(task);
             return true;
         }
@@ -58,6 +59,9 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         #endregion
 
         #region log
+
+        [Conditional("DEBUG")]
+        private static void LogDebug(string message) => Logger.LogDebug("FILE PROCESS", message);
 
         private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("FILE PROCESS", level, message);
 

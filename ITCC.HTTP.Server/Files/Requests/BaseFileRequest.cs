@@ -36,7 +36,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             var response = context.Response;
             if (!File.Exists(fileName))
             {
-                LogMessage(LogLevel.Debug, $"File {fileName} was requested but not found");
+                LogDebug($"File {fileName} was requested but not found");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
                 return;
             }
