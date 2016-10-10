@@ -35,6 +35,7 @@ namespace ITCC.Logging.Windows.Loggers
         public BufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency)
             : base(filename, clearFile)
         {
+            Frequency = frequency;
             InitTimer(frequency);
         }
 
@@ -42,6 +43,7 @@ namespace ITCC.Logging.Windows.Loggers
             : base(filename, level, clearFile)
         {
             Frequency = frequency;
+            InitTimer(frequency);
         }
 
         public void Start()

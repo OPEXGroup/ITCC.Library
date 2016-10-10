@@ -24,7 +24,7 @@ namespace ITCC.Logging.Windows.Utils
                     var resultingString = stringBuilder.ToString();
                     if (string.IsNullOrWhiteSpace(resultingString))
                         return;
-                    streamWriter.WriteLine(stringBuilder.ToString());
+                    streamWriter.Write(stringBuilder.ToString());
                     streamWriter.Flush();
                 }
             }

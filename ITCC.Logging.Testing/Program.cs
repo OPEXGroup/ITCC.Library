@@ -1,8 +1,9 @@
 ﻿// #define WRITE
-#define READ
+// #define READ
 
 using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
@@ -60,6 +61,15 @@ namespace ITCC.Logging.Testing
                 Logger.LogException("MAIN", LogLevel.Warning, ex);
             }
 #endif
+            for (var i = 0; i < 10; ++i)
+            {
+                Logger.LogEntry("TEST", LogLevel.Debug, "line");
+                Logger.LogEntry("TEST", LogLevel.Debug, "line");
+                Logger.LogEntry("TEST", LogLevel.Debug, "line");
+                await Task.Delay(1000);
+            }
+
+            Logger.FlushAll();
 
             await Task.Delay(1);
             Console.ReadLine();
@@ -83,6 +93,7 @@ namespace ITCC.Logging.Testing
 #if WRITE
             _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
 #endif
+            _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
             Logger.RegisterReceiver(_fileLogger);
             Console.OutputEncoding = Encoding.UTF8;
         }
