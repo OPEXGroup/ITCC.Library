@@ -19,9 +19,17 @@
 
 ```    
 void LogEntry(object scope, LogLevel level, string message);                 // записать в лог сообщение 
+void LogDebug(object scope, string message);                                 // записать в лог сообщение если определен DEBUG
+void LogTrace(object scope, string message);                                 // записать в лог сообщение если определены DEBUG и TRACE
+
 void LogException(object scope, LogLevel level, Exception exception);        // записать в лог исключение
+void LogExceptionDebug(object scope, Exception exception);                   // записать в лог исключение если определен DEBUG
+void LogExceptionTrace(object scope, Exception exception);                   // записать в лог исключение если определены DEBUG и TRACE
+
+void AddBannedScope(object scope);                                           // убрать из вывода сообщения с заданным контекстом
 bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false);  // подписать получателя на события лога
 bool UnregisterReceiver(ILogReceiver receiver);                              // отписать получателя
+
 void FlushAll();                                                             // сброс очередей всех логгеров типа IFlushableLogReceiver
 ```
 
