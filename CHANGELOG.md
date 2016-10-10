@@ -1,3 +1,9 @@
+## 2.0.0-rc2 (2016-10-10)
+
+* **New**:  Memory usage and internal error contexts are now displayed in server statistics  
+* **New**:  `Logger` now supports output with conditional compilation  
+* **Fix**:  `BufferedFileLogger` fixes: correct frequency value in all constructors + redundant line break removed  
+
 ## 2.0.0-rc1 (2016-10-05)
 
 * **New**:  `ITCC.HTTP.SslConfigUtil` added: core API, WPF GUI, basic console  
