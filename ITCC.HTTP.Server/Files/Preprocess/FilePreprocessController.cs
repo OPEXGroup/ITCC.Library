@@ -31,7 +31,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             {
                 return false;
             }
-            LogDebug($"Preprocess task queued for {fileName} ({task.FileType})"););
+            LogDebug($"Preprocess task queued for {fileName} ({task.FileType})");
             TaskQueue.Enqueue(task);
             return true;
         }
