@@ -4,9 +4,11 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading;
 using System.Timers;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Enums;
+using Timer = System.Timers.Timer;
 
 namespace ITCC.HTTP.Server.Service
 {
@@ -17,6 +19,11 @@ namespace ITCC.HTTP.Server.Service
         ///     Milliseconds
         /// </summary>
         private const double MemortSamplingPeriod = 100;
+
+        /// <summary>
+        ///     Milliseconds
+        /// </summary>
+        private const double ThreadsSamplingPeriod = 1000;
 
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();
 
@@ -45,9 +52,18 @@ namespace ITCC.HTTP.Server.Service
         private double _totalMemory;
         private long _memorySamples;
 
+        private readonly Timer _threadsTimer;
 
+        private int _maxWorkerThreads;
+        private int _currentWorkerThreads;
+        private long _totalWorkerThreads;
+        private int _maxIocpThreads;
+        private int _currentIocpThreads;
+        private long _totalIocpThreads;
+        private long _threadingSamples;
+
+        private readonly object _threadsLock = new object();
         private readonly object _memoryLock = new object();
-
         private readonly object _counterLock = new object();
 
         /// <summary>
@@ -74,18 +90,50 @@ namespace ITCC.HTTP.Server.Service
             _memoryTimer = new Timer(MemortSamplingPeriod);
             _memoryTimer.Elapsed += MemoryTimerOnElapsed;
             _memoryTimer.Start();
+
+            _threadsTimer = new Timer(ThreadsSamplingPeriod);
+            _threadsTimer.Elapsed += ThreadsTimerOnElapsed;
+            _threadsTimer.Start();
+        }
+
+        private void ThreadsTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_threadsLock)
+            {
+                _threadingSamples++;
+                int totalWorkerThreads;
+                int totalIocpThreads;
+                int availableWorkerThreads;
+                int availableIocpThreads;
+                Thread.MemoryBarrier();
+                ThreadPool.GetMaxThreads(out totalWorkerThreads, out totalIocpThreads);
+                ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableIocpThreads);
+                Thread.MemoryBarrier();
+
+                _currentWorkerThreads = totalWorkerThreads - availableWorkerThreads;
+                _currentIocpThreads = totalIocpThreads - availableIocpThreads;
+
+                _totalWorkerThreads += _currentWorkerThreads;
+                _totalIocpThreads += _currentIocpThreads;
+
+                _maxWorkerThreads = Math.Max(_maxWorkerThreads, _currentWorkerThreads);
+                _maxIocpThreads = Math.Max(_maxIocpThreads, _currentIocpThreads);
+
+                _threadingSamples++;
+            }
         }
 
         private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             lock (_memoryLock)
             {
-                _memorySamples++;
                 var currentMemory = GC.GetTotalMemory(false);
                 _minMemory = Math.Min(_minMemory, currentMemory);
                 _maxMemory = Math.Max(_maxMemory, currentMemory);
                 _currentMemory = currentMemory;
                 _totalMemory += currentMemory;
+
+                _memorySamples++;
             }
         }
 
@@ -190,11 +238,31 @@ namespace ITCC.HTTP.Server.Service
                 {
                     var averageMemory = _totalMemory/_memorySamples;
                     const int bytesInMegabyte = 1024*1024;
+                    builder.AppendLine();
                     builder.AppendLine("Memory statistics:");
                     builder.AppendLine($"\tMin: {(double)_minMemory / bytesInMegabyte, 8:F1} MB");
                     builder.AppendLine($"\tMax: {(double)_maxMemory / bytesInMegabyte,8:F1} MB");
                     builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
                     builder.AppendLine($"\tCur: {(double)_currentMemory / bytesInMegabyte,8:F1} MB");
+                }
+            }
+
+            if (_threadingSamples > 0)
+            {
+                lock (_threadsLock)
+                {
+                    builder.AppendLine();
+                    builder.AppendLine("Thread statistics:");
+                    builder.AppendLine("\tWorker threads:");
+                    var agrWorkerThreads = (double) _totalWorkerThreads/_threadingSamples;
+                    builder.AppendLine($"\t\tMax: {_maxWorkerThreads, 5}");
+                    builder.AppendLine($"\t\tAvg: {agrWorkerThreads, 5:F1}");
+                    builder.AppendLine($"\t\tCur: {_currentWorkerThreads, 5}");
+                    builder.AppendLine("\tIOCP threads:");
+                    var ageIocpThreads = (double)_totalIocpThreads / _threadingSamples;
+                    builder.AppendLine($"\t\tMax: {_maxIocpThreads, 5}");
+                    builder.AppendLine($"\t\tAvg: {ageIocpThreads, 5:F1}");
+                    builder.AppendLine($"\t\tCur: {_currentIocpThreads, 5}");
                 }
             }
 

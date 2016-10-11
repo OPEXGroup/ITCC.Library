@@ -137,7 +137,7 @@ namespace ITCC.HTTP.Testing
                 LogProhibitedQueryParams = new List<string> { "password"},
                 LogProhibitedHeaders = new List<string> { "Authorization" },
                 ServerName = "ITCC Test",
-                StatisticsEnabled = false,
+                StatisticsEnabled = true,
                 SubjectName = "localhost",
                 FilesEnabled = true,
                 FilesNeedAuthorization = false,
