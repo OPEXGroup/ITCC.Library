@@ -1,3 +1,7 @@
+## 2.0.0-rc3 (2016-10-11)
+
+* **Fix**:  Server debug build fixed
+
 ## 2.0.0-rc2 (2016-10-10)
 
 * **New**:  Memory usage and internal error contexts are now displayed in server statistics  
