@@ -1,3 +1,8 @@
+## 2.0.0-rc4 (2016-10-11)
+
+* **New**:  ThreadPool usage added to ServerStatistcs  
+* **Edit**: Better statistics representation  
+
 ## 2.0.0-rc3 (2016-10-11)
 
 * **Fix**:  Server debug build fixed
