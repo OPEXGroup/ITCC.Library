@@ -15,8 +15,7 @@ namespace ITCC.HTTP.Server.Service
     internal class ServerStatistics<TAccount>
         where TAccount : class
     {
-
-
+        #region public 
         public ServerStatistics()
         {
             _memoryTimer = new Timer(MemortSamplingPeriod);
@@ -26,47 +25,6 @@ namespace ITCC.HTTP.Server.Service
             _threadsTimer = new Timer(ThreadsSamplingPeriod);
             _threadsTimer.Elapsed += ThreadsTimerOnElapsed;
             _threadsTimer.Start();
-        }
-
-        private void ThreadsTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
-        {
-            lock (_threadsLock)
-            {
-                _threadingSamples++;
-                int totalWorkerThreads;
-                int totalIocpThreads;
-                int availableWorkerThreads;
-                int availableIocpThreads;
-                Thread.MemoryBarrier();
-                ThreadPool.GetMaxThreads(out totalWorkerThreads, out totalIocpThreads);
-                ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableIocpThreads);
-                Thread.MemoryBarrier();
-
-                _currentWorkerThreads = totalWorkerThreads - availableWorkerThreads;
-                _currentIocpThreads = totalIocpThreads - availableIocpThreads;
-
-                _totalWorkerThreads += _currentWorkerThreads;
-                _totalIocpThreads += _currentIocpThreads;
-
-                _maxWorkerThreads = Math.Max(_maxWorkerThreads, _currentWorkerThreads);
-                _maxIocpThreads = Math.Max(_maxIocpThreads, _currentIocpThreads);
-
-                _threadingSamples++;
-            }
-        }
-
-        private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
-        {
-            lock (_memoryLock)
-            {
-                var currentMemory = GC.GetTotalMemory(false);
-                _minMemory = Math.Min(_minMemory, currentMemory);
-                _maxMemory = Math.Max(_maxMemory, currentMemory);
-                _currentMemory = currentMemory;
-                _totalMemory += currentMemory;
-
-                _memorySamples++;
-            }
         }
 
         public string Serialize()
@@ -146,10 +104,52 @@ namespace ITCC.HTTP.Server.Service
         {
             _authentificationResults.AddOrUpdate(authResult.Status, 1, (key, value) => value + 1);
         }
+        #endregion
 
         #region private
         private static bool HasGoodStatusCode(HttpListenerResponse response) => response.StatusCode / 100 < 4;
         private static bool IsInternalServerError(HttpListenerResponse response) => response.StatusCode >= 500;
+
+        private void ThreadsTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_threadsLock)
+            {
+                _threadingSamples++;
+                int totalWorkerThreads;
+                int totalIocpThreads;
+                int availableWorkerThreads;
+                int availableIocpThreads;
+                Thread.MemoryBarrier();
+                ThreadPool.GetMaxThreads(out totalWorkerThreads, out totalIocpThreads);
+                ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableIocpThreads);
+                Thread.MemoryBarrier();
+
+                _currentWorkerThreads = totalWorkerThreads - availableWorkerThreads;
+                _currentIocpThreads = totalIocpThreads - availableIocpThreads;
+
+                _totalWorkerThreads += _currentWorkerThreads;
+                _totalIocpThreads += _currentIocpThreads;
+
+                _maxWorkerThreads = Math.Max(_maxWorkerThreads, _currentWorkerThreads);
+                _maxIocpThreads = Math.Max(_maxIocpThreads, _currentIocpThreads);
+
+                _threadingSamples++;
+            }
+        }
+
+        private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_memoryLock)
+            {
+                var currentMemory = GC.GetTotalMemory(false);
+                _minMemory = Math.Min(_minMemory, currentMemory);
+                _maxMemory = Math.Max(_maxMemory, currentMemory);
+                _currentMemory = currentMemory;
+                _totalMemory += currentMemory;
+
+                _memorySamples++;
+            }
+        }
 
         private void SerilalizeStatisticsHeader(StringBuilder builder)
         {
