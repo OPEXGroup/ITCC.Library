@@ -212,8 +212,8 @@ namespace ITCC.HTTP.Server.Service
                     }
 
                     builder.AppendLine($"\t{u}");
-                    builder.AppendLine($"\t\tAverage success time (2xx):      {averageSuccessTime,10} ms");
-                    builder.AppendLine($"\t\tAverage fail    time (4xx, 5xx): {averageFailTime,10} ms");
+                    builder.AppendLine($"\t\tAverage success time (2xx):      {averageSuccessTime,10:f} ms");
+                    builder.AppendLine($"\t\tAverage fail    time (4xx, 5xx): {averageFailTime,10:f} ms");
 
                     var methodKeys = methodDict.Keys.ToList();
                     methodKeys.Sort();
@@ -250,12 +250,12 @@ namespace ITCC.HTTP.Server.Service
             if (_requestCount > 0)
             {
                 builder.AppendLine("Request performance statistics:");
-                builder.AppendLine($"\tRequest count:        {_requestCount}");
-                builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount,10} ms");
-                builder.AppendLine($"\tMax     request time: {_maxRequestTime,10} ms");
-                builder.AppendLine($"\tMin     request time: {_minRequestTime,10} ms");
-                builder.AppendLine($"\tTotal   request time: {_totalRequestTime,10} ms");
-                builder.AppendLine($"\tSlowest request:      {_slowestRequest}");
+                builder.AppendLine($"\tRequest count:        {_requestCount,10}");
+                builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount,10:f} ms");
+                builder.AppendLine($"\tMax     request time: {_maxRequestTime,10:f} ms");
+                builder.AppendLine($"\tMin     request time: {_minRequestTime,10:f} ms");
+                builder.AppendLine($"\tTotal   request time: {_totalRequestTime,10:f} ms");
+                builder.AppendLine($"\tSlowest request:      {_slowestRequest,10}");
             }
         }
 
