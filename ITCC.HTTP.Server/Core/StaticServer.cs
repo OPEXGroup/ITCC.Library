@@ -325,7 +325,7 @@ namespace ITCC.HTTP.Server.Core
             try
             {
                 _statisticsController.Statistics?.AddRequest(request);
-                LogDebug($"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context)}");
+                LogDebug($"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context, false, ! _fileRequestController.RequestIsSuitable(request))}");
 
                 var serviceProcessor =
                     ServiceRequestProcessors.FirstOrDefault(sp => sp.RequestIsSuitable(context.Request));
