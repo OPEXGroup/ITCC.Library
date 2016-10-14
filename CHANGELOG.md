@@ -1,3 +1,7 @@
+## 2.0.0-rc5 (2016-10-14)
+
+* **Fix**:  Do not log binary request bodies on server  
+
 ## 2.0.0-rc4 (2016-10-11)
 
 * **New**:  ThreadPool usage added to ServerStatistcs  
