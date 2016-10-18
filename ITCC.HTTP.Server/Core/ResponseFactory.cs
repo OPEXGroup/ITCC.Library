@@ -174,8 +174,6 @@ namespace ITCC.HTTP.Server.Core
                     builder.AppendLine($"{key}: {Constants.RemovedLogString}");
                 builder.AppendLine($"{key}: {response.Headers[key]}");
             }
-            if (response.ContentLength64 > 0 && bodyString == null)
-                builder.AppendLine($"Content-Length: {response.ContentLength64}");
             if (response.OutputStream == null)
                 return builder.ToString();
 

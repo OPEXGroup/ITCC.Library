@@ -161,6 +161,7 @@ namespace ITCC.HTTP.Server.Core
             ServicePointManager.DefaultConnectionLimit = 1000;
             _listener = new HttpListener();
             _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
+            _listener.IgnoreWriteExceptions = true;
             _listener.Start();
             _listenerThread = new Thread(() =>
             {

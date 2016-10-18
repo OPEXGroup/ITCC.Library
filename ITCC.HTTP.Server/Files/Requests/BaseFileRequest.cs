@@ -15,6 +15,7 @@ namespace ITCC.HTTP.Server.Files.Requests
     internal abstract class BaseFileRequest
     {
         #region public
+
         public abstract FileType FileType { get; }
 
         public abstract string FileName { get; protected set; }
@@ -27,6 +28,7 @@ namespace ITCC.HTTP.Server.Files.Requests
         {
             await BuildRangeResponse(context, FileName);
         }
+
         #endregion
 
         #region protected
@@ -42,13 +44,22 @@ namespace ITCC.HTTP.Server.Files.Requests
             }
             if (Range == null)
             {
-                ResponseFactory.BuildResponse(context, HttpStatusCode.OK, null);
+
+                response.StatusCode = (int) HttpStatusCode.OK;
                 response.ContentType = DetermineContentType(fileName);
                 response.ContentLength64 = new FileInfo(fileName).Length;
+                ResponseFactory.SerializeResponse(response, null);
                 using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
                     FileShare.ReadWrite))
                 {
-                    await fileStream.CopyToAsync(response.OutputStream);
+                    try
+                    {
+                        await fileStream.CopyToAsync(response.OutputStream);
+                    }
+                    catch (HttpListenerException ex)
+                    {
+                        LogMessage(LogLevel.Debug, $"Error: {ex.Message}");
+                    }
                 }
                 return;
             }
@@ -62,11 +73,9 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < -rangeEnd)
                     {
-                         ResponseFactory.BuildResponse(context, HttpStatusCode.RequestedRangeNotSatisfiable, null,
-                            new Dictionary<string, string>
-                            {
-                                {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
-                            });
+                        response.StatusCode = (int)HttpStatusCode.RequestedRangeNotSatisfiable;
+                        response.AddHeader("Content-Range", $"bytes 0-{fileInfo.Length - 1}");
+                        ResponseFactory.SerializeResponse(response, null);
                         return;
                     }
                     startPosition = fileInfo.Length + rangeEnd;
@@ -76,11 +85,9 @@ namespace ITCC.HTTP.Server.Files.Requests
                 {
                     if (fileInfo.Length < rangeEnd)
                     {
-                        ResponseFactory.BuildResponse(context, HttpStatusCode.RequestedRangeNotSatisfiable, null,
-                            new Dictionary<string, string>
-                            {
-                                {"Content-Range", $"bytes 0-{fileInfo.Length - 1}"}
-                            });
+                        response.StatusCode = (int)HttpStatusCode.RequestedRangeNotSatisfiable;
+                        response.AddHeader("Content-Range", $"bytes 0-{fileInfo.Length - 1}");
+                        ResponseFactory.SerializeResponse(response, null);
                         return;
                     }
                     endPosition = rangeEnd;
@@ -98,14 +105,23 @@ namespace ITCC.HTTP.Server.Files.Requests
                 using (var reader = new BinaryReader(fileStream))
                 {
                     reader.BaseStream.Seek(startPosition, SeekOrigin.Begin);
-                    buffer = reader.ReadBytes((int)length);
+                    buffer = reader.ReadBytes((int) length);
                 }
             }
-            ResponseFactory.BuildResponse(context, HttpStatusCode.PartialContent, null);
+
+            response.StatusCode = (int) HttpStatusCode.PartialContent;
             response.AddHeader("Content-Range", $"bytes {startPosition}-{endPosition}");
             response.ContentType = DetermineContentType(fileName);
             response.ContentLength64 = buffer.Length;
-            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            ResponseFactory.SerializeResponse(response, null);
+            try
+            {
+                await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            }
+            catch (HttpListenerException ex)
+            {
+                LogMessage(LogLevel.Debug, $"Error: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -127,6 +143,8 @@ namespace ITCC.HTTP.Server.Files.Requests
             if (! rangeValue.StartsWith("bytes="))
                 return false;
             rangeValue = rangeValue.Replace("bytes=", "");
+            if (rangeValue == "0-")
+                return true;
 
             if (rangeValue.EndsWith("-"))
             {

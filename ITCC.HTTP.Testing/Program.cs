@@ -1,4 +1,4 @@
-﻿#define STRESS_TEST
+﻿// #define STRESS_TEST
 
 using System;
 using System.Collections.Generic;
@@ -43,13 +43,13 @@ namespace ITCC.HTTP.Testing
 
             StartServer();
 
-            StaticClient.ServerAddress = "https://localhost:8888";
+            StaticClient.ServerAddress = "http://localhost:8888";
             StaticClient.AllowUntrustedServerCertificates();
             StaticClient.LogBodyReplacePatterns.Add(new Tuple<string, string>("(\"Token\":\")([\\w\\d]+)(\")", $"$1REMOVED_FROM_LOG$3"));
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
 #if !STRESS_TEST
-            var result = await StaticClient.GetRawAsync("token",
+            var result = await StaticClient.GetFileAsync("files/Pictures/All-1.mp4",
                 new Dictionary<string, string>
                 {
                     {"login", "user"},
@@ -59,7 +59,7 @@ namespace ITCC.HTTP.Testing
                 {
                     {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd"},
                     {"Accept-Encoding", "gzip"}
-                });
+                }, "1.mp4");
 #else
             const int requestsPerStep = 10000;
             const int stepCount = 10;
@@ -127,7 +127,7 @@ namespace ITCC.HTTP.Testing
                 //    Serializer = JsonConvert.SerializeObject
                 //},
                 Port = 8888,
-                Protocol = Protocol.Https,
+                Protocol = Protocol.Http,
                 AllowGeneratedCertificates = true,
                 CertificateBindType = BindType.SubjectName,
                 LogBodyReplacePatterns = new List<Tuple<string, string>>
