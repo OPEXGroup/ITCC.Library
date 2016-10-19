@@ -1,3 +1,8 @@
+## 2.0.0-rc6 (2016-10-19)
+
+* **Fix**:  `Range:` headers parsing fix  
+* **Edit**: Use larger copy buffers for large files (gives significant performance improvement)  
+
 ## 2.0.0-rc5 (2016-10-14)
 
 * **Fix**:  Do not log binary request bodies on server  
