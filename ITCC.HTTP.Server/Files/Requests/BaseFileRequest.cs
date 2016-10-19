@@ -14,14 +14,18 @@ namespace ITCC.HTTP.Server.Files.Requests
 {
     internal abstract class BaseFileRequest
     {
+        #region const
+
+        public const int LargeFileSizeThreshold = 8*1024*1024;
+        public const int SmallFileBufferSize = 128*1024;
+        public const int LargeFileBufferSize = 2*1024*1024;
+        #endregion
+
         #region public
 
         public abstract FileType FileType { get; }
-
         public abstract string FileName { get; protected set; }
-
         public abstract RequestRange Range { get; protected set; }
-
         public abstract bool BuildRequest(string fileName, HttpListenerRequest request);
 
         public virtual async Task BuildResponse(HttpListenerContext context)
@@ -47,14 +51,18 @@ namespace ITCC.HTTP.Server.Files.Requests
 
                 response.StatusCode = (int) HttpStatusCode.OK;
                 response.ContentType = DetermineContentType(fileName);
-                response.ContentLength64 = new FileInfo(fileName).Length;
+                var fileLength = new FileInfo(fileName).Length;
+                response.ContentLength64 = fileLength;
                 ResponseFactory.SerializeResponse(response, null);
                 using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read,
                     FileShare.ReadWrite))
                 {
                     try
                     {
-                        await fileStream.CopyToAsync(response.OutputStream);
+                        var bufferSize = fileLength >= LargeFileSizeThreshold
+                            ? LargeFileBufferSize
+                            : SmallFileBufferSize;
+                        await fileStream.CopyToAsync(response.OutputStream, bufferSize);
                     }
                     catch (HttpListenerException ex)
                     {
@@ -65,7 +73,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             }
             var fileInfo = new FileInfo(fileName);
             long startPosition = 0;
-            long endPosition = fileInfo.Length - 1;
+            var endPosition = fileInfo.Length - 1;
             if (Range.RangeEnd != null)
             {
                 var rangeEnd = Range.RangeEnd.Value;
@@ -245,11 +253,8 @@ namespace ITCC.HTTP.Server.Files.Requests
         #region log
 
         protected void LogTrace(string message) => Logger.LogTrace($"{FileType.ToString().ToUpper()} RQST", message);
-
         protected void LogDebug(string message) => Logger.LogDebug($"{FileType.ToString().ToUpper()} RQST", message);
-
         protected void LogMessage(LogLevel level, string message) => Logger.LogEntry($"{FileType.ToString().ToUpper()} RQST", level, message);
-
         protected void LogException(LogLevel level, Exception exception) => Logger.LogException($"{FileType.ToString().ToUpper()} RQST", level, exception);
 
         #endregion
