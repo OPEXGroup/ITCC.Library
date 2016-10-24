@@ -10,6 +10,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using ITCC.HTTP.Client;
 using ITCC.HTTP.Client.Core;
 using ITCC.HTTP.Client.Enums;
@@ -24,7 +26,7 @@ using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Testing
 {
-    internal class TokenStore
+    public class TokenStore
     {
         public string Token { get; set; }
     }
@@ -49,7 +51,7 @@ namespace ITCC.HTTP.Testing
             StaticClient.LogProhibitedHeaders.Add("Authorization");
             StaticClient.AllowGzipEncoding = true;
 #if !STRESS_TEST
-            var result = await StaticClient.GetFileAsync("files/Pictures/All-1.mp4",
+            var result = await StaticClient.GetRawAsync("token",
                 new Dictionary<string, string>
                 {
                     {"login", "user"},
@@ -59,7 +61,7 @@ namespace ITCC.HTTP.Testing
                 {
                     {"Authorization", "lkasjdlkaskjdlkajdlkasjdlkasjdlkajsdlkjaskldjaslkdjaslkkd"},
                     {"Accept-Encoding", "gzip"}
-                }, "1.mp4");
+                });
 #else
             const int requestsPerStep = 10000;
             const int stepCount = 10;
@@ -157,9 +159,21 @@ namespace ITCC.HTTP.Testing
                 BodyEncoder =  new BodyEncoder
                 {
                     AutoGzipCompression = true,
-                    ContentType = "application/json",
+                    ContentType = "application/xml",
                     Encoding = Encoding.UTF8,
-                    Serializer = o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
+                    Serializer = o =>
+                    {
+                        using (var stringWriter = new StringWriter())
+                        {
+                            using (var xmlWriter = XmlWriter.Create(stringWriter))
+                            {
+                                var xmlSerializer = new XmlSerializer(o.GetType());
+                                xmlSerializer.Serialize(xmlWriter, o);
+                            }
+                            return stringWriter.ToString();
+                        }
+                    }
+                    //o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
                 }
             });
 
