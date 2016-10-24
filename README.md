@@ -22,19 +22,52 @@
 
 * `ITCC.Geocoding.Geocoder.cs`
 
-### ITCC.HTTP
+### ITCC.HTTP.Client
 
-Работа с HTTP (клиент с сервер). Настройка TLS на сервере описана [здесь](http://stackoverflow.com/questions/11403333/httplistener-with-https-support). Интересные классы:
+Реализация HTTP-клиентов. Интересные классы:
 
-* `ITCC.HTTP.Server.StaticServer<TAccount>`  
-* `ITCC.HTTP.Server.HttpServerConfiguration`  
+* `ITCC.HTTP.Client.RegularClient`  
 * `ITCC.HTTP.Client.StaticClient`  
+
+### ITCC.HTTP.Common
+
+Маленькая общая часть реализации HTTP
+
+### ITCC.HTTP.Server
+
+HTTP-сервер для быстрого развертывания приложений. 
+Поддерживает дополнительную функциональность (работа со статичными файлами, предобработка контента).
+Интересные классы:
+
+* `ITCC.HTTP.Server.Core.StaticServer<TAccount>`  
+* `ITCC.HTTP.Server.Core.HttpServerConfiguration` 
+
+### ITCC.HTTP.SslConfigUtil.Console
+
+Консольное приложение для генерации и установки TLS-сертификатов  
+
+### ITCC.HTTP.SslConfigUtil.Core
+
+Библиотека для генерации и установки TLS-сертификатов. 
+Интегрирована в `ITCC.HTTP.Server`, но может использоваться и самостоятельно. 
+
+### ITCC.HTTP.SslConfigUtil.GUI
+
+WPF-приложение для генерации и установки TLS-сертификатов  
 
 ### ITCC.Logging.Core
 
 Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`. **Собирается везде.** Интересные классы:
 
 * `ITCC.Logging.Core.Logger`
+
+### ITCC.Logging.Reader.Core
+
+Библиотека для парсинга логов, генерируемых `ITCC.Logging.Core.Logger`  
+
+### ITCC.Logging.Reader.WPF
+
+Настольное приложения для отображения логов, генерируемых `ITCC.Logging.Core.Logger`  
 
 ### ITCC.Logging.Windows
 
@@ -45,13 +78,15 @@
 * `ITCC.Logging.Loggers.SystemEventLogger`  
 * `ITCC.Logging.Loggers.EmailLogger`  
 
-### ITCC.UI
+### ITCC.WPF
 
 Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов. Интересные классы:  
 
-* `ITCC.UI.Windows.LogWindow`  
-* `ITCC.UI.Utils.DataGridHelper`  
-* `ITCC.UI.Utils.ScrollViewerExtensions`  
+* `ITCC.WPF.Windows.LogWindow`  
+* `ITCC.WPF.Utils.DataGridHelper`  
+* `ITCC.WPF.Utils.ScrollViewerExtensions`  
+* `ITCC.WPF.Utils.ObservableRingBuffe`  
+
 
 ## Подключение
 
@@ -84,8 +119,8 @@ git submodule update
 
 #### Prebuild
 
-При сборке `ITCC.HTTP` и `ITCC.Geocoding` выполняются prebuild-скрипты для установки nuget-пакетов в каталоги проектов (Prebuild.ps1).
-Для того, чтобы они могливыполниться, нужно в PowerShell выполнить
+При сборке `ITCC.HTTP.Client`, `ITCC.HTTP.SslConfigUtils` и `ITCC.Geocoding` выполняются prebuild-скрипты для установки nuget-пакетов в каталоги проектов (Prebuild.ps1).
+Для того, чтобы они могли выполниться, нужно в PowerShell выполнить
 
 ```
 Set-ExecutionPolicy Unrestricted
