@@ -72,7 +72,7 @@ namespace ITCC.HTTP.Server.Utils
             var queryString = string.Join("&", request.QueryString.AllKeys.Select(k => $"{k}={QueryParamValueForLog(request, k)}"));
             var separator = string.IsNullOrEmpty(queryString) ? string.Empty : "?";
             var url = absolutePath ? request.Url.ToString() : request.Url.LocalPath;
-            builder.AppendLine($"{request.HttpMethod} {url} HTTP/{request.ProtocolVersion}{separator}{queryString}");
+            builder.AppendLine($"{request.HttpMethod} {url}{separator}{queryString} HTTP/{request.ProtocolVersion}");
 
             foreach (var key in request.Headers.AllKeys)
             {
