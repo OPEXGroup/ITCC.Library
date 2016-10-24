@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace ITCC.UI.Testing
+namespace ITCC.WPF.Testing
 {
     /// <summary>
     /// Interaction logic for App.xaml

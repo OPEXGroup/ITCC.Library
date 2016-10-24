@@ -2,7 +2,7 @@
 using System.Linq;
 using ITCC.Logging.Core;
 
-namespace ITCC.UI.Utils
+namespace ITCC.WPF.Utils
 {
     internal static class EnumHelper
     {

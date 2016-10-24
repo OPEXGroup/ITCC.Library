@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ITCC.Logging.Core;
-using ITCC.UI.Loggers;
-using ITCC.UI.Utils;
-using ITCC.UI.ViewModels;
+using ITCC.WPF.Loggers;
+using ITCC.WPF.Utils;
+using ITCC.WPF.ViewModels;
 
-namespace ITCC.UI.Windows
+namespace ITCC.WPF.Windows
 {
     /// <summary>
     ///     Interaction logic for LogWindow.xaml

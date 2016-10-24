@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ITCC.UI.Attributes
+namespace ITCC.WPF.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class HeaderTooltipAttribute : Attribute

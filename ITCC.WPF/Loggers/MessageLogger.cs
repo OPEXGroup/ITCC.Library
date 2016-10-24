@@ -2,9 +2,9 @@
 using System.Windows;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.UI.Utils;
+using ITCC.WPF.Utils;
 
-namespace ITCC.UI.Loggers
+namespace ITCC.WPF.Loggers
 {
     public class MessageLogger : ILogReceiver
     {

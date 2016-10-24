@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.UI.Utils;
-using ITCC.UI.ViewModels;
-using static ITCC.UI.Common.Delegates;
+using ITCC.WPF.Common;
+using ITCC.WPF.Utils;
+using ITCC.WPF.ViewModels;
 
-namespace ITCC.UI.Loggers
+namespace ITCC.WPF.Loggers
 {
     public class ObservableLogger : IFlushableLogReceiver
     {
@@ -43,7 +43,7 @@ namespace ITCC.UI.Loggers
         #endregion
 
         #region public
-        public ObservableLogger(int capacity, UiThreadRunner uiThreadRunner)
+        public ObservableLogger(int capacity, Delegates.UiThreadRunner uiThreadRunner)
         {
             Level = Logger.Level;
             LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
@@ -51,7 +51,7 @@ namespace ITCC.UI.Loggers
             InitTimer();
         }
 
-        public ObservableLogger(LogLevel level, int capacity, UiThreadRunner uiThreadRunner)
+        public ObservableLogger(LogLevel level, int capacity, Delegates.UiThreadRunner uiThreadRunner)
         {
             Level = level;
             LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
@@ -73,7 +73,7 @@ namespace ITCC.UI.Loggers
         }
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _eventQueue = new ConcurrentQueue<LogEntryEventArgs>();
-        private readonly UiThreadRunner _uiThreadRunner;
+        private readonly Delegates.UiThreadRunner _uiThreadRunner;
         private Timer _flushTimer;
 
         #endregion

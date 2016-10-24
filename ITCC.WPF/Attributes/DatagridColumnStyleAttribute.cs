@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 
-namespace ITCC.UI.Attributes
+namespace ITCC.WPF.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class DatagridColumnStyleAttribute : Attribute

@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
 using ITCC.Logging.Core;
-using ITCC.UI.Attributes;
-using ITCC.UI.Utils;
+using ITCC.WPF.Attributes;
+using ITCC.WPF.Utils;
 
-namespace ITCC.UI.ViewModels
+namespace ITCC.WPF.ViewModels
 {
     public class LogEntryEventArgsViewModel
     {

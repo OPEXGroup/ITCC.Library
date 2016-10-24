@@ -1,4 +1,4 @@
-﻿namespace ITCC.UI.Utils
+﻿namespace ITCC.WPF.Utils
 {
     public class ValidationResult
     {

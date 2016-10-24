@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace ITCC.UI.Utils
+namespace ITCC.WPF.Utils
 {
     internal static class PropertyHelper
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ITCC.UI.Common
+namespace ITCC.WPF.Common
 {
     public static class Delegates
     {

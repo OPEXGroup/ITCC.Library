@@ -2,9 +2,9 @@
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using ITCC.Logging.Core;
-using ITCC.UI.Attributes;
+using ITCC.WPF.Attributes;
 
-namespace ITCC.UI.Utils
+namespace ITCC.WPF.Utils
 {
     public class DataGridHelper : FrameworkElement
     {

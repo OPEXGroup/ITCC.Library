@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace ITCC.UI.Utils
+namespace ITCC.WPF.Utils
 {
     public class ObservableRingBuffer<T> : INotifyCollectionChanged, IEnumerable<T>
         where T: class

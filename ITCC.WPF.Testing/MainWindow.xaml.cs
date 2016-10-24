@@ -4,10 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ITCC.Logging.Core;
-using ITCC.UI.Loggers;
-using ITCC.UI.Windows;
+using ITCC.WPF.Loggers;
+using ITCC.WPF.Windows;
 
-namespace ITCC.UI.Testing
+namespace ITCC.WPF.Testing
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
