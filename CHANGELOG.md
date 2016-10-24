@@ -1,3 +1,7 @@
+## 2.0.0-rc7 (2016-10-24)
+
+* **Fix**:  `SerializeHttpRequest` fixed  
+
 ## 2.0.0-rc6 (2016-10-19)
 
 * **Fix**:  `Range:` headers parsing fix  
