@@ -101,7 +101,7 @@ Delegates.Authentificator Authentificator { get; set; }                         
 Delegates.Authorizer<TAccount> Authorizer { get; set; }                           // Метод авторизации
 Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
-BodyEncoder BodyEncoder { get; set; }                                             // Способ кодирования ответов                            
+List<BodyEncoder> BodyEncoders { get; set; }                                      // Допустимые способы кодирования ответов
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
 int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого значения. Отрицательное значение - нет ограничения
