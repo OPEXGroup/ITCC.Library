@@ -343,9 +343,10 @@ namespace ITCC.HTTP.Server.Files
                 return;
             }
             var fileContent = context.Request.InputStream;
-            if (section.MaxFileSize > 0 && fileContent.Length > section.MaxFileSize)
+            var contentLength = context.Request.ContentLength64;
+            if (section.MaxFileSize > 0 && contentLength > section.MaxFileSize)
             {
-                LogDebug($"Trying to create file of size {fileContent.Length} in section {section.Name} with max size of {section.MaxFileSize}");
+                LogDebug($"Trying to create file of size {contentLength} in section {section.Name} with max size of {section.MaxFileSize}");
                 ResponseFactory.BuildResponse(context, HttpStatusCode.RequestEntityTooLarge, null);
                 return;
             }
