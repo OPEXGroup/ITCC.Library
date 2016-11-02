@@ -48,6 +48,7 @@ namespace ITCC.HTTP.Client.Core
             {HttpStatusCode.NotFound, ServerResponseStatus.ClientError },
             {HttpStatusCode.Conflict, ServerResponseStatus.ClientError },
             {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError },
+            {HttpStatusCode.NotAcceptable, ServerResponseStatus.ClientError },
             {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
             {HttpStatusCode.RequestedRangeNotSatisfiable, ServerResponseStatus.ClientError },
             {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
