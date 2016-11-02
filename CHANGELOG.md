@@ -1,3 +1,9 @@
+## 2.0.0 (2016-11-02)
+
+* **New**:  `StaticServer` now supports several body encoders  
+* **Edit**: **BREAKING CHANGE**: `ITCC.UI` namespace renamed to `ITCC.WPF`  
+* **Fix**:  POST requests handler fixed in `FileRequestController`  
+
 ## 2.0.0-rc7 (2016-10-24)
 
 * **Fix**:  `SerializeHttpRequest` fixed  
