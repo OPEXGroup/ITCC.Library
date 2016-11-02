@@ -156,22 +156,33 @@ namespace ITCC.HTTP.Testing
                 FilesLocation = @"C:\Users\b0-0b",
                 FilesPreprocessingEnabled = false,
                 FilesPreprocessorThreads = -1,
-                BodyEncoder =  new BodyEncoder
+                BodyEncoders = new List<BodyEncoder>
                 {
-                    AutoGzipCompression = true,
-                    ContentType = "application/xml",
-                    Encoding = Encoding.UTF8,
-                    Serializer = o =>
+                    new BodyEncoder
                     {
-                        using (var stringWriter = new StringWriter())
+                        AutoGzipCompression = true,
+                        ContentType = "application/xml",
+                        Encoding = Encoding.UTF8,
+                        Serializer = o =>
                         {
-                            using (var xmlWriter = XmlWriter.Create(stringWriter))
+                            using (var stringWriter = new StringWriter())
                             {
-                                var xmlSerializer = new XmlSerializer(o.GetType());
-                                xmlSerializer.Serialize(xmlWriter, o);
+                                using (var xmlWriter = XmlWriter.Create(stringWriter))
+                                {
+                                    var xmlSerializer = new XmlSerializer(o.GetType());
+                                    xmlSerializer.Serialize(xmlWriter, o);
+                                }
+                                return stringWriter.ToString();
                             }
-                            return stringWriter.ToString();
-                        }
+                        },
+                        IsDefault = false
+                    },
+                    new BodyEncoder
+                    {
+                        AutoGzipCompression = true,
+                        ContentType = "application/json",
+                        Encoding = Encoding.UTF8,
+                        Serializer = o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
                     }
                     //o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
                 }

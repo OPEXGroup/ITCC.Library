@@ -122,12 +122,12 @@ namespace ITCC.HTTP.Server.Core
             if (configuration.LogProhibitedHeaders != null)
                 ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
 
-            ResponseFactory.SetBodyEncoder(configuration.BodyEncoder);
+            ResponseFactory.SetBodyEncoders(configuration.BodyEncoders);
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
             CommonHelper.SetSerializationLimitations(configuration.LogProhibitedQueryParams,
                 configuration.LogProhibitedHeaders,
-                configuration.BodyEncoder.Encoding);
+                configuration.BodyEncoders.First(be => be.IsDefault).Encoding);
 
             if (configuration.ServerName != null)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Common;
 using ITCC.HTTP.Server.Files;
@@ -94,7 +95,7 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Used to process response bodies. Defaults to application/json; charset=utf-8
         /// </summary>
-        public BodyEncoder BodyEncoder { get; set; } = new BodyEncoder();
+        public List<BodyEncoder> BodyEncoders { get; set; } = new List<BodyEncoder> {new BodyEncoder()};
 
         /// <summary>
         ///     If true, server will write response bodies into trace logs
@@ -154,9 +155,9 @@ namespace ITCC.HTTP.Server.Core
                 return false;
             }
 
-            if (BodyEncoder == null)
+            if (BodyEncoders == null || BodyEncoders.Count == 0 || BodyEncoders.Count(be => be.IsDefault) > 1)
             {
-                LogMessage(LogLevel.Warning, "null BodyEncoder passed to Start()");
+                LogMessage(LogLevel.Warning, "Bad BodyEncoders passed to Start()");
                 return false;
             }
 

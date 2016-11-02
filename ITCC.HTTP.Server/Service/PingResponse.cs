@@ -3,12 +3,18 @@ using System.Text;
 
 namespace ITCC.HTTP.Server.Service
 {
-    internal class PingResponse
+    public class PingResponse
     {
         public PingResponse(string input)
         {
             Time = DateTime.Now;
             Request = input;
+        }
+
+        public PingResponse()
+        {
+            Time = DateTime.Now;
+            Request = string.Empty;
         }
 
         public DateTime Time { get; set; }

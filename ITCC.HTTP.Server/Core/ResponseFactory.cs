@@ -26,9 +26,10 @@ namespace ITCC.HTTP.Server.Core
             return true;
         }
 
-        public static void SetBodyEncoder(BodyEncoder encoder)
+        public static void SetBodyEncoders(List<BodyEncoder> encoders)
         {
-            _encoder = encoder;
+            _encoders = encoders;
+            _defaultEncoder = encoders.First(e => e.IsDefault);
         }
 
         public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult)
@@ -75,6 +76,15 @@ namespace ITCC.HTTP.Server.Core
             httpResponse.StatusCode = (int) code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
 
+            var encoder = SelectEncoder(context.Request);
+            if (body != null && encoder == null)
+            {
+                httpResponse.StatusCode = (int) HttpStatusCode.NotAcceptable;
+                httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
+                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                return;
+            }
+
             if (_commonHeaders != null)
             {
                 foreach (var header in _commonHeaders)
@@ -97,27 +107,26 @@ namespace ITCC.HTTP.Server.Core
                 return;
             }
 
-
             string bodyString;
             if (!alreadyEncoded)
-                bodyString = _encoder.Serializer == null ? body.ToString() : _encoder.Serializer(body);
+                bodyString = encoder.Serializer == null ? body.ToString() : encoder.Serializer(body);
             else
             {
                 bodyString = body as string;
             }
 
-            var gzipResponse = RequestEnablesGzip(context.Request);
+            var gzipResponse = RequestEnablesGzip(encoder, context.Request);
             if (gzipResponse)
             {
                 httpResponse.SendChunked = false;
-                httpResponse.ContentType = $"{_encoder.ContentType}; charset={_encoder.Encoding.WebName}";
+                httpResponse.ContentType = $"{encoder.ContentType}; charset={encoder.Encoding.WebName}";
                 httpResponse.AddHeader("Content-Encoding", "gzip");
 
                 var memoryStream = new MemoryStream();
                 try
                 {
                     using (
-                        var uncompressedStream = new MemoryStream(_encoder.Encoding.GetBytes(bodyString ?? string.Empty))
+                        var uncompressedStream = new MemoryStream(encoder.Encoding.GetBytes(bodyString ?? string.Empty))
                     )
                     {
                         using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
@@ -141,10 +150,10 @@ namespace ITCC.HTTP.Server.Core
             }
             else
             {
-                var bodyBuffer = _encoder.Encoding.GetBytes(bodyString ?? string.Empty);
+                var bodyBuffer = encoder.Encoding.GetBytes(bodyString ?? string.Empty);
                 httpResponse.SendChunked = false;
                 httpResponse.ContentLength64 = bodyBuffer.Length;
-                httpResponse.ContentType = $"{_encoder.ContentType}; charset={_encoder.Encoding.WebName}";
+                httpResponse.ContentType = $"{encoder.ContentType}; charset={encoder.Encoding.WebName}";
                 if (!isHeadRequest)
                 {
                     try
@@ -217,9 +226,19 @@ namespace ITCC.HTTP.Server.Core
         #endregion
 
         #region private
-        private static bool RequestEnablesGzip(HttpListenerRequest request)
+
+        private static BodyEncoder SelectEncoder(HttpListenerRequest request)
         {
-            if (!_encoder.AutoGzipCompression)
+            var acceptTypes = request.AcceptTypes;
+            if (acceptTypes == null || acceptTypes.Contains("*/*"))
+                return _defaultEncoder;
+
+            return acceptTypes.Select(acceptType => _encoders.FirstOrDefault(e => e.ContentType == acceptType)).FirstOrDefault(encoder => encoder != null);
+        }
+
+        private static bool RequestEnablesGzip(BodyEncoder encoder, HttpListenerRequest request)
+        {
+            if (!encoder.AutoGzipCompression)
                 return false;
             if (request == null)
                 return false;
@@ -255,6 +274,7 @@ namespace ITCC.HTTP.Server.Core
             {HttpStatusCode.Unauthorized, "Unauthorized"},
             {HttpStatusCode.Forbidden, "Forbidden"},
             {HttpStatusCode.NotFound, "Not found"},
+            {HttpStatusCode.NotAcceptable, "Not Acceptable" },
             {HttpStatusCode.Conflict, "Conflict"},
             {HttpStatusCode.RequestEntityTooLarge, "Request Entity Too Large" },
             {HttpStatusCode.RequestedRangeNotSatisfiable, "Requested Range Not Satisfiable" },
@@ -266,7 +286,9 @@ namespace ITCC.HTTP.Server.Core
         };
 
         private static Dictionary<string, string> _commonHeaders;
-        private static BodyEncoder _encoder;
+        private static List<BodyEncoder> _encoders;
+        private static BodyEncoder _defaultEncoder;
+
         #endregion
 
     }

@@ -24,5 +24,10 @@ namespace ITCC.HTTP.Server.Core
         ///     If true, gzip will be used every time client sends Accept-Encoding: gzip
         /// </summary>
         public bool AutoGzipCompression { get; set; } = true;
+
+        /// <summary>
+        ///     If true, this encoder will be used for request with Accept header missng
+        /// </summary>
+        public bool IsDefault { get; set; } = true;
     }
 }
