@@ -84,6 +84,11 @@ namespace ITCC.HTTP.Server.Core
                 Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
+            httpResponse.SendChunked = false;
+            var contentType = alreadyEncoded
+                ? "text/plain"
+                : encoder.ContentType;
+            httpResponse.ContentType = $"{contentType}; charset={encoder.Encoding.WebName}";
 
             if (_commonHeaders != null)
             {
@@ -118,8 +123,6 @@ namespace ITCC.HTTP.Server.Core
             var gzipResponse = RequestEnablesGzip(encoder, context.Request);
             if (gzipResponse)
             {
-                httpResponse.SendChunked = false;
-                httpResponse.ContentType = $"{encoder.ContentType}; charset={encoder.Encoding.WebName}";
                 httpResponse.AddHeader("Content-Encoding", "gzip");
 
                 var memoryStream = new MemoryStream();
@@ -235,6 +238,7 @@ namespace ITCC.HTTP.Server.Core
 
             var parsedTypes = acceptTypes
                 .Select(AcceptType.Parse)
+                .Where(pt => pt != null)
                 .OrderByDescending(at => at.Qvalue).ToList();
 
             return parsedTypes.Select(acceptType => _encoders.FirstOrDefault(e => acceptType.Matches(e.ContentType))).FirstOrDefault(encoder => encoder != null);
