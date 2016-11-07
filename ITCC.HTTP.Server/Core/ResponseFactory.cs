@@ -230,10 +230,14 @@ namespace ITCC.HTTP.Server.Core
         private static BodyEncoder SelectEncoder(HttpListenerRequest request)
         {
             var acceptTypes = request.AcceptTypes;
-            if (acceptTypes == null || acceptTypes.Contains("*/*"))
+            if (acceptTypes == null)
                 return _defaultEncoder;
 
-            return acceptTypes.Select(acceptType => _encoders.FirstOrDefault(e => e.ContentType == acceptType)).FirstOrDefault(encoder => encoder != null);
+            var parsedTypes = acceptTypes
+                .Select(AcceptType.Parse)
+                .OrderByDescending(at => at.Qvalue).ToList();
+
+            return parsedTypes.Select(acceptType => _encoders.FirstOrDefault(e => acceptType.Matches(e.ContentType))).FirstOrDefault(encoder => encoder != null);
         }
 
         private static bool RequestEnablesGzip(BodyEncoder encoder, HttpListenerRequest request)

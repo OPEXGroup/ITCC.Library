@@ -77,6 +77,7 @@
     <Compile Include="Auth\AuthentificationResult.cs" />
     <Compile Include="Auth\AuthorizationResult.cs" />
     <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Core\AcceptType.cs" />
     <Compile Include="Core\BodyEncoder.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
     <Compile Include="Enums\FileOperationStatus.cs" />
