@@ -121,13 +121,6 @@ namespace ITCC.HTTP.Testing
         {
             StaticServer<object>.Start(new HttpServerConfiguration<object>
             {
-                //BodyEncoder = new BodyEncoder
-                //{
-                //    AutoGzipCompression = false,
-                //    ContentType = "application/json",
-                //    Encoding = Encoding.UTF8,
-                //    Serializer = JsonConvert.SerializeObject
-                //},
                 Port = 8888,
                 Protocol = Protocol.Http,
                 AllowGeneratedCertificates = true,
@@ -184,7 +177,6 @@ namespace ITCC.HTTP.Testing
                         Encoding = Encoding.UTF8,
                         Serializer = o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
                     }
-                    //o => JsonConvert.SerializeObject(o, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
                 }
             });
 
