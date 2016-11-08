@@ -1,3 +1,9 @@
+## 2.0.1 (2016-11-08)
+
+* **New**:  `ITCC.HTTP.Server.Testing` util added  
+* **Edit**: `406 Not Acceptable` is now processed in `StaticClient`  
+* **Fix**:  Encoder selection and response `Content-Type` fixed (correct `Accept` parsing)  
+
 ## 2.0.0 (2016-11-02)
 
 * **New**:  `StaticServer` now supports several body encoders  
