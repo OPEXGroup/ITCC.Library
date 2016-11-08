@@ -9,8 +9,6 @@ namespace ITCC.HTTP.Server.Testing.Enums
 
         Console = 1,
 
-        File = 2,
-
-        SystemEvent = 4
+        File = 2
     }
 }
