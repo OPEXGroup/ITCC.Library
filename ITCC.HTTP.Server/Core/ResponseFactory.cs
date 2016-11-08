@@ -156,7 +156,6 @@ namespace ITCC.HTTP.Server.Core
                 var bodyBuffer = encoder.Encoding.GetBytes(bodyString ?? string.Empty);
                 httpResponse.SendChunked = false;
                 httpResponse.ContentLength64 = bodyBuffer.Length;
-                httpResponse.ContentType = $"{encoder.ContentType}; charset={encoder.Encoding.WebName}";
                 if (!isHeadRequest)
                 {
                     try
