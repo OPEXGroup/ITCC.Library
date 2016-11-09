@@ -30,21 +30,28 @@ namespace ITCC.HTTP.SslConfigUtil.Core
     {
         internal static IEnumerable<CertificateView> GetCertificates()
         {
-            var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-            personalCertStote.Open(OpenFlags.ReadOnly);
-            return personalCertStote.Certificates.Cast<X509Certificate2>().Where(certificate => certificate.Verify() && certificate.IsValid()).Select(CertificateView.FromCert).ToList();
+            using (var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+            {
+                personalCertStote.Open(OpenFlags.ReadOnly);
+                return personalCertStote.Certificates
+                    .Cast<X509Certificate2>()
+                    .Where(certificate => certificate.Verify() && certificate.IsValid())
+                    .Select(CertificateView.FromCert)
+                    .ToList();
+            }
         }
         internal static FindCertificateStatus TryFindBySubjectName(string subjectName, out X509Certificate2 certificate)
         {
             try
             {
-                var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-                personalCertStote.Open(OpenFlags.ReadWrite);
-                var result = personalCertStote.Certificates.Find(X509FindType.FindBySubjectName, subjectName, true);
-                var succeed = result.Count > 0;
-                certificate = succeed ? result[0] : null;
-                return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
-
+                using (var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+                {
+                    personalCertStote.Open(OpenFlags.ReadWrite);
+                    var result = personalCertStote.Certificates.Find(X509FindType.FindBySubjectName, subjectName, true);
+                    var succeed = result.Count > 0;
+                    certificate = succeed ? result[0] : null;
+                    return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
+                }
             }
             catch (CryptographicException cryptographicException)
             {
@@ -57,13 +64,14 @@ namespace ITCC.HTTP.SslConfigUtil.Core
         {
             try
             {
-                var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-                personalCertStote.Open(OpenFlags.ReadWrite);
-                var result = personalCertStote.Certificates.Find(X509FindType.FindByThumbprint, thumbtrint, true);
-                var succeed = result.Count > 0;
-                certificate = succeed ? result[0] : null;
-                return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
-
+                using (var personalCertStote = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+                {
+                    personalCertStote.Open(OpenFlags.ReadWrite);
+                    var result = personalCertStote.Certificates.Find(X509FindType.FindByThumbprint, thumbtrint, true);
+                    var succeed = result.Count > 0;
+                    certificate = succeed ? result[0] : null;
+                    return succeed ? FindCertificateStatus.Found : FindCertificateStatus.NotFound;
+                }
             }
             catch (CryptographicException cryptographicException)
             {
