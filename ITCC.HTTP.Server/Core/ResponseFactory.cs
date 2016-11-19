@@ -72,45 +72,34 @@ namespace ITCC.HTTP.Server.Core
             IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
         {
             var httpResponse = context.Response;
+            // ReSharper disable once RedundantAssignment
             var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
             httpResponse.StatusCode = (int) code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
 
-            var encoder = SelectEncoder(context.Request);
-            if (body != null && encoder == null)
-            {
-                httpResponse.StatusCode = (int) HttpStatusCode.NotAcceptable;
-                httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
-                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
-                return;
-            }
             httpResponse.SendChunked = false;
-            var contentType = alreadyEncoded
-                ? "text/plain"
-                : encoder.ContentType;
-            httpResponse.ContentType = $"{contentType}; charset={encoder.Encoding.WebName}";
 
-            if (_commonHeaders != null)
-            {
-                foreach (var header in _commonHeaders)
-                {
-                    httpResponse.AddHeader(header.Key, header.Value);
-                }
-            }
-
-            if (additionalHeaders != null)
-            {
-                foreach (var header in additionalHeaders)
-                {
-                    httpResponse.AddHeader(header.Key, header.Value);
-                }
-            }
+            SetResponseHeaders(httpResponse, additionalHeaders);
 
             if (body == null)
             {
                 Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
+
+            var encoder = SelectEncoder(context.Request);
+            if (encoder == null)
+            {
+                httpResponse.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
+                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                return;
+            }
+
+            var contentType = alreadyEncoded
+                ? "text/plain"
+                : encoder.ContentType;
+            httpResponse.ContentType = $"{contentType}; charset={encoder.Encoding.WebName}";
 
             string bodyString;
             if (!alreadyEncoded)
@@ -120,54 +109,7 @@ namespace ITCC.HTTP.Server.Core
                 bodyString = body as string;
             }
 
-            var gzipResponse = RequestEnablesGzip(encoder, context.Request);
-            if (gzipResponse)
-            {
-                httpResponse.AddHeader("Content-Encoding", "gzip");
-
-                var memoryStream = new MemoryStream();
-                try
-                {
-                    using (
-                        var uncompressedStream = new MemoryStream(encoder.Encoding.GetBytes(bodyString ?? string.Empty))
-                    )
-                    {
-                        using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-                        {
-                            uncompressedStream.CopyTo(gzipStream);
-                        }
-                    }
-                    httpResponse.ContentLength64 = memoryStream.Length;
-                    if (!isHeadRequest)
-                        httpResponse.OutputStream.Write(memoryStream.GetBuffer(), 0, (int) memoryStream.Length);
-                    memoryStream.Close();
-                }
-                catch (HttpListenerException)
-                {
-                    return;
-                }
-                finally
-                {
-                    memoryStream.Dispose();
-                }
-            }
-            else
-            {
-                var bodyBuffer = encoder.Encoding.GetBytes(bodyString ?? string.Empty);
-                httpResponse.SendChunked = false;
-                httpResponse.ContentLength64 = bodyBuffer.Length;
-                if (!isHeadRequest)
-                {
-                    try
-                    {
-                        httpResponse.OutputStream.Write(bodyBuffer, 0, bodyBuffer.Length);
-                    }
-                    catch (HttpListenerException)
-                    {
-                        return;
-                    }
-                } 
-            }
+            SetResponseBody(context, encoder, bodyString);
 
             Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
         }
@@ -228,6 +170,78 @@ namespace ITCC.HTTP.Server.Core
         #endregion
 
         #region private
+
+        private static void SetResponseHeaders(HttpListenerResponse httpResponse, IDictionary<string, string> additionalHeaders)
+        {
+            if (_commonHeaders != null)
+            {
+                foreach (var header in _commonHeaders)
+                {
+                    httpResponse.AddHeader(header.Key, header.Value);
+                }
+            }
+
+            if (additionalHeaders != null)
+            {
+                foreach (var header in additionalHeaders)
+                {
+                    httpResponse.AddHeader(header.Key, header.Value);
+                }
+            }
+        }
+
+        private static void SetResponseBody(HttpListenerContext context, BodyEncoder encoder, string bodyString)
+        {
+            var httpResponse = context.Response;
+            var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
+
+            var gzipResponse = RequestEnablesGzip(encoder, context.Request);
+            if (gzipResponse)
+            {
+                httpResponse.AddHeader("Content-Encoding", "gzip");
+
+                var memoryStream = new MemoryStream();
+                try
+                {
+                    using (
+                        var uncompressedStream = new MemoryStream(encoder.Encoding.GetBytes(bodyString ?? string.Empty))
+                    )
+                    {
+                        using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+                        {
+                            uncompressedStream.CopyTo(gzipStream);
+                        }
+                    }
+                    httpResponse.ContentLength64 = memoryStream.Length;
+                    if (!isHeadRequest)
+                        httpResponse.OutputStream.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                    memoryStream.Close();
+                }
+                catch (HttpListenerException)
+                {
+                }
+                finally
+                {
+                    memoryStream.Dispose();
+                }
+            }
+            else
+            {
+                var bodyBuffer = encoder.Encoding.GetBytes(bodyString ?? string.Empty);
+                httpResponse.SendChunked = false;
+                httpResponse.ContentLength64 = bodyBuffer.Length;
+                if (!isHeadRequest)
+                {
+                    try
+                    {
+                        httpResponse.OutputStream.Write(bodyBuffer, 0, bodyBuffer.Length);
+                    }
+                    catch (HttpListenerException)
+                    {
+                    }
+                }
+            }
+        }
 
         private static BodyEncoder SelectEncoder(HttpListenerRequest request)
         {
