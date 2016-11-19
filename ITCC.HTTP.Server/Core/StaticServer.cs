@@ -195,7 +195,9 @@ namespace ITCC.HTTP.Server.Core
         {
             ServiceUris.AddRange(configuration.GetReservedUris());
             if (ServiceUris.Any())
+            {
                 LogDebug($"Reserved sections:\n{string.Join("\n", ServiceUris)}");
+            }
 
             ServiceRequestProcessors.Add(_optionsController);
             ServiceRequestProcessors.Add(_fileRequestController);

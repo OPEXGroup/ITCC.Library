@@ -79,6 +79,7 @@
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Core\AcceptType.cs" />
     <Compile Include="Core\BodyEncoder.cs" />
+    <Compile Include="Enums\AcceptTypeMatch.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
     <Compile Include="Enums\FileOperationStatus.cs" />
     <Compile Include="Enums\FileType.cs" />

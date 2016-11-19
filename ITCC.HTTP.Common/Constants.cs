@@ -1,5 +1,8 @@
 ﻿namespace ITCC.HTTP.Common
 {
+    /// <summary>
+    ///     Simple container for all library constants related to HTTP
+    /// </summary>
     public static class Constants
     {
         /// <summary>

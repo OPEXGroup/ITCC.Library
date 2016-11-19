@@ -1,4 +1,5 @@
 ﻿using System;
+using ITCC.HTTP.Server.Enums;
 
 namespace ITCC.HTTP.Server.Core
 {
@@ -56,18 +57,32 @@ namespace ITCC.HTTP.Server.Core
             return result;
         }
 
-        public bool Matches(string mimeType)
+        public AcceptTypeMatch Matches(string mimeType)
         {
             var parts = mimeType.Split('/');
             if (parts.Length != 2)
-                return false;
+                return AcceptTypeMatch.NotMatch;
 
             var requestedType = parts[0];
             var requestedSubType = parts[1];
 
-            return MatchesOrStar(requestedType, Type) && MatchesOrStar(requestedSubType, SubType);
-        }
+            var result = AcceptTypeMatch.NotMatch;
 
-        private static bool MatchesOrStar(string lhs, string rhs) => lhs == rhs || rhs == @"*";
+            if (requestedType == Type)
+                result |= AcceptTypeMatch.TypeMatch;
+            else if (Type == "*")
+                result |= AcceptTypeMatch.TypeStar;
+            else
+                return AcceptTypeMatch.NotMatch;
+
+            if (requestedSubType == SubType)
+                result |= AcceptTypeMatch.SubtypeMatch;
+            else if (SubType == "*")
+                result |= AcceptTypeMatch.SubtypeStar;
+            else
+                return AcceptTypeMatch.NotMatch;
+
+            return result;
+        }
     }
 }

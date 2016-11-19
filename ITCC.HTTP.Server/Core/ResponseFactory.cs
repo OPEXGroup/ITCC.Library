@@ -254,7 +254,23 @@ namespace ITCC.HTTP.Server.Core
                 .Where(pt => pt != null)
                 .OrderByDescending(at => at.Qvalue).ToList();
 
-            return parsedTypes.Select(acceptType => _encoders.FirstOrDefault(e => acceptType.Matches(e.ContentType))).FirstOrDefault(encoder => encoder != null);
+            BodyEncoder selectedEncoder = null;
+            var maxMatch = 0.0;
+
+            foreach (var parsedType in parsedTypes)
+            {
+                foreach (var bodyEncoder in _encoders)
+                {
+                    var normalizedMatch = (int)parsedType.Matches(bodyEncoder.ContentType)*parsedType.Qvalue;
+                    if (normalizedMatch > maxMatch)
+                    {
+                        selectedEncoder = bodyEncoder;
+                        maxMatch = normalizedMatch;
+                    }
+                }
+            }
+
+            return selectedEncoder;
         }
 
         private static bool RequestEnablesGzip(BodyEncoder encoder, HttpListenerRequest request)
