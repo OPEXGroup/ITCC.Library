@@ -1,3 +1,8 @@
+## 2.0.2 (2016-11-09)
+
+* **New**:  `RequestBodyLogLimit` added to `HttpServerConfiguration`  
+* **Fix**:  Several encoder issues fixed (for multiple encoders in `StaticServer`)  
+
 ## 2.0.1 (2016-11-08)
 
 * **New**:  `ITCC.HTTP.Server.Testing` util added  
