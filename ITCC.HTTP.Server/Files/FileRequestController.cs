@@ -36,7 +36,7 @@ namespace ITCC.HTTP.Server.Files
 
         public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
         {
-            await HandleFileRequest(context);
+            await HandleFileRequest(context).ConfigureAwait(false);
             completionCallback(context, stopwatch);
         }
 
@@ -143,7 +143,7 @@ namespace ITCC.HTTP.Server.Files
                     case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
                         {
-                            await HandleFileGetRequest(context, filePath);
+                            await HandleFileGetRequest(context, filePath).ConfigureAwait(false);
                             return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
@@ -184,7 +184,7 @@ namespace ITCC.HTTP.Server.Files
             using (var fileStream = new FileStream(FaviconPath, FileMode.Open, FileAccess.Read,
                 FileShare.ReadWrite))
             {
-                await fileStream.CopyToAsync(response.OutputStream);
+                await fileStream.CopyToAsync(response.OutputStream).ConfigureAwait(false);
             }
         }
 
@@ -228,7 +228,7 @@ namespace ITCC.HTTP.Server.Files
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    return await reader.ReadToEndAsync();
+                    return await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
             }
         }

@@ -125,7 +125,8 @@ namespace ITCC.HTTP.Server.Core
             ResponseFactory.SetBodyEncoders(configuration.BodyEncoders);
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
-            CommonHelper.SetSerializationLimitations(configuration.LogProhibitedQueryParams,
+            CommonHelper.SetSerializationLimitations(configuration.RequestBodyLogLimit,
+                configuration.LogProhibitedQueryParams,
                 configuration.LogProhibitedHeaders,
                 configuration.BodyEncoders.First(be => be.IsDefault).Encoding);
 
@@ -305,9 +306,6 @@ namespace ITCC.HTTP.Server.Core
         #endregion
 
         #region log
-
-        [Conditional("DEBUG")]
-        private static void LogTrace(string message) => Logger.LogTrace("HTTP SERVER", message);
 
         [Conditional("DEBUG")]
         private static void LogDebug(string message) => Logger.LogDebug("HTTP SERVER", message);

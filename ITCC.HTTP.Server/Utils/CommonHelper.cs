@@ -20,10 +20,12 @@ namespace ITCC.HTTP.Server.Utils
     {
         #region public
 
-        public static void SetSerializationLimitations(List<string> prohibitedQueryParams,
+        public static void SetSerializationLimitations(int requestBodyLogLimit,
+            List<string> prohibitedQueryParams,
             List<string> prohibitedHeaders,
             Encoding encoding)
         {
+            _requestBodyLogLimit = requestBodyLogLimit;
             _prohibitedHeaders = prohibitedHeaders;
             _prohibitedQueryParams = prohibitedQueryParams;
             _encoding = encoding;
@@ -114,6 +116,7 @@ namespace ITCC.HTTP.Server.Utils
             ? Constants.RemovedLogString
             : request.QueryString[paramName];
 
+        private static int _requestBodyLogLimit = -1;
         private static List<string> _prohibitedQueryParams = new List<string>();
         private static List<string> _prohibitedHeaders = new List<string>();
         private static Encoding _encoding = Encoding.UTF8;

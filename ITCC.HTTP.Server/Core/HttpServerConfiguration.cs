@@ -108,6 +108,11 @@ namespace ITCC.HTTP.Server.Core
         public int ResponseBodyLogLimit { get; set; } = -1;
 
         /// <summary>
+        ///     Max request body size to write to trace logs. Negative values mean no limit
+        /// </summary>
+        public int RequestBodyLogLimit { get; set; } = -1;
+
+        /// <summary>
         ///     Message body parts patterns that must NEVER be logger. Item1 will be replaced with Item2 (Regex support)
         /// </summary>
         public List<Tuple<string, string>> LogBodyReplacePatterns { get; set; } = new List<Tuple<string, string>>();

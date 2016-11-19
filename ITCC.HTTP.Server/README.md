@@ -104,7 +104,8 @@ Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }               
 List<BodyEncoder> BodyEncoders { get; set; }                                      // Допустимые способы кодирования ответов
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
-int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого значения. Отрицательное значение - нет ограничения
+int ResponseBodyLogLimit { get; set; } = -1;                                      // Ограничение на длину тела логгируемого ответа сервера. Отрицательное значение - нет ограничения
+int RequestBodyLogLimit { get; set; } = -1;                                       // Ограничение на длину тела логгируемого запроса клиента. Отрицательное значение - нет ограничения
 List<Tuple<string, string>> LogBodyReplacePatterns { get; set; }                  // Паттерны замены (заменяемое-замена) для тел сообщений. Служит для исключения из лога секретной информации
 	= new List<Tuple<string, string>>();                                          // Поддерживаются регулярные выражения
 List<string> LogProhibitedHeaders { get; set; } = new List<string>();             // HTTP-заголовки, значения которых не должны попадать в лог
