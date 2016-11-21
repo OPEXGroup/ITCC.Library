@@ -1,4 +1,10 @@
-## 2.0.2 (2016-11-09)
+## 2.1.0 (2016-11-21)
+
+* **New**:  `ITCC.HTTP.API` library added  
+* **Edit**: Build library against .Net 4.5.2  
+* **Edit**: `ITCC.Logging.Core` now can be used under Windows Phone 8.1  
+
+## 2.0.2 (2016-11-19)
 
 * **New**:  `RequestBodyLogLimit` added to `HttpServerConfiguration`  
 * **Fix**:  Several encoder issues fixed (for multiple encoders in `StaticServer`)  
