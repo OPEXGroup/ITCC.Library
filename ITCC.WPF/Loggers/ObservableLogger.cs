@@ -36,8 +36,8 @@ namespace ITCC.WPF.Loggers
                     LogEntryCollection.AddLast(new LogEntryEventArgsViewModel(args));
                 }
             });
-            
-            return Task.CompletedTask;
+
+            return Task.FromResult(0);
         }
 
         #endregion

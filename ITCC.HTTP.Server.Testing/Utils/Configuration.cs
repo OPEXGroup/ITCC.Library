@@ -36,7 +36,7 @@ namespace ITCC.HTTP.Server.Testing.Utils
                         Directory.CreateDirectory(FilesLocation);
                         Directory.CreateDirectory(FilesLocation + Path.PathSeparator + "Test");
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         return false;
                     }

@@ -19,7 +19,7 @@ namespace ITCC.HTTP.Server.Service
             var responseBody = new PingResponse(CommonHelper.SerializeHttpRequest(context, true));
             ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody);
             completionCallback(context, stopwatch);
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
         public string Name => "Ping";

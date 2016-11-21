@@ -21,7 +21,7 @@ namespace ITCC.Logging.Windows.Loggers
         public Task Flush()
         {
             FlushBuffer();
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
         #endregion

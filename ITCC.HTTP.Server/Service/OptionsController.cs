@@ -50,7 +50,7 @@ namespace ITCC.HTTP.Server.Service
             }
 
             completionCallback(context, stopwatch);
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
         public string Name => "Options";
