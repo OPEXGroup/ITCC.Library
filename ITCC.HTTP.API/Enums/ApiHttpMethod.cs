@@ -11,7 +11,7 @@ namespace ITCC.HTTP.API.Enums
         /// <summary>
         ///     View is used only in responses for non-get methods
         /// </summary>
-        Response = 0,
+        Default = 0,
         /// <summary>
         ///     HTTP GET
         /// </summary>
@@ -28,5 +28,9 @@ namespace ITCC.HTTP.API.Enums
         ///     This SHOULD NOT be used. Use guids instead to remove entities
         /// </summary>
         Delete = 1 << 3,
+        /// <summary>
+        ///     HTTP PATCH
+        /// </summary>
+        Patch = 1 << 4
     }
 }
