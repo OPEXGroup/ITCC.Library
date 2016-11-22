@@ -22,6 +22,15 @@
 
 * `ITCC.Geocoding.Geocoder.cs`
 
+### ITCC.HTTP.API
+
+Библиотека для декларативного описания и автоматической проверки контрактов сетевого API.
+Интересные классы:
+
+* `ITCC.HTTP.API.ViewChecker`  
+* `ITCC.HTTP.API.Attributes.ApiViewAttribute`  
+* `ITCC.HTTP.API.Attributes.ApiContractAttribute`
+
 ### ITCC.HTTP.Client
 
 Реализация HTTP-клиентов. Интересные классы:
