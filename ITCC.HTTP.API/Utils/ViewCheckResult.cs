@@ -1,23 +1,23 @@
-﻿namespace ITCC.HTTP.API.Utils
+﻿using ITCC.HTTP.API.Enums;
+
+namespace ITCC.HTTP.API.Utils
 {
     public class ViewCheckResult
     {
         #region properties
         public bool IsCorrect { get; private set; }
 
-        public string ErrorDescription => _errorDescription == null
+        public ApiErrorView ApiErrorView { get; private set; }
+
+        public string ErrorDescription => ApiErrorView.Reason == ApiErrorReason.None
             ? null
-            : $"VIEW ERROR: {_errorDescription}";
+            : ApiErrorView.ToString();
         #endregion
 
         #region construction
         private ViewCheckResult() { }
-        public static ViewCheckResult Ok() => new ViewCheckResult {IsCorrect = true};
-        public static ViewCheckResult Error(string errorDescription) => new ViewCheckResult {IsCorrect = false, _errorDescription = errorDescription};
-        #endregion
-
-        #region private
-        private string _errorDescription;
+        public static ViewCheckResult Ok() => new ViewCheckResult { IsCorrect = true, ApiErrorView = ApiErrorViewFactory.None() };
+        public static ViewCheckResult Error(ApiErrorView errorView) => new ViewCheckResult { IsCorrect = false, ApiErrorView = errorView };
         #endregion
     }
 }

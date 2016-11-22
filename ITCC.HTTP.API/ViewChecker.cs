@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Enums;
@@ -34,10 +33,10 @@ namespace ITCC.HTTP.API
             try
             {
                 var properties = view.GetType().GetRuntimeProperties();
-                var errorList = new List<string>();
-                var innerCheckResults = new List<ViewCheckResult>();
+                var checkResults = new List<ApiErrorView>();
+                var innerCheckResults = new List<ApiErrorView>();
 
-                errorList.AddRange(PerformSpecificChecks(view));
+                innerCheckResults.AddRange(PerformSpecificChecks(view));
 
                 foreach (var propertyInfo in properties)
                 {
@@ -46,11 +45,21 @@ namespace ITCC.HTTP.API
                     if (propertyValue != null)
                     {
                         if (propertyValue.IsApiView())
-                            innerCheckResults.Add(CheckContract(propertyValue));
+                        {
+                            var checkResult = CheckContract(propertyValue);
+                            if (!checkResult.IsCorrect)
+                                innerCheckResults.Add(checkResult.ApiErrorView);
+                        }
                         if (propertyValue.IsApiViewList())
                         {
                             var list = propertyValue as IList;
-                            innerCheckResults.AddRange(from object item in list where item != null select CheckContract(item));
+                            if (list == null)
+                                continue;
+                            innerCheckResults.AddRange(from object item in list
+                                                       select CheckContract(item)
+                                                       into checkResult
+                                                       where !checkResult.IsCorrect
+                                                       select checkResult.ApiErrorView);
                         }
                     }
 
@@ -59,7 +68,7 @@ namespace ITCC.HTTP.API
                         continue;
 
                     if (contractAttributes.Count != 1)
-                        return ViewCheckResult.Error("Multiple ApiContractAttribute's are not allowed");
+                        return ViewCheckResult.Error(ApiErrorViewFactory.Unspecified());
 
                     var contractAttribute = contractAttributes[0];
                     var contractType = contractAttribute.Type;
@@ -72,15 +81,15 @@ namespace ITCC.HTTP.API
                     if (failedChecks.Any())
                     {
                         var propertyName = propertyInfo.Name;
-                        errorList.Add(
-                            $"{propertyName, 20}:\t{string.Join(", ", failedChecks.Select(act => act.ToString()))}");
+                        checkResults.AddRange(
+                            failedChecks.Select(fc => ApiErrorViewFactory.ViewPropertyContractViolation(view, propertyName, fc)));
                     }
                 }
-                return BuildCheckResult(view.GetType().Name, errorList, innerCheckResults);
+                return BuildCheckResult(view, checkResults, innerCheckResults);
             }
             catch (Exception ex)
             {
-                return ViewCheckResult.Error($"Exception occured during contract check: {ex.Message}");
+                return ViewCheckResult.Error(ApiErrorViewFactory.Unspecified($"Failed to check view: {ex.Message}"));
             }
         }
         #endregion
@@ -119,9 +128,9 @@ namespace ITCC.HTTP.API
         /// </summary>
         /// <param name="view">View object</param>
         /// <returns>List of error descriptions (empty list if no contracts are violated)</returns>
-        private static IEnumerable<string> PerformSpecificChecks(object view)
+        private static IEnumerable<ApiErrorView> PerformSpecificChecks(object view)
         {
-            var result = new List<string>();
+            var result = new List<ApiErrorView>();
             var methodInfos = view
                 .GetType()
                 .GetRuntimeMethods()
@@ -138,30 +147,27 @@ namespace ITCC.HTTP.API
                 var checkResult = (bool)deleg.DynamicInvoke();
                 if (!checkResult)
                 {
-                    result.Add(methodInfo.GetCustomAttribute<ApiViewCheckAttribute>().ErrorDescription);
+                    var apiErrorView = ApiErrorViewFactory.ViewContractViolation(view,
+                        methodInfo.GetCustomAttribute<ApiViewCheckAttribute>().ErrorDescription);
+                    result.Add(apiErrorView);
                 }
             }
             return result;
         }
 
-        private static ViewCheckResult BuildCheckResult(string typeName, List<string> selfErrors, List<ViewCheckResult> innerErrors)
+        private static ViewCheckResult BuildCheckResult(object view, List<ApiErrorView> errors, List<ApiErrorView> innerErrors)
         {
-            var hasSelfErrors = selfErrors.Any();
-            var hasInnerErrors = innerErrors.Any(ie => ! ie.IsCorrect);
+            var hasErrors = errors.Any();
+            var hasInnerErrors = innerErrors.Any();
 
-            if (!hasSelfErrors && !hasInnerErrors)
+            if (!hasInnerErrors && !hasErrors)
                 return ViewCheckResult.Ok();
 
-            var builder = new StringBuilder();
-            builder.AppendLine($"The following [{typeName}] contract violations found:");
-            builder.AppendLine(hasSelfErrors ? string.Join("\n", selfErrors) : "No self errors");
+            var allErrors = new List<ApiErrorView>(errors);
             if (hasInnerErrors)
-            {
-                builder.AppendLine("The following inner errors found:");
-                builder.AppendLine(string.Join("\n    ", innerErrors.Where(ie => !ie.IsCorrect).Select(e => e.ErrorDescription)));
-            }
+                allErrors.Add(ApiErrorViewFactory.InnerErrors(view, innerErrors));
 
-            return ViewCheckResult.Error(builder.ToString());
+            return ViewCheckResult.Error(ApiErrorViewFactory.InnerErrors(view, allErrors));
         }
 
         #region checks
