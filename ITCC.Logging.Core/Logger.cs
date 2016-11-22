@@ -162,6 +162,9 @@ namespace ITCC.Logging.Core
             LogEntryEvent?.Invoke(scope, eventArgs);
         }
 
+        /// <summary>
+        ///     Synchronously flushes all logger's output buffers (which implement <see cref="IFlushableLogReceiver"/>)
+        /// </summary>
         public static void FlushAll()
         {
             lock (LockObject)
