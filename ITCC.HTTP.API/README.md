@@ -23,7 +23,7 @@ ViewCheckResult CheckContract(object view);
 Атрибуты для маркировки классов, структур, их методов и свойств
 для последующего использования при автоматической проверке контрактов API.
 
-#### class ApiContractAttribute : Attribute
+#### `class ApiContractAttribute : Attribute`
 
 `[AttributeUsage(AttributeTargets.Property)]`
 
@@ -41,7 +41,7 @@ ApiContractType Type { get; }
 string Comment { get; }
 ```
 
-#### class ApiViewAttribute : Attribute
+#### `class ApiViewAttribute : Attribute`
 
 `[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]`.
 
@@ -58,7 +58,7 @@ ApiViewAttribute(ApiHttpMethod httpMethod);
 ApiHttpMethod HttpMethod { get; }
 ```
 
-#### class ApiViewCheckAttribute : Attribute
+#### `class ApiViewCheckAttribute : Attribute`
 
 `[AttributeUsage(AttributeTargets.Method)]`
 
@@ -81,7 +81,7 @@ string ErrorDescription { get; }
 
 Используемые перечисления.
 
-#### ApiContractType
+#### `enum ApiContractType`
 
 `[Flags]`
 
@@ -142,7 +142,7 @@ NotNullNonSingleGuidList = NotNull | NotSingle | ItemsNotNull | ItemsGuidStrings
 NullOrNonSingleGuidList = CanBeNull | NotSingle | ItemsNotNull | ItemsGuidStrings
 ```
 
-#### enum ApiErrorReason
+#### `enum ApiErrorReason`
 
 Типы ошибок представлений данных. Значения:
 
@@ -160,7 +160,7 @@ InnerErrors,                    // Тип для нелистовых верши
 Unspecified                     // Неопределенный тип ошибки (неподходящий ни к чему вышеописанному)
 ```
 
-#### enum ApiHttpMethod
+#### `enum ApiHttpMethod`
 
 [Flags]
 
@@ -180,7 +180,7 @@ Patch = 1 << 4,     // HTTP PATCH
 
 Методы расширения, используемые в библиотеке (и могут быть использованы для организации собственных проверок)
 
-#### static class ListExtensions
+#### `static class ListExtensions`
 
 Методы для списков
 
@@ -199,7 +199,7 @@ IEnumerable<List<T>> GetSubsets<T>(this IList<T> list, bool includeEmpty = true)
 IEnumerable<List<object>> GetSubsets(this IList list, bool includeEmpty = true);
 ```
 
-#### static class ObjectExtensions
+#### `static class ObjectExtensions`
 
 Методы для объектов
 
@@ -213,7 +213,7 @@ ViewCheckResult CheckAsView(this object view);  // Проверка объект
 
 Служебные классы
 
-#### class ApiErrorView
+#### `class ApiErrorView`
 
 Представление ошибки API для передаче в теле ответа (с кодом 4xx).
 Имеет перегруженный метод `ToString()`, выдающий человекочитаемое описание дерева ошибок.
@@ -229,7 +229,7 @@ string ErrorMessage { get; set; }               // Человекочитаем�
 List<ApiErrorView> InnerErrorList { get; set; } // Список дочерних ошибок. Отличен от null только при Reason == InnerErrors
 ```
 
-#### static class ApiErrorViewFactory
+#### `static class ApiErrorViewFactory`
 
 Служит для создания объектов типа `ApiErrorView`. **Подробно все методы описаны в исходниках.** Методы:
 
@@ -247,7 +247,7 @@ ApiErrorView InnerErrors(object view, List<ApiErrorView> innerErrorViews);
 ApiErrorView Unspecified(string errorMessage = null);
 ```
 
-#### static class EnumHelper
+#### `static class EnumHelper`
 
 Служит для преобразований (тип контракта) <=> (описание ошибки). Методы:
 
@@ -256,7 +256,7 @@ string ApiContractTypeName(ApiContractType apiContractType);
 ApiContractType ApiContractTypeByName(string name);
 ```
 
-#### class ViewCheckResult
+#### `class ViewCheckResult`
 
 Представление результата проверки. Свойства:
 
