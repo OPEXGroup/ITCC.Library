@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ITCC.HTTP.API.Extensions;
 using ITCC.HTTP.API.Testing.Views;
@@ -29,7 +30,15 @@ namespace ITCC.HTTP.API.Testing
 
         private static void PerformTest()
         {
-            var viewTree = new NodeView();
+            var viewTree = new NodeView
+            {
+                Name = "Root",
+                Children = new List<NodeView>
+                {
+                    
+                },
+                IsLeaf = true
+            };
 
             var checkResult = viewTree.CheckAsView();
             var logBuilder = new StringBuilder();

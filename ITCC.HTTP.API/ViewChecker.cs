@@ -39,7 +39,7 @@ namespace ITCC.HTTP.API
                 var checkResults = new List<ApiErrorView>();
                 var innerCheckResults = new List<ApiErrorView>();
 
-                innerCheckResults.AddRange(PerformSpecificChecks(view));
+                checkResults.AddRange(PerformSpecificChecks(view));
 
                 foreach (var propertyInfo in properties)
                 {

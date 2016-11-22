@@ -33,7 +33,10 @@ namespace ITCC.HTTP.API.Testing.Views
 
         #region checks
 
-        public bool LeavesMustNotHaveChildren() => IsLeaf || Children != null;
+        [ApiViewCheck]
+        public bool LeavesMustNotHaveChildren() => IsLeaf ^ (Children != null);
+
+        public bool ThisWontBeCalled() => false;
 
         #endregion
     }
