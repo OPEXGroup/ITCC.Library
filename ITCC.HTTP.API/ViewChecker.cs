@@ -11,6 +11,9 @@ using ITCC.HTTP.API.Utils;
 
 namespace ITCC.HTTP.API
 {
+    /// <summary>
+    ///     Used to check API views' contracts
+    /// </summary>
     public static class ViewChecker
     {
         #region public
@@ -442,10 +445,11 @@ namespace ITCC.HTTP.API
         {
             if (str == null)
                 return true;
-            var guidRegEx = new Regex(@"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
-            return guidRegEx.IsMatch(str);
+            return GuidRegEx.IsMatch(str);
         }
+
+        private static readonly Regex GuidRegEx = new Regex(@"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
         #endregion
 
         #endregion
