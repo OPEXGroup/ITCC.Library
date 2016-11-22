@@ -95,6 +95,16 @@ namespace ITCC.HTTP.API
                 return ViewCheckResult.Error(ApiErrorViewFactory.Unspecified($"Failed to check view: {ex.Message}"));
             }
         }
+
+        /// <summary>
+        ///     Checks is view is correct
+        /// </summary>
+        /// <param name="view">View to checks</param>
+        /// <returns>True if view is correct, otherwise, false</returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Will be thrown if <see cref="view"/> does not have <see cref="ApiViewAttribute"/> attribute
+        /// </exception>
+        public static bool IsCorrectView(object view) => CheckContract(view).IsCorrect;
         #endregion
 
         #region private
