@@ -1,3 +1,8 @@
+## 2.1.1 (2016-11-22)
+
+* **New**:  API error tree generation added  
+* **Edit**: Several docs fixes  
+
 ## 2.1.0 (2016-11-21)
 
 * **New**:  `ITCC.HTTP.API` library added  
