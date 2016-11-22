@@ -1,3 +1,8 @@
+## 2.1.2 (2016-11-22)
+
+* **Edit**: Build `ITCC.Logging.Core` and `ITCC.HTTP.API` against netstandard 1.3  
+* **Edit**: Build all desktop projects against .Net 4.6
+
 ## 2.1.1 (2016-11-22)
 
 * **New**:  API error tree generation added  
