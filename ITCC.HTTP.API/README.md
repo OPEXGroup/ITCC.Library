@@ -162,7 +162,7 @@ Unspecified                     // Неопределенный тип ошиб�
 
 #### `enum ApiHttpMethod`
 
-[Flags]
+`[Flags]`
 
 Используется в `ITCC.HTTP.API.Attributes.ApiViewAttribute` для указания методы, в котором используется представление.
 Значения:
@@ -213,6 +213,24 @@ ViewCheckResult CheckAsView(this object view);  // Проверка объект
 
 Служебные классы
 
+#### `class ApiErrorOr<T> : Either<ApiErrorView, T> where T : class`
+
+Реализация монады `ITCC.HTTP.API.Utils.Either` для случая `TFirst == ApiErrorView`. Свойства:
+
+```
+ApiErrorView ErrorView { get; } // Представление ошибки при ошибке (First)
+T Data { get; }                 // Представление данных при успехе (Second)
+bool IsError { get; }           // ErrorView != null
+bool IsSuccess { get; }         // Data != null
+```
+
+Создание:
+
+```
+static ApiErrorOr<T> Error(ApiErrorView errorView); // Создание экземпляра с ошибкой
+static ApiErrorOr<T> Success(T data);               // Создание экземпляра с данными
+```
+
 #### `class ApiErrorView`
 
 Представление ошибки API для передаче в теле ответа (с кодом 4xx).
@@ -245,6 +263,26 @@ ApiErrorView ForeignKeyError(Type viewType, string keyName);
 ApiErrorView BusinessLogicError(string errorMessage);
 ApiErrorView InnerErrors(object view, List<ApiErrorView> innerErrorViews);
 ApiErrorView Unspecified(string errorMessage = null);
+```
+
+#### `class Either<TFirst, TSecond> where TFirst : class where TSecond : class`
+
+Представляет монаду `Either`. Содержит либо значение типа `TFirst`, либо значение типа `TSecond`.
+Конструкторы: 
+
+```
+Either(TFirst first);   // Создание с First != null
+Either(TSecond second); // Создание с Second != null
+```
+
+Свойства:
+
+```
+TFirst First { get; }
+TSecond Second { get; }
+
+bool HasFirst => First != null;
+bool HasSecond => Second != null;
 ```
 
 #### `static class EnumHelper`

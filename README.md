@@ -31,6 +31,7 @@
 * `ITCC.HTTP.API.ViewChecker`  
 * `ITCC.HTTP.API.Attributes.ApiViewAttribute`  
 * `ITCC.HTTP.API.Attributes.ApiContractAttribute`
+* `ITCC.HTTP.API.Utils.Either<TFirst, TSecond>`
 
 ### ITCC.HTTP.Client
 
