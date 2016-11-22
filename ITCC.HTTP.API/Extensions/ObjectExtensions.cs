@@ -32,11 +32,12 @@ namespace ITCC.HTTP.API.Extensions
                 if (!checkResults.Any())
                     return ViewCheckResult.Ok();
 
-                var errorDescriptions = checkResults
+                var errorViews = checkResults
                     .Where(result => !result.IsCorrect)
-                    .Select(result => result.ErrorDescription);
+                    .Select(result => result.ApiErrorView)
+                    .ToList();
 
-                return ViewCheckResult.Error(string.Join("\n", errorDescriptions));
+                return ViewCheckResult.Error(ApiErrorViewFactory.InnerErrors(view, errorViews));
             }
             return ViewChecker.CheckContract(view);
         }

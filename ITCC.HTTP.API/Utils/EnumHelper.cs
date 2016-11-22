@@ -4,7 +4,7 @@ using ITCC.HTTP.API.Enums;
 
 namespace ITCC.HTTP.API.Utils
 {
-    internal static class EnumHelper
+    public static class EnumHelper
     {
         #region ApiContractType
 

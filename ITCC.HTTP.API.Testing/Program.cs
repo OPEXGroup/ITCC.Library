@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Text;
+using ITCC.HTTP.API.Extensions;
+using ITCC.HTTP.API.Testing.Views;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
 
@@ -26,7 +29,18 @@ namespace ITCC.HTTP.API.Testing
 
         private static void PerformTest()
         {
-            
+            var viewTree = new NodeView();
+
+            var checkResult = viewTree.CheckAsView();
+            var logBuilder = new StringBuilder();
+            logBuilder.AppendLine();
+            logBuilder.AppendLine($"IsCorrect: {checkResult.IsCorrect}");
+            logBuilder.AppendLine(Separator);
+            logBuilder.AppendLine("Message:");
+            logBuilder.AppendLine(checkResult.ErrorDescription);
+
+            var level = checkResult.IsCorrect ? LogLevel.Info : LogLevel.Warning;
+            LogMessage(level, logBuilder.ToString());
         }
 
         private static void InitLoggers()
@@ -40,5 +54,7 @@ namespace ITCC.HTTP.API.Testing
 
         private static void LogException(Exception exception)
             => Logger.LogException("TEST", LogLevel.Warning, exception);
+
+        private const string Separator = "------------------------------------------";
     }
 }

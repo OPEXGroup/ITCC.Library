@@ -247,6 +247,15 @@ ApiErrorView InnerErrors(object view, List<ApiErrorView> innerErrorViews);
 ApiErrorView Unspecified(string errorMessage = null);
 ```
 
+#### static class EnumHelper
+
+Служит для преобразований (тип контракта) <=> (описание ошибки). Методы:
+
+```
+string ApiContractTypeName(ApiContractType apiContractType);
+ApiContractType ApiContractTypeByName(string name);
+```
+
 #### class ViewCheckResult
 
 Представление результата проверки. Свойства:
