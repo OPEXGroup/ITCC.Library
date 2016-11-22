@@ -1,6 +1,7 @@
 ﻿# ITCC.HTTP.API
 
 Библиотека для декларативного описания и автоматической проверки контрактов сетевого API.
+Изначально предназначена для работы с HTTP.
 
 ### Корневые
 
@@ -141,6 +142,24 @@ NotNullNonSingleGuidList = NotNull | NotSingle | ItemsNotNull | ItemsGuidStrings
 NullOrNonSingleGuidList = CanBeNull | NotSingle | ItemsNotNull | ItemsGuidStrings
 ```
 
+#### enum ApiErrorReason
+
+Типы ошибок представлений данных. Значения:
+
+```
+None,                           // Ошибок нет. Не рекомендуется к использованию
+BadDatatype,                    // Неверный тип данных
+ViewPropertyContractViolation,  // Свойства полученных объектов имеют неверные значения
+ViewContractViolation,          // Один или более метод проверки представлений вернул false
+ViewSetConflict,                // Полученный набор данных содержит внутренние противоречия
+QueryParameterError,            // Параметры HTTP-запроса отсутствуют или содержат неверные значения
+QueryParameterAmbiguous,        // Метод обработки запроса не может быть выбран на основании параметров HTTP-запроса
+ForeignKeyError,                // Ошибка связей. Присланные данные ссылаются на недопустимые или несуществующие объекты
+BusinessLogicError,             // Нарушение бизнес-логики приложения
+InnerErrors,                    // Тип для нелистовых вершин дерева ошибок
+Unspecified                     // Неопределенный тип ошибки (неподходящий ни к чему вышеописанному)
+```
+
 #### enum ApiHttpMethod
 
 [Flags]
@@ -180,7 +199,7 @@ IEnumerable<List<T>> GetSubsets<T>(this IList<T> list, bool includeEmpty = true)
 IEnumerable<List<object>> GetSubsets(this IList list, bool includeEmpty = true);
 ```
 
-### static class ObjectExtensions
+#### static class ObjectExtensions
 
 Методы для объектов
 
@@ -188,4 +207,52 @@ IEnumerable<List<object>> GetSubsets(this IList list, bool includeEmpty = true);
 bool IsApiView(this object maybeView);          // Проверка того, что объект является представлением API (помечен ApiViewAttribute)
 bool IsApiViewList(this object maybeViewList);  // Проверка того, что объект является списком представлений API
 ViewCheckResult CheckAsView(this object view);  // Проверка объекта (через ViewChecker)
+```
+
+### Utils
+
+Служебные классы
+
+#### class ApiErrorView
+
+Представление ошибки API для передаче в теле ответа (с кодом 4xx).
+Имеет перегруженный метод `ToString()`, выдающий человекочитаемое описание дерева ошибок.
+**Конструировать такие объекты стоит только через `ApiErrorViewFactory`.**
+Свойства:
+
+```
+ApiErrorReason Reason { get; set; }             // Тип ошибки
+ApiContractType ViolatedContract { get; set; }  // Нарушенный контракт. Отличен от None только при Reason == ViewPropertyContractViolation
+string Context { get; set; }                    // Контекст возникновения ошибки
+string ViewType { get; set; }                   // Тип представления, нарушевшего контракт
+string ErrorMessage { get; set; }               // Человекочитаемое сообщение об ошибке
+List<ApiErrorView> InnerErrorList { get; set; } // Список дочерних ошибок. Отличен от null только при Reason == InnerErrors
+```
+
+#### static class ApiErrorViewFactory
+
+Служит для создания объектов типа `ApiErrorView`. **Подробно все методы описаны в исходниках.** Методы:
+
+```
+ApiErrorView None();
+ApiErrorView ViewPropertyContractViolation(object view,
+                                           string propertyName,
+                                           ApiContractType violatedContract);
+ApiErrorView ViewContractViolation(object view, string violatedContractName);
+ApiErrorView QueryParameterError(string parameterName);
+ApiErrorView QueryParameterAmbiguous(IEnumerable<string> availableParamSets);
+ApiErrorView ForeignKeyError(Type viewType, string keyName);
+ApiErrorView BusinessLogicError(string errorMessage);
+ApiErrorView InnerErrors(object view, List<ApiErrorView> innerErrorViews);
+ApiErrorView Unspecified(string errorMessage = null);
+```
+
+#### class ViewCheckResult
+
+Представление результата проверки. Свойства:
+
+```
+bool IsCorrect { get; }             // Пройдена ли проверка
+ApiErrorView ApiErrorView { get; }  // Представление ошибки в виде объекта
+string ErrorDescription { get; }    // Представление ошибки в виде строки
 ```

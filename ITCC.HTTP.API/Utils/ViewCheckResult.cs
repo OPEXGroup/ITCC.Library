@@ -2,6 +2,9 @@
 
 namespace ITCC.HTTP.API.Utils
 {
+    /// <summary>
+    ///     Represents view check result
+    /// </summary>
     public class ViewCheckResult
     {
         #region properties
