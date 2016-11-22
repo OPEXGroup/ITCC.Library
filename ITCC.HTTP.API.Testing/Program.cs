@@ -35,7 +35,13 @@ namespace ITCC.HTTP.API.Testing
                 Name = "Root",
                 Children = new List<NodeView>
                 {
-                    
+                    new NodeView
+                    {
+                        Children = new List<NodeView>
+                        {
+                            new NodeView()
+                        }
+                    }
                 },
                 IsLeaf = true
             };
