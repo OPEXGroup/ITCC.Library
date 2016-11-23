@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ITCC.HTTP.Server.Testing.Enums;
 using ITCC.HTTP.Server.Testing.Utils;
 using ITCC.Logging.Core;
+using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.HTTP.Server.Testing

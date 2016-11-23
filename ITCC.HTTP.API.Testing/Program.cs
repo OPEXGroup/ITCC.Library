@@ -4,6 +4,7 @@ using System.Text;
 using ITCC.HTTP.API.Extensions;
 using ITCC.HTTP.API.Testing.Views;
 using ITCC.Logging.Core;
+using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.HTTP.API.Testing

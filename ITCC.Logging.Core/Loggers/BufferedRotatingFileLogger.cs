@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.Logging.Windows.Utils;
+using ITCC.Logging.Core.Utils;
 
-namespace ITCC.Logging.Windows.Loggers
+namespace ITCC.Logging.Core.Loggers
 {
     public class BufferedRotatingFileLogger : IFlushableLogReceiver
     {
@@ -48,20 +47,14 @@ namespace ITCC.Logging.Windows.Loggers
             Level = level;
             FilesCount = filesCount;
             MaxFileSize = maxFileSize;
-            Frequency = frequency;
+            Frequency = Convert.ToInt32(Math.Floor(frequency));
             
             InitTimer();
         }
 
-        public void Start()
-        {
-            _queueTimer.Enabled = true;
-        }
+        public void Start() => _queueTimer.Change(0, Frequency);
 
-        public void Stop()
-        {
-            _queueTimer.Enabled = false;
-        }
+        public void Stop() => _queueTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
         public int FilesCount { get; }
 
@@ -69,16 +62,13 @@ namespace ITCC.Logging.Windows.Loggers
 
         public string FilenamePrefix { get; }
 
-        public double Frequency { get; }
+        public int Frequency { get; }
         #endregion
 
         #region private
         private void InitTimer()
         {
-            _queueTimer = new Timer(Frequency);
-            _queueTimer.Elapsed += QueueTimerOnElapsed;
-            _queueTimer.AutoReset = true;
-            _queueTimer.Enabled = true;
+            _queueTimer = new Timer(QueueTimerOnElapsed, null, 0, Frequency);
         }
 
         private bool FlushBuffer()
@@ -119,7 +109,7 @@ namespace ITCC.Logging.Windows.Loggers
 
         private string MakeFilename(int index) => $"{FilenamePrefix}_{index}.txt";
 
-        private void QueueTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) => Task.Run(() => FlushBuffer());
+        private void QueueTimerOnElapsed(object sender) => Task.Run(() => FlushBuffer());
 
         private Timer _queueTimer;
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
+using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Reader.Core;
 using ITCC.Logging.Windows.Loggers;
 

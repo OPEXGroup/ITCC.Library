@@ -1,9 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
-using ITCC.Logging.Core;
 
-namespace ITCC.Logging.Windows.Utils
+namespace ITCC.Logging.Core.Utils
 {
     internal static class FileUtils
     {
