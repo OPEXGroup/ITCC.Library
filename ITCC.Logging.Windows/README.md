@@ -6,43 +6,6 @@
 
 Уже написанные варианты получателя лога
 
-#### `class ConsoleLogger : ILogReceiver`
-
-Выводит лог в консоль. Основной конструктор 
-```
-ConsoleLogger(LogLevel level);
-```
-
-#### `class ColouredConsoleLogger : ConsoleLogger`
-
-Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор
-```
-ColouredConsoleLogger(LogLevel level);
-```
-
-#### `class FileLogger : ILogReceiver`
-
-Пишет лог в файл. Основной конструктор
-```
-FileLogger(string filename, LogLevel level, bool clearFile = false);
-```
-
-#### `class BufferedFileLogger : FileLogger, IFlushableLogReceiver`
-
-Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
-```
-BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
-```
-
-#### `class BufferedRotatingFileLogger : IFlushableLogReceiver`
-
-Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Файлы ротируются при достижении определенного размера.  
-**ВАЖНО: файлы ротируются только после очередного сброса очереди. Не гарантируется, что их размер не превышает `maxFileSize`**  
-Основной конструктор 
-```
-BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = 10000);
-```
-
 #### `class RotatingRequestLogger`
 
 Логгер, который собирает сообщения с список и выдает последние несколько сообщений по запросу. **Использует блокировки на очередь**

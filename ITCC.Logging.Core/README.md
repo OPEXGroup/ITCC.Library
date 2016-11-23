@@ -1,13 +1,23 @@
 ﻿# ITCC.Logging.Core
 
-**Компонент работает в .Net 4.6, .Net Core**  
+**Компонент работает в .Net 4.6, .Net Core, ASP.NET Core, Xamarin**  
 Библиотека для логгирования в сильно многопоточной среде. Основана на `event`'ах. Работает по упрощенному принципу `pub-sub`, при этом логгер выступает брокером. Содержит следующие компоненты (более подробное описание - исходники):
 
 ### Корневые
 
 #### `enum Loglevel`
 
-Возможные уровни лога (серьезности сообщений)
+Возможные уровни лога (серьезности сообщений). Значения:
+
+```
+None,
+Critical,
+Error,
+Warning,
+Info,
+Debug,
+Trace
+```
 
 #### `class LogEntryEventArgs`
 
@@ -62,9 +72,46 @@ Task Flush();
 
 Уже написанные варианты получателя лога
 
+#### `class BufferedFileLogger : FileLogger, IFlushableLogReceiver`
+
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
+```
+BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
+```
+
+#### `class BufferedRotatingFileLogger : IFlushableLogReceiver`
+
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Файлы ротируются при достижении определенного размера.  
+**ВАЖНО: файлы ротируются только после очередного сброса очереди. Не гарантируется, что их размер не превышает `maxFileSize`**  
+Основной конструктор 
+```
+BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = 10000);
+```
+
+#### `class ColouredConsoleLogger : ConsoleLogger`
+
+Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор
+```
+ColouredConsoleLogger(LogLevel level);
+```
+
+#### `class ConsoleLogger : ILogReceiver`
+
+Выводит лог в консоль. Основной конструктор 
+```
+ConsoleLogger(LogLevel level);
+```
+
 #### `class DebugLogger : ILogReceiver`
 
 Выводит лог в дебаггер (System.Diagnostics.Debug). Основной конструктор 
 ```
 DebugLogger(LogLevel level);
+```
+
+#### `class FileLogger : ILogReceiver`
+
+Пишет лог в файл. Основной конструктор
+```
+FileLogger(string filename, LogLevel level, bool clearFile = false);
 ```
