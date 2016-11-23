@@ -156,6 +156,11 @@ namespace ITCC.HTTP.Server.Files
                             await HandleFileGetRequest(context, filePath).ConfigureAwait(false);
                             return;
                         }
+                        if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
+                        {
+                            await HandleFileHeadRequest(context, filePath).ConfigureAwait(false);
+                            return;
+                        }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
                             await HandleFilePostRequest(context, section, filePath).ConfigureAwait(false);
@@ -342,6 +347,32 @@ namespace ITCC.HTTP.Server.Files
                 return;
             }
             await fileRequest.BuildResponse(context);
+        }
+
+        private Task HandleFileHeadRequest(HttpListenerContext context, string filePath)
+        {
+            if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
+            {
+                LogDebug($"File {filePath} was requested but is in progress");
+                ResponseFactory.BuildResponse(context, HttpStatusCode.ServiceUnavailable, null);
+                return Task.FromResult(0);
+            }
+
+            if (!File.Exists(filePath))
+            {
+                LogDebug($"File {filePath} was requested but was not found");
+                ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
+                return Task.FromResult(0);
+            }
+
+            var response = context.Response;
+            var fileInfo = new FileInfo(filePath);
+
+            response.ContentLength64 = fileInfo.Length;
+            response.StatusCode = (int) HttpStatusCode.OK;
+            response.ContentType = MimeTypes.GetTypeByExtenstion(Path.GetExtension(filePath).Substring(1));
+
+            return Task.FromResult(0);
         }
 
         private async Task HandleFilePostRequest(HttpListenerContext context, FileSection section, string filePath)
