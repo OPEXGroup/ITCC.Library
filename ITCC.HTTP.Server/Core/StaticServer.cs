@@ -250,6 +250,8 @@ namespace ITCC.HTTP.Server.Core
             InnerRequestProcessors.Clear();
             InnerStaticRedirectionTable.Clear();
             _listener = null;
+            _fileRequestController.Dispose();
+            _statisticsController.Dispose();
             ServiceUris.Clear();
         }
 

@@ -21,7 +21,7 @@ using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Files
 {
-    internal class FileRequestController<TAccount> : IServiceController
+    internal class FileRequestController<TAccount> : IServiceController, IDisposable
         where TAccount : class
     {
         #region IServiceRequestProcessor
@@ -41,6 +41,16 @@ namespace ITCC.HTTP.Server.Files
         }
 
         public string Name => "Files";
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            _preprocessTimer.Stop();
+            _preprocessTimer.Dispose();
+        }
+
         #endregion
 
         #region config

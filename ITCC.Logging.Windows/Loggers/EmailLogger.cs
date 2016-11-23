@@ -13,7 +13,7 @@ using ITCC.Logging.Windows.Utils;
 
 namespace ITCC.Logging.Windows.Loggers
 {
-    public class EmailLogger : IFlushableLogReceiver
+    public class EmailLogger : IFlushableLogReceiver, IDisposable
     {
         #region ILogReceiver
         public LogLevel Level { get; set; }
@@ -34,6 +34,16 @@ namespace ITCC.Logging.Windows.Loggers
         }
 
         public async Task Flush() => await FlushAndRestartTimer(EmailLoggerFlushReason.ForceFlush);
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Stop();
+            _updateTimer.Dispose();
+        }
 
         #endregion
 
@@ -59,6 +69,8 @@ namespace ITCC.Logging.Windows.Loggers
             Flush(EmailLoggerFlushReason.LoggerStarted).Wait();
             _updateTimer.Start();
         }
+
+        public void Stop() => _updateTimer.Stop();
 
         public string Login { get; private set; }
 

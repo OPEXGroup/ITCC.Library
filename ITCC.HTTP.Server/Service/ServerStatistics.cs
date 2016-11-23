@@ -12,9 +12,21 @@ using Timer = System.Timers.Timer;
 
 namespace ITCC.HTTP.Server.Service
 {
-    internal class ServerStatistics<TAccount>
+    internal class ServerStatistics<TAccount> : IDisposable
         where TAccount : class
     {
+        #region IDisposable
+
+        public void Dispose()
+        {
+            _memoryTimer.Stop();
+            _threadsTimer.Stop();
+            _memoryTimer.Dispose();
+            _threadsTimer.Dispose();
+        }
+
+        #endregion
+
         #region public 
         public ServerStatistics()
         {

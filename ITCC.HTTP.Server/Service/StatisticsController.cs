@@ -12,7 +12,7 @@ using ITCC.HTTP.Server.Utils;
 
 namespace ITCC.HTTP.Server.Service
 {
-    internal class StatisticsController<TAccount> : IServiceController
+    internal class StatisticsController<TAccount> : IServiceController, IDisposable
         where TAccount : class 
     {
         #region IServiceController
@@ -52,6 +52,12 @@ namespace ITCC.HTTP.Server.Service
         }
 
         public string Name => "Statistics";
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose() => Statistics.Dispose();
 
         #endregion
 

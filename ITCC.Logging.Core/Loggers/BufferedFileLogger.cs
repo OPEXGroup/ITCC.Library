@@ -7,7 +7,7 @@ using ITCC.Logging.Core.Utils;
 
 namespace ITCC.Logging.Core.Loggers
 {
-    public class BufferedFileLogger : FileLogger, IFlushableLogReceiver
+    public class BufferedFileLogger : FileLogger, IFlushableLogReceiver, IDisposable
     {
         #region IFlushableLogReceiver
         public override void WriteEntry(object sender, LogEntryEventArgs args)
@@ -21,6 +21,16 @@ namespace ITCC.Logging.Core.Loggers
         {
             FlushBuffer();
             return Task.FromResult(0);
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Stop();
+            _queueTimer.Dispose();
         }
 
         #endregion

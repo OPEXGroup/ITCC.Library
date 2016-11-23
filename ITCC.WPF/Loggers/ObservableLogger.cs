@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Timers;
 using ITCC.Logging.Core;
@@ -9,7 +10,7 @@ using ITCC.WPF.ViewModels;
 
 namespace ITCC.WPF.Loggers
 {
-    public class ObservableLogger : IFlushableLogReceiver
+    public class ObservableLogger : IFlushableLogReceiver, IDisposable
     {
         public const double FlushInterval = 5;
         public const int BufferSize = 100;
@@ -38,6 +39,16 @@ namespace ITCC.WPF.Loggers
             });
 
             return Task.FromResult(0);
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            _flushTimer.Stop();
+            _flushTimer.Dispose();
         }
 
         #endregion
