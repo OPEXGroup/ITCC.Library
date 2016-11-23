@@ -3,10 +3,11 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.Logging.Core.Utils;
+using ITCC.Logging.Windows.Utils;
 
-namespace ITCC.Logging.Core.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     public class BufferedRotatingFileLogger : IFlushableLogReceiver
     {

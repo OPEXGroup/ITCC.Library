@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Text;
+using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
 
-namespace ITCC.Logging.Core.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     public class FileLogger : ILogReceiver
     {

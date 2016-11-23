@@ -1,7 +1,8 @@
 ﻿using System;
+using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
 
-namespace ITCC.Logging.Core.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     /// <summary>
     ///     Simple logger for console

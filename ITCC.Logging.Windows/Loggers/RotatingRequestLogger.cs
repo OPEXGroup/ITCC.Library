@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.Logging.Core.Utils;
+using ITCC.Logging.Windows.Utils;
 
-namespace ITCC.Logging.Core.Loggers
+namespace ITCC.Logging.Windows.Loggers
 {
     /// <summary>
     ///     Logger than cat return last log entries by request

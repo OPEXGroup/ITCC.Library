@@ -6,11 +6,34 @@
 
 Уже написанные варианты получателя лога
 
-#### `class SystemEventLogger : ILogReceiver, IDisposable`
+#### `class BufferedFileLogger : FileLogger, IFlushableLogReceiver`
 
-Пишет лог в системные логи `Windows`. **Не поддерживает уровни логи ниже `Info`.** Основной конструктор 
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
 ```
-SystemEventLogger(string source, LogLevel level);
+BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
+```
+
+#### `class BufferedRotatingFileLogger : IFlushableLogReceiver`
+
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Файлы ротируются при достижении определенного размера.  
+**ВАЖНО: файлы ротируются только после очередного сброса очереди. Не гарантируется, что их размер не превышает `maxFileSize`**  
+Основной конструктор 
+```
+BufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = 10000);
+```
+
+#### `class ColouredConsoleLogger : ConsoleLogger`
+
+Выводит лог в консоль, раскрашивая его в зависимости от уровня. Использует дополнительные блокировки. Основной конструктор
+```
+ColouredConsoleLogger(LogLevel level);
+```
+
+#### `class ConsoleLogger : ILogReceiver`
+
+Выводит лог в консоль. Основной конструктор 
+```
+ConsoleLogger(LogLevel level);
 ```
 
 #### `class EmailLogger : IFlushableLogReceiver`
@@ -18,6 +41,38 @@ SystemEventLogger(string source, LogLevel level);
 Отправляет логи по почте Основной конструктор 
 ```
 EmailLogger(LogLevel level, EmailLoggerConfiguration configuration);
+```
+
+#### `class FileLogger : ILogReceiver`
+
+Пишет лог в файл. Основной конструктор
+```
+FileLogger(string filename, LogLevel level, bool clearFile = false);
+```
+
+#### `class RotatingRequestLogger ; ILogReceiver`
+
+Логгер, который собирает сообщения с список и выдает последние несколько сообщений по запросу. **Использует блокировки на очередь**
+
+Основной конструктор
+
+```
+RotatingRequestLogger(int capacity, LogLevel level);
+```
+
+Ключевые методы:
+
+```
+List<LogEntryEventArgs> GetEntries();          // Получение всех хранимых записей
+List<LogEntryEventArgs> GetEntries(int count); // Полученного заданного количества хранимых записей
+void Flush();                                  // Очистка очереди записей
+```
+
+#### `class SystemEventLogger : ILogReceiver, IDisposable`
+
+Пишет лог в системные логи `Windows`. **Не поддерживает уровни логи ниже `Info`.** Основной конструктор 
+```
+SystemEventLogger(string source, LogLevel level);
 ```
 
 ### Utils
