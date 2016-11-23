@@ -1,3 +1,7 @@
+## 2.2.2 (2016-11-23)
+
+* **New**:  Files HEAD requests implemented
+
 ## 2.2.1 (2016-11-23)
 
 * **Edit**: **BREAKING CHANGE**: Loggers splitted into desktop and portable versions
