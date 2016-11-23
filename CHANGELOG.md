@@ -1,3 +1,7 @@
+## 2.2.1 (2016-11-23)
+
+* **Edit**: **BREAKING CHANGE**: Loggers splitted into desktop and portable versions
+
 ## 2.2.0 (2016-11-23)
 
 * **Edit**: **BREAKING CHANGE**: `*FileLogger`, `*ConsoleLogger`, `RotatingRequestLogger` moved to ITCC.Logging.Core
