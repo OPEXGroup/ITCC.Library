@@ -1,4 +1,8 @@
-##
+## 2.2.0 (2016-11-23)
+
+* **Edit**: **BREAKING CHANGE**: `*FileLogger`, `*ConsoleLogger`, `RotatingRequestLogger` moved to ITCC.Logging.Core
+* **Edit**: `IDisposable` implemented in classes with timers  
+* **Edit**: `ItemsFilter` updated
 
 ## 2.1.2 (2016-11-22)
 
