@@ -79,4 +79,30 @@ Task Flush();
 DebugLogger(LogLevel level);
 ```
 
+#### `class PortableBufferedFileLogger : FileLogger, IFlushableLogReceiver`
+
+**НЕ РАБОТАЕТ в полном .Net**. 
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
+```
+PortableBufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
+```
+
+#### `class PortableBufferedRotatingFileLogger : IFlushableLogReceiver`
+
+**НЕ РАБОТАЕТ в полном .Net**. 
+Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Файлы ротируются при достижении определенного размера.  
+**ВАЖНО: файлы ротируются только после очередного сброса очереди. Не гарантируется, что их размер не превышает `maxFileSize`**  
+Основной конструктор 
+```
+PortableBufferedRotatingFileLogger(string filenamePrefix, LogLevel level, int filesCount = 10, long maxFileSize = 10 * 1024 * 1024, double frequency = 10000);
+```
+
+#### `class PortableFileLogger : ILogReceiver`
+
+**НЕ РАБОТАЕТ в полном .Net**. 
+Пишет лог в файл. Основной конструктор
+```
+PortableFileLogger(string filename, LogLevel level, bool clearFile = false);
+```
+
 
