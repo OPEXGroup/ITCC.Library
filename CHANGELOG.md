@@ -1,3 +1,5 @@
+##
+
 ## 2.1.2 (2016-11-22)
 
 * **Edit**: Build `ITCC.Logging.Core` and `ITCC.HTTP.API` against netstandard 1.3  

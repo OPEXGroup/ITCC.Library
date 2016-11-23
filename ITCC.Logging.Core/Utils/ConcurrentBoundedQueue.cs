@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ITCC.Logging.Windows.Utils
+namespace ITCC.Logging.Core.Utils
 {
     /// <summary>
     ///     Simple custom concurrent queue implementation

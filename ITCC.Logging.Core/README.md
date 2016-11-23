@@ -115,3 +115,21 @@ DebugLogger(LogLevel level);
 ```
 FileLogger(string filename, LogLevel level, bool clearFile = false);
 ```
+
+#### `class RotatingRequestLogger ; ILogReceiver`
+
+Логгер, который собирает сообщения с список и выдает последние несколько сообщений по запросу. **Использует блокировки на очередь**
+
+Основной конструктор
+
+```
+RotatingRequestLogger(int capacity, LogLevel level);
+```
+
+Ключевые методы:
+
+```
+List<LogEntryEventArgs> GetEntries();          // Получение всех хранимых записей
+List<LogEntryEventArgs> GetEntries(int count); // Полученного заданного количества хранимых записей
+void Flush();                                  // Очистка очереди записей
+```

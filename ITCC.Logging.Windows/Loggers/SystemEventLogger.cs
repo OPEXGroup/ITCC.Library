@@ -35,10 +35,8 @@ namespace ITCC.Logging.Windows.Loggers
         #endregion
 
         #region IDisposable
-        public void Dispose()
-        {
-            _eventLog.Dispose();
-        }
+        public void Dispose() => _eventLog.Dispose();
+
         #endregion
 
         #region public
