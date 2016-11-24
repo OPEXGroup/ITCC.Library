@@ -1,3 +1,7 @@
+## 2.2.4 (2016-11-24)
+
+* **Fix**:  Display generic types correctly in `ApiErrorView::ViewType`  
+
 ## 2.2.3 (2016-11-24)
 
 * **New**:  `NonSerializableTypes` option added to `HttpServerConfiguration`
