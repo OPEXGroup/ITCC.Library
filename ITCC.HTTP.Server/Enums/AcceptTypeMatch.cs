@@ -7,9 +7,9 @@ namespace ITCC.HTTP.Server.Enums
     {
         NotMatch,
 
-        TypeStar = 1,
+        TypeStar = 2,
 
-        SubtypeStar = 2,
+        SubtypeStar = 4,
 
         TypeMatch = 8,
 

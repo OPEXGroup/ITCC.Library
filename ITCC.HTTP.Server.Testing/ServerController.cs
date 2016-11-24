@@ -86,7 +86,8 @@ namespace ITCC.HTTP.Server.Testing
                         ContentType = "application/json",
                         Encoding = Encoding.UTF8,
                         Serializer = o => JsonConvert.SerializeObject(o,
-                            new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Serialize})
+                            new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Serialize}),
+                        IsDefault = true
                     }
                 }
             };

@@ -267,7 +267,7 @@ namespace ITCC.HTTP.Server.Core
             {
                 foreach (var bodyEncoder in _encoders)
                 {
-                    var normalizedMatch = (int)parsedType.Matches(bodyEncoder.ContentType)*parsedType.Qvalue;
+                    var normalizedMatch = (int)parsedType.Matches(bodyEncoder.ContentType)*parsedType.Qvalue + (bodyEncoder.IsDefault ? 1 : 0);
                     if (normalizedMatch > maxMatch)
                     {
                         selectedEncoder = bodyEncoder;
