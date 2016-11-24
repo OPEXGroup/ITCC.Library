@@ -1,3 +1,7 @@
+## 2.2.3 (2016-11-24)
+
+* **New**:  `NonSerializableTypes` option added to `HttpServerConfiguration`
+
 ## 2.2.2 (2016-11-23)
 
 * **New**:  Files HEAD requests implemented
