@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 using ITCC.HTTP.API.Extensions;
 using ITCC.HTTP.API.Testing.Views;
+using ITCC.HTTP.API.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Windows.Loggers;
@@ -57,6 +61,23 @@ namespace ITCC.HTTP.API.Testing
 
             var level = checkResult.IsCorrect ? LogLevel.Info : LogLevel.Warning;
             LogMessage(level, logBuilder.ToString());
+
+            var apiErrorView = ApiErrorViewFactory.ForeignKeyError(typeof(List<string>), "jljfslkdf");
+            using (var stringWriter = new StringWriter())
+            {
+                var settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    NewLineOnAttributes = true
+                };
+                using (var xmlWriter = XmlWriter.Create(stringWriter, settings))
+                {
+                    var xmlSerializer = new XmlSerializer(apiErrorView.GetType());
+                    xmlSerializer.Serialize(xmlWriter, apiErrorView);
+                }
+                LogMessage(LogLevel.Info, stringWriter.ToString());
+            }
+            
         }
 
         private static void InitLoggers()

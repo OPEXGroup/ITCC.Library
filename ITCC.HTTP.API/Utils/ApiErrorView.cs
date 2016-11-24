@@ -65,7 +65,7 @@ namespace ITCC.HTTP.API.Utils
             }
             else
             {
-                builder.AppendLine($"{indent}[{Context ?? "LOGIC",14}]: {ErrorMessage}");
+                builder.AppendLine($"{indent}[{ViewType ?? "LOGIC",14}]: [{Context}]: {ErrorMessage}");
             }
 
             return builder.ToString();

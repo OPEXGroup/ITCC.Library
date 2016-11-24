@@ -149,7 +149,30 @@ namespace ITCC.HTTP.API.Utils
 
         #region private
 
-        private static string GetTypeName(Type type) => type?.Name ?? "LOGIC";
+        private static string GetTypeName(Type type) => type?.GetFriendlyName() ?? "LOGIC";
+
+        private static string GetFriendlyName(this Type type)
+        {
+            var friendlyName = type.Name;
+            if (!type.IsConstructedGenericType)
+                return friendlyName;
+
+            var iBacktick = friendlyName.IndexOf('`');
+            if (iBacktick > 0)
+            {
+                friendlyName = friendlyName.Remove(iBacktick);
+            }
+            friendlyName += "<";
+            var typeParameters = type.GenericTypeArguments;
+            for (var i = 0; i < typeParameters.Length; ++i)
+            {
+                var typeParamName = typeParameters[i].Name;
+                friendlyName += (i == 0 ? typeParamName : "," + typeParamName);
+            }
+            friendlyName += ">";
+
+            return friendlyName;
+        }
 
         #endregion
     }
