@@ -1,3 +1,7 @@
+## 2.2.5 (2016-11-24)
+
+* **Fix**:  Encoder selection fixed in `ResponseFactory`  
+
 ## 2.2.4 (2016-11-24)
 
 * **Fix**:  Display generic types correctly in `ApiErrorView::ViewType`  
