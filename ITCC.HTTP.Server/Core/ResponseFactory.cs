@@ -103,7 +103,12 @@ namespace ITCC.HTTP.Server.Core
 
             string bodyString;
             if (!alreadyEncoded)
-                bodyString = encoder.Serializer == null ? body.ToString() : encoder.Serializer(body);
+            {
+                if (NonSerializableTypes.Any(t => t.IsInstanceOfType(body)))
+                    bodyString = body.ToString();
+                else
+                    bodyString = encoder.Serializer == null ? body.ToString() : encoder.Serializer(body);
+            }
             else
             {
                 bodyString = body as string;
@@ -162,6 +167,7 @@ namespace ITCC.HTTP.Server.Core
         }
 
         
+        public static List<Type> NonSerializableTypes = new List<Type>();
         public static bool LogResponseBodies = true;
         public static int ResponseBodyLogLimit = -1;
         public static readonly List<Tuple<string, string>> LogBodyReplacePatterns = new List<Tuple<string, string>>();

@@ -122,6 +122,7 @@ namespace ITCC.HTTP.Server.Core
             if (configuration.LogProhibitedHeaders != null)
                 ResponseFactory.LogProhibitedHeaders.AddRange(configuration.LogProhibitedHeaders);
 
+            ResponseFactory.NonSerializableTypes = configuration.NonSerializableTypes;
             ResponseFactory.SetBodyEncoders(configuration.BodyEncoders);
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;

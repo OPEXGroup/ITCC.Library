@@ -98,6 +98,11 @@ namespace ITCC.HTTP.Server.Core
         public List<BodyEncoder> BodyEncoders { get; set; } = new List<BodyEncoder> {new BodyEncoder()};
 
         /// <summary>
+        ///     For objects of these types simple ToString() will be invoked
+        /// </summary>
+        public List<Type> NonSerializableTypes { get; set; } = new List<Type>();
+
+        /// <summary>
         ///     If true, server will write response bodies into trace logs
         /// </summary>
         public bool LogResponseBodies { get; set; } = true;
@@ -163,6 +168,12 @@ namespace ITCC.HTTP.Server.Core
             if (BodyEncoders == null || BodyEncoders.Count == 0 || BodyEncoders.Count(be => be.IsDefault) > 1)
             {
                 LogMessage(LogLevel.Warning, "Bad BodyEncoders passed to Start()");
+                return false;
+            }
+
+            if (NonSerializableTypes == null)
+            {
+                LogMessage(LogLevel.Warning, "NonSerializableTypes cannot be null");
                 return false;
             }
 
