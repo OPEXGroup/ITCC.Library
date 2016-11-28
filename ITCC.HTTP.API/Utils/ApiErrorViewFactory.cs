@@ -66,6 +66,20 @@ namespace ITCC.HTTP.API.Utils
         };
 
         /// <summary>
+        ///     Constructs ApiErrorView with <see cref="ApiErrorReason.ViewSetConflict"/> reason.
+        ///     Means received view set conteins internal contradictions.
+        /// </summary>
+        /// <param name="view">Malformed view (List-type)</param>
+        /// <param name="errorMessage">Error description</param>
+        /// <returns>Constructed ApiErrorView</returns>
+        public static ApiErrorView ViewSetConflict(object view, string errorMessage) => new ApiErrorView
+        {
+            Reason = ApiErrorReason.ViewSetConflict,
+            ViewType = GetTypeName(view.GetType()),
+            ErrorMessage = errorMessage
+        };
+
+        /// <summary>
         ///     Constructs ApiErrorView with <see cref="ApiErrorReason.QueryParameterError"/> reason.
         ///     Means one of HTTP query params is missing or has invalid value.
         /// </summary>
