@@ -320,6 +320,7 @@ namespace ITCC.HTTP.Server.Core
             {HttpStatusCode.NotAcceptable, "Not Acceptable" },
             {HttpStatusCode.Conflict, "Conflict"},
             {HttpStatusCode.RequestEntityTooLarge, "Request Entity Too Large" },
+            {HttpStatusCode.UnsupportedMediaType, "Unsupported Media Type" },
             {HttpStatusCode.RequestedRangeNotSatisfiable, "Requested Range Not Satisfiable" },
             {(HttpStatusCode)429, "Too many requests"},
             {HttpStatusCode.InternalServerError, "Internal Server Error"},

@@ -50,6 +50,7 @@ namespace ITCC.HTTP.Client.Core
             {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError },
             {HttpStatusCode.NotAcceptable, ServerResponseStatus.ClientError },
             {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
+            {HttpStatusCode.UnsupportedMediaType, ServerResponseStatus.ClientError },
             {HttpStatusCode.RequestedRangeNotSatisfiable, ServerResponseStatus.ClientError },
             {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
             {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError },
