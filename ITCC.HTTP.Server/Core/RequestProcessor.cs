@@ -18,7 +18,7 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Request method
         /// </summary>
-        public HttpMethod Method;
+        public HttpMethod Method = HttpMethod.Get;
 
         /// <summary>
         ///     Request SubUri

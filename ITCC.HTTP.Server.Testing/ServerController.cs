@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using ITCC.HTTP.Server.Core;
@@ -22,6 +25,19 @@ namespace ITCC.HTTP.Server.Testing
 
             var startResult = StaticServer<AccountMock>.Start(config);
             Logger.LogEntry("SERV CONTROL", startResult == ServerStartStatus.Ok ? LogLevel.Info : LogLevel.Error, $"Start result: {startResult}");
+
+            StaticServer<AccountMock>.AddRequestProcessor(new RequestProcessor<AccountMock>
+            {
+                AuthorizationRequired = false,
+                Handler = (account, request) =>
+                {
+                    Logger.LogEntry("CONTENT", LogLevel.Info, $"{request.ContentType} (== null: {request.ContentType == null})");
+                    return Task.FromResult(new HandlerResult(HttpStatusCode.OK, null));
+                },
+                SubUri = "content",
+                Method = HttpMethod.Get
+            });
+
             return startResult == ServerStartStatus.Ok;
         }
 
