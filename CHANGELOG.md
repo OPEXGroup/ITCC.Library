@@ -1,3 +1,9 @@
+## 2.2.6 (2016-11-28)
+
+* **New**:  `415 Unsupported Media Type` is now processed by `StaticServer`, `RegularClient` and `StaticClient`  
+* **New**:  `ViewSetConflict` errors construction  
+* **Edit**: `RequestProcessor::Method` now defaults to `GET`  
+
 ## 2.2.5 (2016-11-24)
 
 * **Fix**:  Encoder selection fixed in `ResponseFactory`  
