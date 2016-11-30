@@ -32,7 +32,8 @@ namespace ITCC.HTTP.Testing
             };
             var serialized = JsonConvert.SerializeObject(testObject);
             var dummy = JsonConvert.DeserializeObject<None>(serialized);
-            
+
+            await Task.Yield();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
             Console.ReadLine();
         }
