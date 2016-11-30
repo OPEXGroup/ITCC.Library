@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client.Common;
+using ITCC.HTTP.Client.Interfaces;
 using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common.Enums;
 
@@ -328,6 +329,48 @@ namespace ITCC.HTTP.Client.Core
         #endregion
 
         #region properties
+
+        /// <summary>
+        ///     Request body serializer
+        /// </summary>
+        public static IBodySerializer BodySerializer
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.BodySerializer;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.BodySerializer = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     We assume responses have this content type by default
+        /// </summary>
+        public static ContentType DefaultContentType
+        {
+            get
+            {
+                lock (ClientLock)
+                {
+                    return RegularClient.DefaultContentType;
+                }
+            }
+            set
+            {
+                lock (ClientLock)
+                {
+                    RegularClient.DefaultContentType = value;
+                }
+            }
+        }
 
         /// <summary>
         ///     Http(s) server address
