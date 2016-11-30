@@ -1,3 +1,9 @@
+## 2.3.0 (2016-11-30)
+
+* **Edit**: **BREAKING CHANGE**: `RegularClient` and `StaticClient` API breaking changes  
+* **Edit**: `Either<TFirst, TSecond>` does not accept nulls in costructors    
+* **Edit**: Several minor fixes  
+
 ## 2.2.6 (2016-11-28)
 
 * **New**:  `415 Unsupported Media Type` is now processed by `StaticServer`, `RegularClient` and `StaticClient`  
