@@ -12,7 +12,7 @@ namespace ITCC.WPF.Testing
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         public MainWindow()
         {
@@ -24,6 +24,8 @@ namespace ITCC.WPF.Testing
 
             Logger.LogEntry("Test", LogLevel.Info, "Started");
         }
+
+        public void Dispose() => _observableLogger.Dispose();
 
         private void LogWindowButton_OnClick(object sender, RoutedEventArgs e)
         {
@@ -78,5 +80,6 @@ namespace ITCC.WPF.Testing
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e) => _logWindow?.Close();
+        
     }
 }

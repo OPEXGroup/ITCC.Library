@@ -182,6 +182,10 @@ namespace ITCC.Logging.Windows.Loggers
                     case EmailLoggerFlushReason.ForceFlush:
                         alarmStr = ", FORCE FLUSH";
                         break;
+                    case EmailLoggerFlushReason.LoggerStarted:
+                    case EmailLoggerFlushReason.RegularPeriodical:
+                        // No additional parts
+                        break;
                 }
                 priority = reason == EmailLoggerFlushReason.RegularPeriodical ? MailPriority.Normal : MailPriority.High;
                 subject = $"{Subject} ({counter} new entries{alarmStr})";

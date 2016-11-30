@@ -12,7 +12,7 @@ namespace ITCC.Logging.Core.Loggers
     /// <summary>
     ///     Used for .Net Core apps. MUST NOT be used for .Net 4.6 apps
     /// </summary>
-    public class PortableBufferedFileLogger : PortableFileLogger, IFlushableLogReceiver
+    public class PortableBufferedFileLogger : PortableFileLogger, IFlushableLogReceiver, IDisposable
     {
         #region IFlushableLogReceiver
         public override void WriteEntry(object sender, LogEntryEventArgs args)

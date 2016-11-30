@@ -27,8 +27,8 @@ namespace ITCC.HTTP.Client.Core
         /// <summary>
         ///     Most general http method
         /// </summary>
-        /// <typeparam name="TBody">Request body type</typeparam>
-        /// <typeparam name="TResult">Response body type</typeparam>
+        /// <typeparam name="TBody">Request body type. Use object for empty body</typeparam>
+        /// <typeparam name="TResult">Response body type. Use object for empty body</typeparam>
         /// <param name="method">Request method (GET/POST...)</param>
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
@@ -51,8 +51,20 @@ namespace ITCC.HTTP.Client.Core
             Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class => RegularClient.PerformRequestAsync(method, partialUri, parameters, headers, bodyArg,
-                requestBodySerializer, responseBodyDeserializer, authentificationProvider, outputStream, RegularClient.AllowedRedirectCount, cancellationToken);
+            CancellationToken cancellationToken = default(CancellationToken))
+                where TResult : class
+                where TBody : class
+                => RegularClient.PerformRequestAsync(method,
+                    partialUri,
+                    parameters,
+                    headers,
+                    bodyArg,
+                    requestBodySerializer,
+                    responseBodyDeserializer,
+                    authentificationProvider,
+                    outputStream,
+                    RegularClient.AllowedRedirectCount,
+                    cancellationToken);
 
         #endregion
 

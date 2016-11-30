@@ -67,8 +67,8 @@ namespace ITCC.HTTP.Client.Core
         /// <summary>
         ///     Most general http method
         /// </summary>
-        /// <typeparam name="TBody">Request body type</typeparam>
-        /// <typeparam name="TResult">Response body type</typeparam>
+        /// <typeparam name="TBody">Request body type. Use object for empty body</typeparam>
+        /// <typeparam name="TResult">Response body type. Use object for empty body</typeparam>
         /// <param name="method">Request method (GET/POST...)</param>
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
@@ -82,6 +82,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // ReSharper disable once FunctionComplexityOverflow
         internal async Task<RequestResult<TResult>> PerformRequestAsync<TBody, TResult>(
             HttpMethod method,
             string partialUri,
@@ -93,7 +94,9 @@ namespace ITCC.HTTP.Client.Core
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
             int redirectsLeft = 0,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
+            CancellationToken cancellationToken = default(CancellationToken))
+                where TResult : class
+                where TBody : class
         {
             var fullUri = UriHelper.BuildFullUri(_serverAddress, partialUri, parameters);
             if (fullUri == null)

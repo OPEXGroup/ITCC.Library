@@ -29,6 +29,10 @@ namespace ITCC.Logging.Windows.Loggers
                     case LogLevel.Trace:
                         Console.ForegroundColor = ConsoleColor.DarkCyan;
                         break;
+                    case LogLevel.None:
+                    case LogLevel.Debug:
+                        // Default color
+                        break;
                 }
                 Console.WriteLine(args);
                 Console.ResetColor();

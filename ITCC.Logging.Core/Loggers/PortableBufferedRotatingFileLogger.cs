@@ -8,7 +8,7 @@ using ITCC.Logging.Core.Utils;
 
 namespace ITCC.Logging.Core.Loggers
 {
-    public class PortableBufferedRotatingFileLogger : IFlushableLogReceiver
+    public class PortableBufferedRotatingFileLogger : IFlushableLogReceiver, IDisposable
     {
         #region IFlushableLogReceiver
         public LogLevel Level { get; set; }
@@ -24,6 +24,16 @@ namespace ITCC.Logging.Core.Loggers
             FlushBuffer();
             return Task.FromResult(0);
         }
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Stop();
+            _queueTimer.Dispose();
+        } 
+
         #endregion
 
         #region public
