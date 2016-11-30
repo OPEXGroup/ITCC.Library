@@ -1,4 +1,6 @@
-﻿namespace ITCC.HTTP.API.Utils
+﻿using System;
+
+namespace ITCC.HTTP.API.Utils
 {
     /// <summary>
     ///     Represents 'either' monad (one of two possible values).
@@ -14,8 +16,12 @@
         ///     Create instance with First != null
         /// </summary>
         /// <param name="first">First value</param>
+        /// <exception cref="ArgumentNullException">Thrown if first is null</exception>
         public Either(TFirst first)
         {
+            if (first == null)
+                throw new ArgumentNullException(nameof(first));
+
             First = first;
         }
 
@@ -23,8 +29,12 @@
         ///     Create instance with Second != null
         /// </summary>
         /// <param name="second">Second value</param>
+        /// <exception cref="ArgumentNullException">Thrown if second is null</exception>
         public Either(TSecond second)
         {
+            if (second == null)
+                throw new ArgumentNullException(nameof(second));
+
             Second = second;
         }
 

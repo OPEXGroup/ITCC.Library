@@ -14,7 +14,7 @@ namespace ITCC.HTTP.Client.Utils
         /// <summary>
         ///     Success request result (processed response body)
         /// </summary>
-        public TSuccess Success => _either.First;
+        public TSuccess Success => _either?.First;
 
         /// <summary>
         ///     True iff Success != null;
@@ -24,7 +24,7 @@ namespace ITCC.HTTP.Client.Utils
         /// <summary>
         ///     Success request result (processed response body)
         /// </summary>
-        public TError Error => _either.Second;
+        public TError Error => _either?.Second;
 
         /// <summary>
         ///     True iff Error != null;
@@ -56,21 +56,24 @@ namespace ITCC.HTTP.Client.Utils
 
         public VariadicRequestResult(TSuccess success, ServerResponseStatus status, IDictionary<string, string> headers = null)
         {
-            _either = new Either<TSuccess, TError>(success);
+            if (success != null)
+                _either = new Either<TSuccess, TError>(success);
             Status = status;
             Headers = headers ?? new Dictionary<string, string>();
         }
 
         public VariadicRequestResult(TError error, ServerResponseStatus status, IDictionary<string, string> headers = null)
         {
-            _either = new Either<TSuccess, TError>(error);
+            if (error != null)
+                _either = new Either<TSuccess, TError>(error);
             Status = status;
             Headers = headers ?? new Dictionary<string, string>();
         }
 
         public VariadicRequestResult(TError error, ServerResponseStatus status, Exception exception)
         {
-            _either = new Either<TSuccess, TError>(error);
+            if (error != null)
+                _either = new Either<TSuccess, TError>(error);
             Status = status;
             Exception = exception;
         }

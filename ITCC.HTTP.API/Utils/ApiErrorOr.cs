@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ITCC.HTTP.API.Utils
 {
@@ -14,12 +15,14 @@ namespace ITCC.HTTP.API.Utils
         ///     Creates error instance with given error
         /// </summary>
         /// <param name="errorView">Error view</param>
+        /// <exception cref="ArgumentNullException">Thrown if errorView is null</exception>
         /// <returns>Created ApiErrorOr</returns>
         public static ApiErrorOr<T> Error(ApiErrorView errorView) => new ApiErrorOr<T>(errorView);
         /// <summary>
         ///     Creates success instance with given data
         /// </summary>
         /// <param name="data">Success data</param>
+        /// <exception cref="ArgumentNullException">Thrown if data is null</exception>
         /// <returns>Created ApiErrorOr</returns>
         public static ApiErrorOr<T> Success(T data) => new ApiErrorOr<T>(data);
 
