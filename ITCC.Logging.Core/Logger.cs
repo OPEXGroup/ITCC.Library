@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.Logging.Core.Interfaces;
@@ -142,7 +143,7 @@ namespace ITCC.Logging.Core
                 return;
             if (level > Level || level == LogLevel.None || BannedScopes.Contains(scope.ToString()))
                 return;
-            var description = new StringBuilder($"EXCEPTION ({exception.GetType().Name})\n");
+            var description = new StringBuilder($"EXCEPTION ({exception.GetType().GetTypeInfo().Name})\n");
             try
             {
                 var tempException = exception;
