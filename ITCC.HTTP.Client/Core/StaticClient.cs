@@ -34,8 +34,6 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
         /// <param name="bodyArg">Object to be serialized to request body</param>
-        /// <param name="requestBodySerializer">Method to serialize request body</param>
-        /// <param name="responseBodyDeserializer">Method to deserialize response body</param>
         /// <param name="authentificationProvider">Method to add authentification data</param>
         /// <param name="outputStream">If not null, response body will be copied to this stream</param>
         /// <param name="cancellationToken">Task cancellation token</param>
@@ -47,20 +45,16 @@ namespace ITCC.HTTP.Client.Core
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             TBody bodyArg = default(TBody),
-            Delegates.BodySerializer requestBodySerializer = null,
-            Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
             CancellationToken cancellationToken = default(CancellationToken))
                 where TResult : class
                 where TBody : class
-                => RegularClient.PerformRequestAsync(method,
+                => RegularClient.PerformRequestAsync<TBody, TResult>(method,
                     partialUri,
                     parameters,
                     headers,
                     bodyArg,
-                    requestBodySerializer,
-                    responseBodyDeserializer,
                     authentificationProvider,
                     outputStream,
                     RegularClient.AllowedRedirectCount,
@@ -98,7 +92,6 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
-        /// <param name="bodyDeserializer">Method to convert string -> TResult</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
@@ -106,13 +99,12 @@ namespace ITCC.HTTP.Client.Core
             string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
-            Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-                => RegularClient.GetDeserializedAsync(partialUri,
+            CancellationToken cancellationToken = default(CancellationToken))
+                where TResult : class
+                => RegularClient.GetDeserializedAsync<TResult>(partialUri,
                     parameters,
                     headers,
-                    bodyDeserializer,
                     authentificationProvider,
                     cancellationToken);
 

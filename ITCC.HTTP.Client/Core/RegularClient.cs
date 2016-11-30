@@ -10,8 +10,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using ITCC.HTTP.Client.Common;
 using ITCC.HTTP.Client.Enums;
+using ITCC.HTTP.Client.Interfaces;
 using ITCC.HTTP.Client.Utils;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Common.Enums;
@@ -74,8 +76,6 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
         /// <param name="bodyArg">Object to be serialized to request body</param>
-        /// <param name="requestBodySerializer">Method to serialize request body</param>
-        /// <param name="responseBodyDeserializer">Method to deserialize response body</param>
         /// <param name="authentificationProvider">Method to add authentification data</param>
         /// <param name="outputStream">If not null, response body will be copied to this stream</param>
         /// <param name="redirectsLeft">How many times client is allowed to follow redirects</param>
@@ -89,8 +89,6 @@ namespace ITCC.HTTP.Client.Core
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             TBody bodyArg = default(TBody),
-            Delegates.BodySerializer requestBodySerializer = null,
-            Delegates.BodyDeserializer<TResult> responseBodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             Stream outputStream = null,
             int redirectsLeft = 0,
@@ -139,13 +137,7 @@ namespace ITCC.HTTP.Client.Core
                                 }
                                 else
                                 {
-                                    // We will be unable to serialize request body
-                                    if (requestBodySerializer == null)
-                                    {
-                                        LogDebug("Unable to serialize request body");
-                                        return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
-                                    }
-                                    requestBody = requestBodySerializer(bodyArg);
+                                    requestBody = _bodySerializer.Serialize(bodyArg);
                                     request.Content = new StringContent(requestBody);
                                 }
                             }
@@ -154,6 +146,7 @@ namespace ITCC.HTTP.Client.Core
                                 requestBody = bodyArg as string;
                                 request.Content = new StringContent(requestBody);
                             }
+                            request.Headers.Add("Content-Type", _bodySerializer.ContentType);
                         }
 
                         LogTrace($"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
@@ -189,13 +182,11 @@ namespace ITCC.HTTP.Client.Core
                                     if (PreserveAuthorizationOnRedirect)
                                         redirectAuthProvider = authentificationProvider;
 
-                                    return await PerformRequestAsync(method,
+                                    return await PerformRequestAsync<TBody, TResult>(method,
                                         redirectLocation,
                                         parameters,
                                         headers,
                                         bodyArg,
-                                        requestBodySerializer,
-                                        responseBodyDeserializer,
                                         redirectAuthProvider,
                                         outputStream,
                                         redirectsLeft - 1,
@@ -225,12 +216,12 @@ namespace ITCC.HTTP.Client.Core
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             LogTrace($"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
-                            if (responseBodyDeserializer != null)
+                            var decoder = SelectDecoder<TResult>(responseHeaders);
+                            if (decoder != null)
                             {
                                 try
                                 {
-                                    return new RequestResult<TResult>(responseBodyDeserializer(responseBody), status,
-                                        responseHeaders);
+                                    return new RequestResult<TResult>(decoder(responseBody), status, responseHeaders);
                                 }
                                 catch (Exception ex)
                                 {
@@ -297,8 +288,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     null,
-                    null,
-                    null,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -312,7 +301,6 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="partialUri">Uri part after server address/fqdn and port</param>
         /// <param name="parameters">Request parameters after `?`</param>
         /// <param name="headers">Request headers</param>
-        /// <param name="bodyDeserializer">Method to convert string -> TResult</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns></returns>
@@ -320,7 +308,6 @@ namespace ITCC.HTTP.Client.Core
             string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
-            Delegates.BodyDeserializer<TResult> bodyDeserializer = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
                 => PerformRequestAsync<string, TResult>(
@@ -329,8 +316,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     null,
-                    null,
-                    bodyDeserializer,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -359,8 +344,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     null,
-                    null,
-                    JsonConvert.DeserializeObject<TResult>,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -412,8 +395,6 @@ namespace ITCC.HTTP.Client.Core
                         parameters,
                         headers,
                         null,
-                        null,
-                        null,
                         authentificationProvider,
                         fileStream,
                         AllowedRedirectCount,
@@ -454,8 +435,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     data,
-                    null,
-                    null,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -479,15 +458,14 @@ namespace ITCC.HTTP.Client.Core
             IDictionary<string, string> headers = null,
             object data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-                => PerformRequestAsync(
+            CancellationToken cancellationToken = default(CancellationToken))
+                where TResult : class
+                => PerformRequestAsync<object, TResult>(
                     HttpMethod.Post,
                     partialUri,
                     parameters,
                     headers,
                     data,
-                    JsonConvert.SerializeObject,
-                    JsonConvert.DeserializeObject<TResult>,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -521,8 +499,6 @@ namespace ITCC.HTTP.Client.Core
                         parameters,
                         headers,
                         fileStream,
-                        null,
-                        null,
                         authentificationProvider,
                         null,
                         AllowedRedirectCount,
@@ -567,8 +543,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     data,
-                    null,
-                    null,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -601,8 +575,6 @@ namespace ITCC.HTTP.Client.Core
                         parameters,
                         headers,
                         fileStream,
-                        null,
-                        null,
                         authentificationProvider,
                         null,
                         AllowedRedirectCount,
@@ -647,8 +619,6 @@ namespace ITCC.HTTP.Client.Core
                     parameters,
                     headers,
                     data,
-                    null,
-                    null,
                     authentificationProvider,
                     null,
                     AllowedRedirectCount,
@@ -797,9 +767,72 @@ namespace ITCC.HTTP.Client.Core
             }
         }
 
+        #region decoders
+
+        private static TType DeserializeJson<TType>(string rawData) => JsonConvert.DeserializeObject<TType>(rawData);
+
+        private static TType DeserializeXml<TType>(string rawData)
+        {
+            var serializer = new XmlSerializer(typeof(TType));
+            using (TextReader reader = new StringReader(rawData))
+            {
+                return (TType)serializer.Deserialize(reader);
+            }
+        }
+
+        private Func<string, TType> SelectDecoder<TType>(IDictionary<string, string> responseHeaders)
+        {
+            string contentType;
+            if (!responseHeaders.TryGetValue("Content-Type", out contentType) || string.IsNullOrWhiteSpace(contentType))
+                return GetDefaultDecoder<TType>();
+
+            if (contentType.StartsWith("application/json", StringComparison.InvariantCultureIgnoreCase))
+                return DeserializeJson<TType>;
+            if (contentType.StartsWith("application/xml", StringComparison.InvariantCultureIgnoreCase))
+                return DeserializeXml<TType>;
+            return null;
+        }
+
+        private Func<string, TType> GetDefaultDecoder<TType>()
+        {
+            switch (DefaultContentType)
+            {
+                case ContentType.Json:
+                    return DeserializeJson<TType>;
+                case ContentType.Xml:
+                    return DeserializeXml<TType>;
+                default:
+                    return null;
+            }
+        }
+
+        private const string SupportedContentTypes = "application/json, application/xml";
+
+        #endregion
+
         #endregion
 
         #region properties
+
+        /// <summary>
+        ///     Request body serializer
+        /// </summary>
+        public IBodySerializer BodySerializer
+        {
+            get { return _bodySerializer; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                _bodySerializer = value;
+            }
+        }
+
+        /// <summary>
+        ///     We assume responses have this content type by default
+        /// </summary>
+        public ContentType DefaultContentType { get; set; } = ContentType.Json;
 
         /// <summary>
         ///     Http(s) server address
@@ -878,6 +911,7 @@ namespace ITCC.HTTP.Client.Core
         public List<string> LogProhibitedHeaders { get; } = new List<string>();
 
         private DecompressionMethods _decompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+        private IBodySerializer _bodySerializer = new JsonBodySerializer();
 
         #endregion
     }

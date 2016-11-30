@@ -15,14 +15,6 @@ namespace ITCC.HTTP.Client.Common
         public delegate bool AuthentificationDataAdder(HttpRequestMessage request);
 
         /// <summary>
-        ///     string -> TResult converter used to process request/response bodies.
-        /// </summary>
-        /// <typeparam name="TResult">Deserialization result type</typeparam>
-        /// <param name="data">Raw body</param>
-        /// <returns>Deserialized object</returns>
-        public delegate TResult BodyDeserializer<out TResult>(string data);
-
-        /// <summary>
         ///     TArg -> string converter used to create request/response bodies
         /// </summary>
         /// <param name="data">Object to put in body</param>
