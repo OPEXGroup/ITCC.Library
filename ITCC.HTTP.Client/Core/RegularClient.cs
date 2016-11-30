@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -31,36 +32,38 @@ namespace ITCC.HTTP.Client.Core
             if (serverAddress != null)
                 ServerAddress = serverAddress;
         }
+
         #endregion
 
         #region private
 
         private string _serverAddress = "http://127.0.0.1/";
 
-        private static readonly Dictionary<HttpStatusCode, ServerResponseStatus> ServerResponseStatusDictionary = new Dictionary<HttpStatusCode, ServerResponseStatus>
-        {
-            {HttpStatusCode.OK, ServerResponseStatus.Ok },
-            {HttpStatusCode.Created, ServerResponseStatus.Ok },
-            {HttpStatusCode.Accepted, ServerResponseStatus.Ok },
-            {HttpStatusCode.PartialContent, ServerResponseStatus.Ok },
-            {HttpStatusCode.NoContent, ServerResponseStatus.NothingToDo },
-            {HttpStatusCode.Unauthorized, ServerResponseStatus.Unauthorized },
-            {HttpStatusCode.Forbidden, ServerResponseStatus.Forbidden },
-            {HttpStatusCode.BadRequest, ServerResponseStatus.ClientError },
-            {HttpStatusCode.NotFound, ServerResponseStatus.ClientError },
-            {HttpStatusCode.Conflict, ServerResponseStatus.ClientError },
-            {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError },
-            {HttpStatusCode.NotAcceptable, ServerResponseStatus.ClientError },
-            {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError },
-            {HttpStatusCode.UnsupportedMediaType, ServerResponseStatus.ClientError },
-            {HttpStatusCode.RequestedRangeNotSatisfiable, ServerResponseStatus.ClientError },
-            {(HttpStatusCode)429, ServerResponseStatus.TooManyRequests },
-            {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError },
-            {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError },
-            {HttpStatusCode.ServiceUnavailable, ServerResponseStatus.TemporaryUnavailable },
-            {HttpStatusCode.MovedPermanently, ServerResponseStatus.Redirect },
-            {HttpStatusCode.Found, ServerResponseStatus.Redirect }
-        };
+        private static readonly Dictionary<HttpStatusCode, ServerResponseStatus> ServerResponseStatusDictionary = new Dictionary
+            <HttpStatusCode, ServerResponseStatus>
+            {
+                {HttpStatusCode.OK, ServerResponseStatus.Ok},
+                {HttpStatusCode.Created, ServerResponseStatus.Ok},
+                {HttpStatusCode.Accepted, ServerResponseStatus.Ok},
+                {HttpStatusCode.PartialContent, ServerResponseStatus.Ok},
+                {HttpStatusCode.NoContent, ServerResponseStatus.NothingToDo},
+                {HttpStatusCode.Unauthorized, ServerResponseStatus.Unauthorized},
+                {HttpStatusCode.Forbidden, ServerResponseStatus.Forbidden},
+                {HttpStatusCode.BadRequest, ServerResponseStatus.ClientError},
+                {HttpStatusCode.NotFound, ServerResponseStatus.ClientError},
+                {HttpStatusCode.Conflict, ServerResponseStatus.ClientError},
+                {HttpStatusCode.MethodNotAllowed, ServerResponseStatus.ClientError},
+                {HttpStatusCode.NotAcceptable, ServerResponseStatus.ClientError},
+                {HttpStatusCode.RequestEntityTooLarge, ServerResponseStatus.ClientError},
+                {HttpStatusCode.UnsupportedMediaType, ServerResponseStatus.ClientError},
+                {HttpStatusCode.RequestedRangeNotSatisfiable, ServerResponseStatus.ClientError},
+                {(HttpStatusCode) 429, ServerResponseStatus.TooManyRequests},
+                {HttpStatusCode.InternalServerError, ServerResponseStatus.ServerError},
+                {HttpStatusCode.NotImplemented, ServerResponseStatus.ServerError},
+                {HttpStatusCode.ServiceUnavailable, ServerResponseStatus.TemporaryUnavailable},
+                {HttpStatusCode.MovedPermanently, ServerResponseStatus.Redirect},
+                {HttpStatusCode.Found, ServerResponseStatus.Redirect}
+            };
 
         #endregion
 
@@ -93,14 +96,64 @@ namespace ITCC.HTTP.Client.Core
             Stream outputStream = null,
             int redirectsLeft = 0,
             CancellationToken cancellationToken = default(CancellationToken))
-                where TResult : class
-                where TBody : class
+            where TResult : class
+            where TBody : class
+        {
+            var variadicResult = await PerformVariadicRequestAsync<TBody, TResult, NoError>(
+                method,
+                partialUri,
+                parameters,
+                headers,
+                bodyArg,
+                authentificationProvider,
+                outputStream,
+                redirectsLeft,
+                cancellationToken);
+
+            if (variadicResult.Exception != null)
+                return new RequestResult<TResult>(variadicResult.Success, variadicResult.Status, variadicResult.Exception);
+            return new RequestResult<TResult>(variadicResult.Success, variadicResult.Status, variadicResult.Headers);
+        }
+
+        /// <summary>
+        ///     Most general http method
+        /// </summary>
+        /// <typeparam name="TRequestBody">Request body type. Use object for empty body</typeparam>
+        /// <typeparam name="TResponseSuccess">Success response body type. Use object for empty body</typeparam>
+        /// <typeparam name="TResponseError">Error response body type. Use object for empty body</typeparam>
+        /// <param name="method">Request method (GET/POST...)</param>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="bodyArg">Object to be serialized to request body</param>
+        /// <param name="authentificationProvider">Method to add authentification data</param>
+        /// <param name="outputStream">If not null, response body will be copied to this stream</param>
+        /// <param name="redirectsLeft">How many times client is allowed to follow redirects</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // ReSharper disable once FunctionComplexityOverflow
+        internal async Task<VariadicRequestResult<TResponseSuccess, TResponseError>> PerformVariadicRequestAsync
+            <TRequestBody, TResponseSuccess, TResponseError>(
+                HttpMethod method,
+                string partialUri,
+                IDictionary<string, string> parameters = null,
+                IDictionary<string, string> headers = null,
+                TRequestBody bodyArg = default(TRequestBody),
+                Delegates.AuthentificationDataAdder authentificationProvider = null,
+                Stream outputStream = null,
+                int redirectsLeft = 0,
+                CancellationToken cancellationToken = default(CancellationToken))
+            where TRequestBody : class
+            where TResponseSuccess : class
+            where TResponseError : class
         {
             var fullUri = UriHelper.BuildFullUri(_serverAddress, partialUri, parameters);
             if (fullUri == null)
             {
                 LogDebug($"Failed to build uri with addr={_serverAddress} and uri {partialUri}");
-                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError);
+                return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError),
+                    ServerResponseStatus.ClientError);
             }
 
             try
@@ -128,7 +181,7 @@ namespace ITCC.HTTP.Client.Core
                         var requestBody = "";
                         if (bodyArg != null)
                         {
-                            if (typeof(TBody) != typeof(string))
+                            if (typeof(TRequestBody) != typeof(string))
                             {
                                 var bodyStream = bodyArg as Stream;
                                 if (bodyStream != null)
@@ -148,11 +201,17 @@ namespace ITCC.HTTP.Client.Core
                             }
                             request.Headers.Add("Content-Type", _bodySerializer.ContentType);
                         }
+                        foreach (var contentType in SupportedContentTypes)
+                        {
+                            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
+                        }
 
                         LogTrace($"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
-                            var responseHeaders = response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key, httpResponseHeader => string.Join(";", httpResponseHeader.Value));
+                            var responseHeaders =
+                                response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key,
+                                    httpResponseHeader => string.Join(";", httpResponseHeader.Value));
 
                             var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
                                 ? ServerResponseStatusDictionary[response.StatusCode]
@@ -162,42 +221,55 @@ namespace ITCC.HTTP.Client.Core
                             {
                                 if (redirectsLeft <= 0)
                                 {
-                                    return new RequestResult<TResult>(null, ServerResponseStatus.Redirect, responseHeaders);
+                                    return
+                                        new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                            default(TResponseSuccess), ServerResponseStatus.Redirect, responseHeaders);
                                 }
                                 if (method == HttpMethod.Head || method == HttpMethod.Get)
                                 {
                                     if (!responseHeaders.ContainsKey("Location"))
                                     {
-                                        return new RequestResult<TResult>(null,
-                                            ServerResponseStatus.IncompehensibleResponse, responseHeaders);
+                                        return
+                                            new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                                default(TResponseError),
+                                                ServerResponseStatus.IncompehensibleResponse, responseHeaders);
                                     }
                                     var redirectLocation = responseHeaders["Location"];
                                     if (!redirectLocation.StartsWith(_serverAddress) && !AllowRedirectHostChange)
                                     {
-                                        return new RequestResult<TResult>(null,
-                                            ServerResponseStatus.Redirect, responseHeaders);
+                                        return
+                                            new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                                default(TResponseSuccess),
+                                                ServerResponseStatus.Redirect, responseHeaders);
                                     }
 
                                     Delegates.AuthentificationDataAdder redirectAuthProvider = null;
                                     if (PreserveAuthorizationOnRedirect)
                                         redirectAuthProvider = authentificationProvider;
 
-                                    return await PerformRequestAsync<TBody, TResult>(method,
-                                        redirectLocation,
-                                        parameters,
-                                        headers,
-                                        bodyArg,
-                                        redirectAuthProvider,
-                                        outputStream,
-                                        redirectsLeft - 1,
-                                        cancellationToken);
+                                    return
+                                        await
+                                            PerformVariadicRequestAsync<TRequestBody, TResponseSuccess, TResponseError>(
+                                                method,
+                                                redirectLocation,
+                                                parameters,
+                                                headers,
+                                                bodyArg,
+                                                redirectAuthProvider,
+                                                outputStream,
+                                                redirectsLeft - 1,
+                                                cancellationToken);
                                 }
-                                return new RequestResult<TResult>(null, ServerResponseStatus.Redirect, responseHeaders);
+                                return
+                                    new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                        default(TResponseSuccess), ServerResponseStatus.Redirect, responseHeaders);
                             }
 
                             if (outputStream != null)
                             {
-                                var result = new RequestResult<TResult>(null, status, responseHeaders);
+                                var result =
+                                    new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                        default(TResponseSuccess), status, responseHeaders);
                                 try
                                 {
                                     if (response.Content != null)
@@ -216,26 +288,42 @@ namespace ITCC.HTTP.Client.Core
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             LogTrace($"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
-                            var decoder = SelectDecoder<TResult>(responseHeaders);
-                            if (decoder != null)
+                            var successDecoder = SelectDecoder<TResponseSuccess>(responseHeaders);
+                            if (successDecoder != null)
                             {
                                 try
                                 {
-                                    return new RequestResult<TResult>(decoder(responseBody), status, responseHeaders);
+                                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                        successDecoder(responseBody), status, responseHeaders);
                                 }
                                 catch (Exception ex)
                                 {
                                     LogExceptionDebug(ex);
-                                    return new RequestResult<TResult>(default(TResult),
-                                        ServerResponseStatus.IncompehensibleResponse, responseHeaders);
+                                    try
+                                    {
+                                        var errorDecoder = SelectDecoder<TResponseError>(responseHeaders);
+                                        if (errorDecoder == null)
+                                        {
+                                            return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError),
+                                                ServerResponseStatus.IncompehensibleResponse, responseHeaders);
+                                        }
+                                        return new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                            errorDecoder(responseBody), status, responseHeaders);
+                                    }
+                                    catch (Exception innerException)
+                                    {
+                                        LogExceptionDebug(innerException);
+                                        return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError),
+                                            ServerResponseStatus.IncompehensibleResponse, responseHeaders);
+                                    }
                                 }
                             }
-                            if (typeof(TResult) != typeof(string) && typeof(TResult) != typeof(object))
+                            if (typeof(TResponseSuccess) != typeof(string) && typeof(TResponseSuccess) != typeof(object))
                             {
-                                return new RequestResult<TResult>(default(TResult),
+                                return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError),
                                         ServerResponseStatus.ClientError, responseHeaders);
                             }
-                            return new RequestResult<TResult>(responseBody as TResult,
+                            return new VariadicRequestResult<TResponseSuccess, TResponseError>(responseBody as TResponseSuccess,
                                         status, responseHeaders);
                         }
                     }
@@ -246,20 +334,20 @@ namespace ITCC.HTTP.Client.Core
                 if (cancellationToken.IsCancellationRequested)
                 {
                     LogDebug($"Request {method.Method} /{partialUri} has been cancelled");
-                    return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestCancelled, ocex);
+                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError), ServerResponseStatus.RequestCancelled, ocex);
                 }
                 LogDebug($"Request {method.Method} /{partialUri} has been timed out ({RequestTimeout} seconds)");
-                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.RequestTimeout, ocex);
+                return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError), ServerResponseStatus.RequestTimeout, ocex);
             }
             catch (HttpRequestException networkException)
             {
                 LogExceptionDebug(networkException);
-                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ConnectionError, networkException);
+                return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError), ServerResponseStatus.ConnectionError, networkException);
             }
             catch (Exception exception)
             {
                 LogExceptionDebug(exception);
-                return new RequestResult<TResult>(default(TResult), ServerResponseStatus.ClientError, exception);
+                return new VariadicRequestResult<TResponseSuccess, TResponseError>(default(TResponseError), ServerResponseStatus.ClientError, exception);
             }
         }
 
@@ -657,8 +745,6 @@ namespace ITCC.HTTP.Client.Core
         [Conditional("DEBUG")]
         private static void LogDebug(string message) => Logger.LogDebug("HTTP CLIENT", message);
 
-        private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP CLIENT", level, message);
-
         private static void LogException(LogLevel level, Exception exception) => Logger.LogException("HTTP CLIENT", level, exception);
 
         private static void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug("HTTP CLIENT", exception);
@@ -806,7 +892,11 @@ namespace ITCC.HTTP.Client.Core
             }
         }
 
-        private const string SupportedContentTypes = "application/json, application/xml";
+        private static readonly List<string> SupportedContentTypes = new List<string>
+        {
+            "application/json",
+            "application/xml"
+        };
 
         #endregion
 

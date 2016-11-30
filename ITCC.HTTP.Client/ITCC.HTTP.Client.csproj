@@ -86,8 +86,11 @@
     <Compile Include="Core\RegularClient.cs" />
     <Compile Include="Core\StaticClient.cs" />
     <Compile Include="Utils\JsonBodySerializer.cs" />
+    <Compile Include="Utils\NoError.cs" />
+    <Compile Include="Utils\None.cs" />
     <Compile Include="Utils\RequestResult.cs" />
     <Compile Include="Utils\UriHelper.cs" />
+    <Compile Include="Utils\VariadicRequestResult.cs" />
     <Compile Include="Utils\XmlBodySerializer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +99,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ITCC.HTTP.API\ITCC.HTTP.API.csproj">
+      <Project>{A0AD6ED0-19AF-4980-AAF8-BA3A4A12A46D}</Project>
+      <Name>ITCC.HTTP.API</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
       <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
       <Name>ITCC.HTTP.Common</Name>
