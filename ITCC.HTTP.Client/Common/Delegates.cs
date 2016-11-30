@@ -13,12 +13,5 @@ namespace ITCC.HTTP.Client.Common
         /// <param name="request">Outcoming request</param>
         /// <returns>Operation status</returns>
         public delegate bool AuthentificationDataAdder(HttpRequestMessage request);
-
-        /// <summary>
-        ///     TArg -> string converter used to create request/response bodies
-        /// </summary>
-        /// <param name="data">Object to put in body</param>
-        /// <returns>Serialized data</returns>
-        public delegate string BodySerializer(object data);
     }
 }
