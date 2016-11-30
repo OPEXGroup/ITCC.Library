@@ -384,34 +384,6 @@ namespace ITCC.HTTP.Client.Core
                     );
 
         /// <summary>
-        ///     Methods sends GET and tries to deserialize body
-        /// </summary>
-        /// <typeparam name="TResult">Result object type</typeparam>
-        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
-        /// <param name="parameters">Request parameters after `?`</param>
-        /// <param name="headers">Request headers</param>
-        /// <param name="authentificationProvider">Authentification provider</param>
-        /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns></returns>
-        public Task<RequestResult<TResult>> GetDeserializedAsync<TResult>(
-            string partialUri,
-            IDictionary<string, string> parameters = null,
-            IDictionary<string, string> headers = null,
-            Delegates.AuthentificationDataAdder authentificationProvider = null,
-            CancellationToken cancellationToken = default(CancellationToken)) where TResult : class
-                => PerformRequestAsync<string, TResult>(
-                    HttpMethod.Get,
-                    partialUri,
-                    parameters,
-                    headers,
-                    null,
-                    authentificationProvider,
-                    null,
-                    AllowedRedirectCount,
-                    cancellationToken
-                    );
-
-        /// <summary>
         ///     Method tries to deserialize response as TResult
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
@@ -596,7 +568,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<RequestResult<TResult>> PostAsync<TResult>(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -628,7 +600,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<TSuccess, TError>> PostVariadicAsync<TSuccess, TError>(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -660,7 +632,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<TSuccess, ApiErrorView>> PostWithApiErrorAsync<TSuccess>(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -765,7 +737,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<string, TError>> PutVariadicAsync<TError>(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -795,7 +767,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<string, ApiErrorView>> PutWithApiErrorAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -873,10 +845,10 @@ namespace ITCC.HTTP.Client.Core
             string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
-            object data = null,
+            string data = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
-                => PerformRequestAsync<object, string>(
+                => PerformRequestAsync<string, string>(
                     HttpMethod.Delete,
                     partialUri,
                     parameters,
@@ -898,7 +870,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<string, TError>> DeleteVariadicAsync<TError>(
             string partialUri,
             IDictionary<string, string> parameters = null,
@@ -928,7 +900,7 @@ namespace ITCC.HTTP.Client.Core
         /// <param name="data">Raw request body</param>
         /// <param name="authentificationProvider">Authentification provider</param>
         /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>Response result and deserialized TResult</returns>
+        /// <returns>Response result and deserialized body</returns>
         public Task<VariadicRequestResult<string, ApiErrorView>> DeleteWithApiErrorAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,

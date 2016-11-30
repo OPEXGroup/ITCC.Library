@@ -5,7 +5,7 @@ namespace ITCC.HTTP.Client.Utils
 {
     public class JsonBodySerializer : IBodySerializer
     {
-        #region properties
+        #region IBodySerializer
         public string ContentType => "application/json";
         public string Serialize(object data)
         {

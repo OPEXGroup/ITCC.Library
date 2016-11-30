@@ -6,7 +6,7 @@ namespace ITCC.HTTP.Client.Utils
 {
     public class XmlBodySerializer
     {
-        #region properties
+        #region IBodySerializer
         public string ContentType => "application/xml";
         public string Serialize(object data)
         {
