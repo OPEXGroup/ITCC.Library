@@ -1,3 +1,8 @@
+## 2.3.1 (2016-12-09)
+
+* **Edit**: `Logger` portability improved  
+* **Fix**:  Small docs fixes
+
 ## 2.3.0 (2016-11-30)
 
 * **Edit**: **BREAKING CHANGE**: `RegularClient` and `StaticClient` API breaking changes  
