@@ -1,7 +1,7 @@
 ﻿namespace ITCC.HTTP.Server.Enums
 {
     /// <summary>
-    ///     <see cref="Isengard.HTTP.Server.Start" />
+    ///     <see cref="Core.StaticServer&lt;TAccount&gt;.Start" />
     /// </summary>
     public enum ServerStartStatus
     {

@@ -4,7 +4,7 @@ using ITCC.HTTP.API.Enums;
 namespace ITCC.HTTP.API.Attributes
 {
     /// <summary>
-    ///     Says that class or struct represents Isengard public API view. 
+    ///     Says that class or struct represents public API view. 
     ///     All API views MUST have this attributes and all other classes MUST NOT
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

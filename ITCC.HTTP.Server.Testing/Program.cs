@@ -37,7 +37,7 @@ namespace ITCC.HTTP.Server.Testing
             {
                 Console.OutputEncoding = Encoding.UTF8;
                 Console.InputEncoding = Encoding.Unicode;
-                Console.Title = @"Isengard Server 2016";
+                Console.Title = @"ITCC Test Server 2016";
                 var consoleLogger = new ColouredConsoleLogger();
                 Logger.RegisterReceiver(consoleLogger, true);
             }
