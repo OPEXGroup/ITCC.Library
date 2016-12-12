@@ -982,7 +982,7 @@ namespace ITCC.HTTP.Client.Core
                     }
                     else
                     {
-                        var normalValue = string.Join("", header.Value);
+                        var normalValue = string.Join(", ", header.Value);
                         builder.AppendLine($"{header.Key}: {normalValue}");
                     }
                 }
