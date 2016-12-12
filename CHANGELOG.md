@@ -1,3 +1,7 @@
+## 2.3.2 (2016-12-12)
+
+* **Fix**:  `RegularClient::SerializeHttpRequestMessage` headers format fixed  
+
 ## 2.3.1 (2016-12-09)
 
 * **Edit**: `Logger` portability improved  
