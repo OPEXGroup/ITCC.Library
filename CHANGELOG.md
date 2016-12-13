@@ -1,3 +1,8 @@
+## 2.4.0 (2016-12-13)
+
+* **New**:  `StaticServer` memory overhead warnings added  
+* **New**:  `CriticalMemoryValue` and `MemoryAlarmStrategy` added to `HttpServerConfiguration`  
+
 ## 2.3.2 (2016-12-12)
 
 * **Fix**:  `RegularClient::SerializeHttpRequestMessage` headers format fixed  
