@@ -30,7 +30,7 @@ namespace ITCC.HTTP.Server.Service
         #region public 
         public ServerStatistics()
         {
-            _memoryTimer = new Timer(MemortSamplingPeriod);
+            _memoryTimer = new Timer(MemorySamplingPeriod);
             _memoryTimer.Elapsed += MemoryTimerOnElapsed;
             _memoryTimer.Start();
 
@@ -318,7 +318,7 @@ namespace ITCC.HTTP.Server.Service
         /// <summary>
         ///     Milliseconds
         /// </summary>
-        private const double MemortSamplingPeriod = 100;
+        private const double MemorySamplingPeriod = 100;
 
         /// <summary>
         ///     Milliseconds

@@ -157,6 +157,8 @@ namespace ITCC.HTTP.Server.Core
         /// </summary>
         public double RequestMaxServeTime { get; set; } = -1;
 
+
+
         public bool IsEnough()
         {
             if (SubjectName == null)
