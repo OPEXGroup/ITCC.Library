@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Common;
+using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.SslConfigUtil.Core;
 using ITCC.HTTP.SslConfigUtil.Core.Enums;
@@ -157,7 +158,15 @@ namespace ITCC.HTTP.Server.Core
         /// </summary>
         public double RequestMaxServeTime { get; set; } = -1;
 
+        /// <summary>
+        ///     Memory size in megabytes after which warnings will be thrown. Negative values mean never
+        /// </summary>
+        public int CriticalMemoryValue { get; set; } = -1;
 
+        /// <summary>
+        ///     Memory pressure alarm interval startegy
+        /// </summary>
+        public MemoryAlarmStrategy MemoryAlarmStrategy { get; set; } = MemoryAlarmStrategy.Fibonacci;
 
         public bool IsEnough()
         {
@@ -206,6 +215,12 @@ namespace ITCC.HTTP.Server.Core
             if (FilesPreprocessingEnabled && FilesPreprocessorThreads == 0)
             {
                 LogMessage(LogLevel.Warning, "Cannot use zero threads for files preprocessing");
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(MemoryAlarmStrategy), MemoryAlarmStrategy))
+            {
+                LogMessage(LogLevel.Warning, "Invalid memeory alarm strategy");
                 return false;
             }
 

@@ -2,6 +2,7 @@
 using System.Text;
 using ITCC.HTTP.Server.Testing.Enums;
 using ITCC.HTTP.Server.Testing.Utils;
+using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
 

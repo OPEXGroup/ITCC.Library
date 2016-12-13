@@ -111,7 +111,10 @@ namespace ITCC.HTTP.Server.Core
         private static void PrepareStatistics(HttpServerConfiguration<TAccount> configuration)
         {
             _statisticsController = configuration.StatisticsEnabled
-                ? new StatisticsController<TAccount>(new ServerStatistics<TAccount>(), configuration.StatisticsAuthorizer)
+                ? new StatisticsController<TAccount>(new ServerStatistics<TAccount>(
+                        configuration.CriticalMemoryValue,
+                        configuration.MemoryAlarmStrategy),
+                    configuration.StatisticsAuthorizer)
                 : new StatisticsController<TAccount>(null, null);
         }
 

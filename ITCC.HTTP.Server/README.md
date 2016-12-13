@@ -118,6 +118,10 @@ string FaviconPath { get; set; }                                                
 string ServerName { get; set; }                                                   // Имя сервера для заголовков Server:
 
 double RequestMaxServeTime { get; set; } = 1;                                     // Допустимое время обработки запроса (после него кидается предупреждение)
+
+int CriticalMemoryValue { get; set; } = -1;                                       // Размер памяти процесса в мегабайтах, после которого выдается предупреждение. Отрицательные значения - предупреждения не выдаются
+MemoryAlarmStrategy MemoryAlarmStrategy { get; set; }                             // Стратегия задания интервалов предупреждений об избыточном потреблении памяти 
+= MemoryAlarmStrategy.Fibonacci;
 ```
 
 #### `static class MimeTypes`
@@ -201,7 +205,16 @@ FilesNotEnabled,    // Файлы отключены на сервере
 Error               // Непредвиденная ошибка
 ``` 
 
-#### `enum Protocol`
+#### `enum MemoryAlarmStrategy`
+
+Стратегии определения интервалов предупреждений об избыточном использовании памяти процессом. Значения:
+
+```
+Constant,   // 1 минута, 1 минута, 1 минута, 1 минута, 1 минута
+Linear,     // 1 минута, 2 минуты, 3 минуты, 4 минуты, 5 минут
+Geometric,  // 1 минута, 2 минуты, 4 минуты, 8 минут, 16 минут
+Fibonacci   // 1 минута, 2 минуты, 3 минуты, 5 минут, 8 минут
+```
 
 #### `enum ServerStartStatus`
 

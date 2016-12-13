@@ -83,6 +83,7 @@
     <Compile Include="Enums\AuthorizationStatus.cs" />
     <Compile Include="Enums\FileOperationStatus.cs" />
     <Compile Include="Enums\FileType.cs" />
+    <Compile Include="Enums\MemoryAlarmStrategy.cs" />
     <Compile Include="Enums\ServerStartStatus.cs" />
     <Compile Include="Files\FileSection.cs" />
     <Compile Include="Files\FileRequestController.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Service\StatisticsController.cs" />
     <Compile Include="Utils\CommonHelper.cs" />
     <Compile Include="Utils\ConstantCounterProvider.cs" />
+    <Compile Include="Utils\CounterProviderFactory.cs" />
     <Compile Include="Utils\FibonacciCounterProvider.cs" />
     <Compile Include="Utils\GeometricCounterProvider.cs" />
     <Compile Include="Utils\LinearCounterProvider.cs" />

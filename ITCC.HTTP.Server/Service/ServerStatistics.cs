@@ -2,12 +2,14 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
-using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Timers;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Enums;
+using ITCC.HTTP.Server.Interfaces;
+using ITCC.HTTP.Server.Utils;
+using ITCC.Logging.Core;
 using Timer = System.Timers.Timer;
 
 namespace ITCC.HTTP.Server.Service
@@ -28,8 +30,14 @@ namespace ITCC.HTTP.Server.Service
         #endregion
 
         #region public 
-        public ServerStatistics()
+        public ServerStatistics(int criticalMemoryValue, MemoryAlarmStrategy memoryAlarmStrategy)
         {
+            _criticalMemoryValue = criticalMemoryValue;
+            _counterProvider = CounterProviderFactory.BuildCounterProvider(memoryAlarmStrategy, StartMemoryWarningCount);
+            _memoryIntervalSamplesLeft = _counterProvider.GetNextCount();
+            _memorySampleCount = _memoryIntervalSamplesLeft;
+            _memoryOverheadOccured = false;
+
             _memoryTimer = new Timer(MemorySamplingPeriod);
             _memoryTimer.Elapsed += MemoryTimerOnElapsed;
             _memoryTimer.Start();
@@ -160,7 +168,47 @@ namespace ITCC.HTTP.Server.Service
                 _totalMemory += currentMemory;
 
                 _memorySamples++;
+
+                if (MemoryWarningsEnabled)
+                    ProcessPossibleMemoryOverhead();
             }
+        }
+
+        private void ProcessPossibleMemoryOverhead()
+        {
+            var memoryValueInMegabytes = (double) _currentMemory/(1024*1024);
+            if (memoryValueInMegabytes > _criticalMemoryValue)
+            {
+                _memoryOverheadOccured = true;
+                _memoryOverheadValue = memoryValueInMegabytes;
+                _memoryOverheadCount++;
+            }
+
+            _memoryIntervalSamplesLeft--;
+            if (_memoryIntervalSamplesLeft > 0)
+                return;
+
+            if (_memoryOverheadOccured)
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine($"SERVER MEMORY OVERHEAD (Max {_criticalMemoryValue} MBs allowed)");
+                builder.AppendLine($"Took {_memorySampleCount} samples during last {_memorySampleCount} seconds");
+                var overheadSamplesPercentage = (double) _memoryOverheadCount*100/_memorySampleCount;
+                builder.AppendLine($"Total {_memoryOverheadCount} overhead samples ({overheadSamplesPercentage:F1}%)");
+                var overheadValuePercentage = _memoryOverheadValue * 100 / _criticalMemoryValue;
+                builder.AppendLine($"Max memory value {_memoryOverheadValue:F1} MBs ({overheadValuePercentage:F1}%)");
+                Logger.LogEntry("SERVER STAT", LogLevel.Warning, builder.ToString());
+            }
+            else
+            {
+                _counterProvider.Reset();
+                _memoryOverheadOccured = false;
+                _memoryOverheadCount = 0;
+            }
+
+            _memoryIntervalSamplesLeft = _counterProvider.GetNextCount();
+            _memorySampleCount = _memoryIntervalSamplesLeft;
+            _memoryOverheadCount = 0;
         }
 
         private void SerilalizeStatisticsHeader(StringBuilder builder)
@@ -318,7 +366,9 @@ namespace ITCC.HTTP.Server.Service
         /// <summary>
         ///     Milliseconds
         /// </summary>
-        private const double MemorySamplingPeriod = 100;
+        private const double MemorySamplingPeriod = 1000;
+
+        private const long StartMemoryWarningCount = 60;
 
         /// <summary>
         ///     Milliseconds
@@ -351,6 +401,20 @@ namespace ITCC.HTTP.Server.Service
         private long _currentMemory;
         private double _totalMemory;
         private long _memorySamples;
+
+        private readonly int _criticalMemoryValue;
+        private readonly IIntervalCounterProvider _counterProvider;
+        private bool MemoryWarningsEnabled => _criticalMemoryValue > 0;
+        private bool _memoryOverheadOccured;
+        /// <summary>
+        ///     MBs
+        /// </summary>
+        private double _memoryOverheadValue;
+
+        private long _memorySampleCount;
+        private long _memoryOverheadCount;
+
+        private long _memoryIntervalSamplesLeft;
 
         private readonly Timer _threadsTimer;
 

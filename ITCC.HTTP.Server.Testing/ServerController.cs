@@ -105,7 +105,8 @@ namespace ITCC.HTTP.Server.Testing
                             new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Serialize}),
                         IsDefault = true
                     }
-                }
+                },
+                CriticalMemoryValue = 1
             };
         }
     }
