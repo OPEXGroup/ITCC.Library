@@ -40,7 +40,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         {
             try
             {
-                return TaskQueue.Any(t => t.FileName == fileName);
+                return TaskQueue.Any(t => t.FileName == fileName)
+                    || WorkerThreads.Any(t => t.CurrentFile == fileName);
             }
             catch (Exception ex)
             {

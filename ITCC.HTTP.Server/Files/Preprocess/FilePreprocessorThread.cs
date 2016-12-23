@@ -23,7 +23,34 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         public void Join() => _thread.Join();
 
-        public void Stop() => _thread.Abort();
+        public void Stop(bool hard)
+        {
+            lock (_stopLock)
+            {
+                _stopRequested = true;
+            }
+
+            if (hard)
+                _thread.Abort();
+        }
+
+        public string CurrentFile
+        {
+            get
+            {
+                lock (_fileLock)
+                {
+                    return _currentFile;
+                }
+            }
+            private set
+            {
+                lock (_fileLock)
+                {
+                    _currentFile = value;
+                }
+            }
+        }
 
         #endregion
 
@@ -36,12 +63,21 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             {
                 try
                 {
+                    lock (_stopLock)
+                    {
+                        if (_stopRequested)
+                            return;
+                    }
+
                     BaseFilePreprocessTask task;
                     if (!_taskQueue.TryDequeue(out task))
                     {
                         Thread.Sleep(Constants.FilesPreprocessorThreadSleepInterval);
                         continue;
                     }
+
+                    CurrentFile = task.FileName;
+                    Thread.MemoryBarrier();
 
                     if (!task.Perform())
                         LogMessage(LogLevel.Warning, $"Task for file {task.FileName} ({task.FileType}) failed");
@@ -63,6 +99,13 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         private readonly string _name;
         private Thread _thread;
         private readonly ConcurrentQueue<BaseFilePreprocessTask> _taskQueue;
+
+        private readonly object _fileLock = new object();
+        private string _currentFile;
+
+        private bool _stopRequested;
+        private readonly object _stopLock = new object();
+        
         #endregion
 
         #region log
