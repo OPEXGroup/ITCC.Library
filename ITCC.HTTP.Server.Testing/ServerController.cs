@@ -74,6 +74,7 @@ namespace ITCC.HTTP.Server.Testing
                 },
                 FilesLocation = Configuration.FilesLocation,
                 FilesPreprocessingEnabled = true,
+                FilesCompressionEnabled = true,
                 FilesPreprocessorThreads = -1,
                 BodyEncoders = new List<BodyEncoder>
                 {
@@ -106,7 +107,7 @@ namespace ITCC.HTTP.Server.Testing
                         IsDefault = true
                     }
                 },
-                CriticalMemoryValue = 1
+                CriticalMemoryValue = 1024
             };
         }
     }

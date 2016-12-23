@@ -43,7 +43,9 @@ namespace ITCC.HTTP.Server.Files
             {"bmp", FileType.Image },
             {"gif", FileType.Image },
             {"ico", FileType.Image },
-            {"mp4", FileType.Video }
+            {"mp4", FileType.Video },
+            {"mkv", FileType.Video },
+            {"avi", FileType.Video }
         };
 
         private static readonly object DictLock = new object();

@@ -46,7 +46,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
             using (var originalFileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                using (var compressedFileStream = File.Create(gzipName))
+                using (var compressedFileStream = new FileStream(gzipName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 {
                     using (var compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress))
                     {
