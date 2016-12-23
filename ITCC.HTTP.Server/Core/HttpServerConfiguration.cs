@@ -68,6 +68,10 @@ namespace ITCC.HTTP.Server.Core
         /// </summary>
         public bool FilesPreprocessingEnabled { get; set; } = true;
         /// <summary>
+        ///     If true, zipped copies of all files will be created. Works only with FilesPreprocessingEnabled
+        /// </summary>
+        public bool FilesCompressionEnabled { get; set; } = false;
+        /// <summary>
         ///     Number of threads used for files preprocessing. All CPU cores will be used for negative values
         /// </summary>
         public int FilesPreprocessorThreads { get; set; } = -1;

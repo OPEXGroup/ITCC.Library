@@ -9,10 +9,11 @@ namespace ITCC.HTTP.Server.Files.Preprocess
     internal class FilePreprocessorThread
     {
         #region public
-        public FilePreprocessorThread(ConcurrentQueue<BaseFilePreprocessTask> taskQueue, string name)
+        public FilePreprocessorThread(ConcurrentQueue<BaseFilePreprocessTask> taskQueue, string name, bool compressFiles)
         {
             _name = name;
             _taskQueue = taskQueue;
+            _compressFiles = compressFiles;
         }
 
         public void Start()
@@ -83,6 +84,14 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                         LogMessage(LogLevel.Warning, $"Task for file {task.FileName} ({task.FileType}) failed");
                     else
                         LogDebug($"Task for file {task.FileName} ({task.FileType}) completed");
+
+                    if (_compressFiles)
+                    {
+                        if (! task.ZipAllChanged())
+                            LogMessage(LogLevel.Warning, $"Compression for file {task.FileName} ({task.FileType}) failed");
+                        else
+                            LogDebug($"Compression for file {task.FileName} ({task.FileType}) completed");
+                    }
                 }
                 catch (ThreadAbortException)
                 {
@@ -105,6 +114,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         private bool _stopRequested;
         private readonly object _stopLock = new object();
+
+        private bool _compressFiles;
         
         #endregion
 

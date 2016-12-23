@@ -155,6 +155,7 @@ namespace ITCC.HTTP.Server.Core
                 FilesLocation = configuration.FilesLocation,
                 FilesNeedAuthorization = configuration.FilesNeedAuthorization,
                 FilesPreprocessingEnabled = configuration.FilesPreprocessingEnabled,
+                FilesCompressionEnabled = configuration.FilesCompressionEnabled,
                 FilesPreprocessorThreads = configuration.FilesPreprocessorThreads
             },
             _statisticsController.Statistics);

@@ -73,6 +73,9 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                 return false;
             }
         }
+
+        public override List<string> GetAllFiles()
+            => IoHelper.LoadAllChanged(FileName);
         #endregion
 
         #region private

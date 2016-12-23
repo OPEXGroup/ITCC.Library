@@ -10,12 +10,12 @@ namespace ITCC.HTTP.Server.Files.Preprocess
     internal static class FilePreprocessController
     {
         #region public
-        public static bool Start(int workerThreads)
+        public static bool Start(int workerThreads, bool compressFiles)
         {
             var realThreadNumber = workerThreads > 0 ? workerThreads : Environment.ProcessorCount;
             for (var i = 0; i < realThreadNumber; ++i)
             {
-                WorkerThreads.Add(new FilePreprocessorThread(TaskQueue, $"FPP-0{i + 1}"));
+                WorkerThreads.Add(new FilePreprocessorThread(TaskQueue, $"FPP-0{i + 1}", compressFiles));
             }
             WorkerThreads.ForEach(t => t.Start());
 

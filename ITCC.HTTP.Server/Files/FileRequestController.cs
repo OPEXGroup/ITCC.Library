@@ -76,7 +76,8 @@ namespace ITCC.HTTP.Server.Files
 
             if (FilesPreprocessingEnabled && FilesEnabled)
             {
-                FilePreprocessController.Start(configuration.FilesPreprocessorThreads);
+                FilePreprocessController.Start(configuration.FilesPreprocessorThreads,
+                    configuration.FilesCompressionEnabled);
                 if (ExistingFilesPreprocessingFrequency > 0)
                 {
                     PreprocessExistingFiles();
