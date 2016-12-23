@@ -28,10 +28,8 @@ namespace ITCC.HTTP.Server.Files.Requests
         public abstract RequestRange Range { get; protected set; }
         public abstract bool BuildRequest(string fileName, HttpListenerRequest request);
 
-        public virtual async Task BuildResponse(HttpListenerContext context)
-        {
-            await BuildRangeResponse(context, FileName);
-        }
+        public virtual Task BuildResponse(HttpListenerContext context)
+            => BuildRangeResponse(context, FileName);
 
         #endregion
 
