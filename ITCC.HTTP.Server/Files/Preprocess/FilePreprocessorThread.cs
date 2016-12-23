@@ -23,7 +23,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
         public void Join() => _thread.Join();
 
-        public void Stop(bool hard)
+        public void Stop(bool hard = false)
         {
             lock (_stopLock)
             {
