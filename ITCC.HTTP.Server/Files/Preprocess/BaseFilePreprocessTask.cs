@@ -2,10 +2,8 @@
 using ITCC.HTTP.Server.Enums;
 using ITCC.Logging.Core;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 
 namespace ITCC.HTTP.Server.Files.Preprocess
 {
@@ -46,22 +44,21 @@ namespace ITCC.HTTP.Server.Files.Preprocess
             LogDebug($"Compressing {filename}");
             var gzipName = GzipName(filename);
 
-            using (FileStream originalFileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var originalFileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                using (FileStream compressedFileStream = File.Create(gzipName))
+                using (var compressedFileStream = File.Create(gzipName))
                 {
-                    using (GZipStream compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress))
+                    using (var compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress))
                     {
                         // This is CPU-bound, do synchronously
                         originalFileStream.CopyTo(compressionStream);
                     }
                 }
-                FileInfo info = new FileInfo(gzipName);
             }
             LogDebug($"Compressed {filename}");
         }
 
-        private string GzipName(string originalName) => originalName + ".gz";
+        private static string GzipName(string originalName) => originalName + ".gz";
 
         #endregion
 

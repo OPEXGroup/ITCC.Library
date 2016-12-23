@@ -1,5 +1,4 @@
-﻿using System;
-using ITCC.HTTP.Server.Enums;
+﻿using ITCC.HTTP.Server.Enums;
 using System.Collections.Generic;
 
 namespace ITCC.HTTP.Server.Files.Preprocess

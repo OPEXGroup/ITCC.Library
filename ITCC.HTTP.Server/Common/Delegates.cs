@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Core;
