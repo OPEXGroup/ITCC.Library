@@ -10,56 +10,48 @@ namespace ITCC.HTTP.SslConfigUtil.Console
         #region ParamList
         internal static readonly List<CommandParameter> ParamList = new List<CommandParameter>
         {
-            new CommandParameter
+            new CommandParameter("-ip")
             {
-                Name = "-ip",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Target interface ip address. Use 0.0.0.0 for listening on all interfaces."
             },
-            new CommandParameter
+            new CommandParameter("-port")
             {
-                Name = "-port",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Port using for listen on"
             },
-            new CommandParameter
+            new CommandParameter("-assemblyPath")
             {
-                Name = "-assemblyPath",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"Full path to server assebmly."
             },
-            new CommandParameter
+            new CommandParameter("-cn")
             {
-                Name = "-cn",
                 IsFlag = false,
                 IsRequired = true,
                 Description = @"FQDN of service. Matching SSL certificate will be obtained from Localhost certificateStore. If certificate doesn't exist or is invalid - binding will be aborted. Use '-createCertificate' param to create self-signed certificate and use it."
             },
-            new CommandParameter
+            new CommandParameter("-certPath")
             {
-                Name = "-certPath",
                 IsFlag = false,
                 IsRequired = false,
                 Description = @"Full path to certificate file."
             },
-            new CommandParameter
+            new CommandParameter("-createCertificate")
             {
-                Name = "-createCertificate",
                 IsFlag = true,
                 Description = @"Creates self-signed certificate with specified CN."
             },
-            new CommandParameter
+            new CommandParameter("-verbose")
             {
-                Name = "-verbose",
                 IsFlag = true,
                 Description = @"Verbose output."
             },
-            new CommandParameter
+            new CommandParameter("-help")
             {
-                Name = "-help",
                 IsFlag = true,
                 Description = @""
             },

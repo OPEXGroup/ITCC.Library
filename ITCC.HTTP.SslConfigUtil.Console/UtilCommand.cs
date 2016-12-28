@@ -24,7 +24,15 @@ namespace ITCC.HTTP.SslConfigUtil.Console
     }
     internal class CommandParameter : IEquatable<CommandParameter>
     {
-        public string Name { get; set; }
+        public CommandParameter(string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            Name = name;
+        }
+
+        public string Name { get; }
         public string Description { get; set; }
         public bool IsFlag { get; set; }
         public bool IsRequired { get; set; }
@@ -32,6 +40,7 @@ namespace ITCC.HTTP.SslConfigUtil.Console
         public List<CommandParameter> RequiredParameters { get; set; } = new List<CommandParameter>();
         public List<CommandParameter> ConflictParameters { get; set; } = new List<CommandParameter>();
 
-        public bool Equals(CommandParameter other) => Name.Equals(other.Name);
+        public bool Equals(CommandParameter other) => Name.Equals(other?.Name);
+        public override int GetHashCode() => Name.GetHashCode();
     }
 }
