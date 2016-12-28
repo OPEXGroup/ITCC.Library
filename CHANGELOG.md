@@ -1,3 +1,9 @@
+## 2.4.1 (2016-12-28)
+
+* **New**:  `StaticServer` now supports background file gzipping  
+* **Fix**:  Minor fixes after PVS-studio check  
+* **Fix**:  Possible race conditions fixed in FilePreprocessController  
+
 ## 2.4.0 (2016-12-13)
 
 * **New**:  `StaticServer` memory overhead warnings added  
