@@ -291,6 +291,26 @@ namespace ITCC.HTTP.Client.Core
                             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             LogTrace($"Got response:\n{SerializeHttpResponseMessage(response, responseBody)}");
+                            if (typeof(TResponseSuccess) == typeof(string))
+                            {
+                                try
+                                {
+                                    var errorDeserializer = SelectDeserializer<TResponseError>(responseHeaders);
+                                    if (errorDeserializer == null)
+                                    {
+                                        return new VariadicRequestResult<TResponseSuccess, TResponseError>(response as TResponseSuccess,
+                                            status, responseHeaders);
+                                    }
+                                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(
+                                        errorDeserializer(responseBody), status, responseHeaders);
+                                }
+                                catch (Exception)
+                                {
+                                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(response as TResponseSuccess,
+                                        status, responseHeaders);
+                                }
+                            }
+
                             var successDeserializer = SelectDeserializer<TResponseSuccess>(responseHeaders);
                             if (successDeserializer != null)
                             {
