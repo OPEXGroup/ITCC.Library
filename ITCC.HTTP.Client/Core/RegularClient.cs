@@ -298,7 +298,7 @@ namespace ITCC.HTTP.Client.Core
                                     var errorDeserializer = SelectDeserializer<TResponseError>(responseHeaders);
                                     if (errorDeserializer == null)
                                     {
-                                        return new VariadicRequestResult<TResponseSuccess, TResponseError>(response as TResponseSuccess,
+                                        return new VariadicRequestResult<TResponseSuccess, TResponseError>(responseBody as TResponseSuccess,
                                             status, responseHeaders);
                                     }
                                     return new VariadicRequestResult<TResponseSuccess, TResponseError>(
@@ -306,7 +306,7 @@ namespace ITCC.HTTP.Client.Core
                                 }
                                 catch (Exception)
                                 {
-                                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(response as TResponseSuccess,
+                                    return new VariadicRequestResult<TResponseSuccess, TResponseError>(responseBody as TResponseSuccess,
                                         status, responseHeaders);
                                 }
                             }
