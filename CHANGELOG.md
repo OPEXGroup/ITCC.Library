@@ -1,3 +1,7 @@
+## 2.4.2 (2017-01-09)
+
+* **Fix**:  `StaticClient` and `RegularClient` fix in case `TResponseSuccess` is raw string  
+
 ## 2.4.1 (2016-12-28)
 
 * **New**:  `StaticServer` now supports background file gzipping  
