@@ -87,6 +87,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     else
                         LogDebug($"Task for file {task.FileName} ({task.FileType}) completed");
 
+                    CurrentFile = null;
                     if (_compressFiles)
                     {
                         if (! task.ZipAllChanged())
