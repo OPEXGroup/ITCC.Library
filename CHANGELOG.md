@@ -1,3 +1,8 @@
+## 2.4.4 (2017-01-12)
+
+* **Fix**:  Prevent files from multiple gzipping in `FilePreprocessorController`    
+* **Fix**:  Unlock files correctly after processing in `FilePreprocessorThread`  
+
 ## 2.4.3 (2017-01-12)
 
 * **Fix**:  `StaticClient` and `RegularClient` `Content-Type` fix for `POST` requests  
