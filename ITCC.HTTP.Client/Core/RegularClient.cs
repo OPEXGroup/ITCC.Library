@@ -34,6 +34,8 @@ namespace ITCC.HTTP.Client.Core
         {
             if (serverAddress != null)
                 ServerAddress = serverAddress;
+
+            ServicePointManager.Expect100Continue = false;
         }
 
         #endregion
@@ -194,7 +196,7 @@ namespace ITCC.HTTP.Client.Core
                                 else
                                 {
                                     requestBody = _bodySerializer.Serialize(bodyArg);
-                                    request.Content = new StringContent(requestBody);
+                                    request.Content = new StringContent(requestBody, _bodySerializer.Encoding, _bodySerializer.ContentType);
                                 }
                             }
                             else
@@ -202,7 +204,6 @@ namespace ITCC.HTTP.Client.Core
                                 requestBody = bodyArg as string;
                                 request.Content = new StringContent(requestBody);
                             }
-                            request.Headers.Add("Content-Type", _bodySerializer.ContentType);
                         }
                         foreach (var contentType in SupportedContentTypes)
                         {
@@ -1008,10 +1009,19 @@ namespace ITCC.HTTP.Client.Core
                         builder.AppendLine($"{header.Key}: {normalValue}");
                     }
                 }
+                if (request.Content?.Headers != null)
+                {
+                    foreach (var header in request.Content.Headers)
+                    {
+                        var normalValue = string.Join(", ", header.Value);
+                        builder.AppendLine($"{header.Key}: {normalValue}");
+                    }
+                }
 
                 if (requestBody == null)
                     return builder.ToString();
 
+                builder.AppendLine();
                 var processedResponseBody = requestBody;
                 foreach (var logBodyReplacePattern in LogBodyReplacePatterns)
                 {
