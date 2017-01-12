@@ -1,3 +1,7 @@
+## 2.4.3 (2017-01-12)
+
+* **Fix**:  `StaticClient` and `RegularClient` `Content-Type` fix for `POST` requests  
+
 ## 2.4.2 (2017-01-09)
 
 * **Fix**:  `StaticClient` and `RegularClient` fix in case `TResponseSuccess` is raw string  
