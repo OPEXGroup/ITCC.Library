@@ -300,6 +300,7 @@ TemporaryUnavailable,      // Ресурс временно недоступен
 Реализации, доступные по умолчанию - `JsonBodySerializer` и `XmlBodySerializer`.
 
 ```
+Encoding Encoding { get; }
 string ContentType { get; }
 string Serialize(object data);
 ```
@@ -308,7 +309,7 @@ string Serialize(object data);
 
 #### `class JsonBodySerializer : IBodySerializer`
 
-Сериализатор в JSON
+Сериализатор в JSON (UTF-8)
 
 #### `class RequestResult<TResult>`
 
@@ -349,4 +350,4 @@ Exception Exception { get; }                        // Исключение, в�
 
 #### `class XmlBodySerializer : IBodySerializer`
 
-Сериализатор в XML
+Сериализатор в XML (UTF-8)
