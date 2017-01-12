@@ -45,6 +45,8 @@ namespace ITCC.HTTP.Server.Files.Preprocess
         {
             LogDebug($"Compressing {filename}");
             var gzipName = GzipName(filename);
+            if (File.Exists(gzipName))
+                return;
 
             using (var originalFileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
