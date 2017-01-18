@@ -36,11 +36,7 @@ namespace ITCC.HTTP.Server.Files
             return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-        public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
-        {
-            await HandleFileRequest(context).ConfigureAwait(false);
-            completionCallback(context, stopwatch);
-        }
+        public Task HandleRequest(HttpListenerContext context) => HandleFileRequest(context);
 
         public string Name => "Files";
         #endregion

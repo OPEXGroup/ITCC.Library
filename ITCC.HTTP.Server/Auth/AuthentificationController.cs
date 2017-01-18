@@ -27,7 +27,7 @@ namespace ITCC.HTTP.Server.Auth
             return request.QueryString["login"] != null && request.QueryString["password"] != null;
         }
 
-        public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
+        public async Task HandleRequest(HttpListenerContext context)
         {
             AuthentificationResult authResult;
             var request = context.Request;
@@ -38,7 +38,6 @@ namespace ITCC.HTTP.Server.Auth
             if (authResult == null)
                 throw new InvalidOperationException("Authentificator fault: null result");
             ResponseFactory.BuildResponse(context, authResult);
-            completionCallback(context, stopwatch);
         }
 
         public string Name => "Authentification";

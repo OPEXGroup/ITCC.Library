@@ -2,12 +2,15 @@
 
 namespace ITCC.HTTP.Server.Interfaces
 {
+    /// <summary>
+    ///     Used for server response body serializations. IMPORTANT: implementations MUST be thraed-safe
+    /// </summary>
     public interface IBodyEncoder
     {
         /// <summary>
         ///     Character stream encoding
         /// </summary>
-        Encoding Encoding { get;  }
+        Encoding Encoding { get; }
 
         /// <summary>
         ///     Body serializer

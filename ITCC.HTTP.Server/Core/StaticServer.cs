@@ -342,7 +342,8 @@ namespace ITCC.HTTP.Server.Core
                 if (serviceProcessor != null)
                 {
                     LogDebug($"Service {serviceProcessor.Name} requested");
-                    await serviceProcessor.HandleRequest(context, stopWatch, OnResponseReady);
+                    await serviceProcessor.HandleRequest(context);
+                    OnResponseReady(context, stopWatch);
                     return;
                 }
 
