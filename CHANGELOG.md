@@ -1,3 +1,12 @@
+## 2.5.0 (2017-01-18)
+
+* **Edit**: **BREAKING CHANGE**: `HttpServerConfiguration` now takes `IBodyEncoder` list instead of `BodyEncoder` list. Several implementations added.    
+* **Edit**: `StaticServer` now requires prebuild script  
+* **Edit**: `StaticServer` services refactor  
+* **Edit**: `StaticServer` now adds list of supported content types with `406 Not Acceptable`  
+* **Edit**: All nuget dependencies updated to last versions  
+* **Fix**:  `StaticServer` now starts correctly if static files are disabled  
+
 ## 2.4.4 (2017-01-12)
 
 * **Fix**:  Prevent files from multiple gzipping in `FilePreprocessorController`    
