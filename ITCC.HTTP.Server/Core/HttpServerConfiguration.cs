@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Common;
+using ITCC.HTTP.Server.Encoders;
 using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files;
+using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
 
@@ -101,7 +103,7 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Used to process response bodies. Defaults to application/json; charset=utf-8
         /// </summary>
-        public List<BodyEncoder> BodyEncoders { get; set; } = new List<BodyEncoder> {new BodyEncoder()};
+        public List<IBodyEncoder> BodyEncoders { get; set; } = new List<IBodyEncoder> {new PlainTextBodyEncoder()};
 
         /// <summary>
         ///     For objects of these types simple ToString() will be invoked

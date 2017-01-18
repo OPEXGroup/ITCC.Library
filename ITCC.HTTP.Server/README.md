@@ -48,16 +48,6 @@ delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpL
 
 #### `class BodyEncoder`
 
-Класс для сериализации и кодирования тел ответов. Ключевые свойства:
-
-```
-public Encoding Encoding { get; set; } = Encoding.UTF8;                                 // Кодировка ответов
-public Delegates.BodySerializer Serializer { get; set; } = JsonConvert.SerializeObject; // Метод сериализации объектов в строки
-public string ContentType { get; set; } = "application/json";                           // Content-Type
-bool AutoGzipCompression { get; set; } = true;                                          // Используется ли клиентский заголовок Accept-Encoding: gzip
-```
-
-
 #### `class HandlerResult`
 
 Представляет результат обработки клиентского запроса на сервере. Ключевые свойства:

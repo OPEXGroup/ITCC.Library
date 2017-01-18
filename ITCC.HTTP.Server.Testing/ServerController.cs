@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using ITCC.HTTP.Server.Core;
+using ITCC.HTTP.Server.Encoders;
 using ITCC.HTTP.Server.Enums;
 using ITCC.HTTP.Server.Files;
+using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.Server.Testing.Utils;
 using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
@@ -78,36 +80,11 @@ namespace ITCC.HTTP.Server.Testing
                 FilesPreprocessingEnabled = true,
                 FilesCompressionEnabled = true,
                 FilesPreprocessorThreads = -1,
-                BodyEncoders = new List<BodyEncoder>
+                BodyEncoders = new List<IBodyEncoder>
                 {
-                    new BodyEncoder
-                    {
-                        AutoGzipCompression = Configuration.AutoGzipCompression,
-                        ContentType = "application/xml",
-                        Encoding = Encoding.UTF8,
-                        Serializer = o =>
-                        {
-                            using (var stringWriter = new StringWriter())
-                            {
-                                using (var xmlWriter = XmlWriter.Create(stringWriter))
-                                {
-                                    var xmlSerializer = new XmlSerializer(o.GetType());
-                                    xmlSerializer.Serialize(xmlWriter, o);
-                                }
-                                return stringWriter.ToString();
-                            }
-                        },
-                        IsDefault = false
-                    },
-                    new BodyEncoder
-                    {
-                        AutoGzipCompression = Configuration.AutoGzipCompression,
-                        ContentType = "application/json",
-                        Encoding = Encoding.UTF8,
-                        Serializer = o => JsonConvert.SerializeObject(o,
-                            new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Serialize}),
-                        IsDefault = true
-                    }
+                    new PlainTextBodyEncoder(),
+                    new JsonBodyEncoder(isDefault: true),
+                    new XmlBodyEncoder()
                 },
                 CriticalMemoryValue = 1024
             };
