@@ -89,7 +89,7 @@ Delegates.Authentificator Authentificator { get; set; }                         
 Delegates.Authorizer<TAccount> Authorizer { get; set; }                           // Метод авторизации
 Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
-List<BodyEncoder> BodyEncoders { get; set; }                                      // Допустимые способы кодирования ответов
+List<IBodyEncoder> BodyEncoders { get; set; }                                     // Допустимые способы кодирования ответов
 List<Type> NonSerializableTypes { get; set; } = new List<Type>();                 // Типы, сериализация которых производится простым ToString()
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
