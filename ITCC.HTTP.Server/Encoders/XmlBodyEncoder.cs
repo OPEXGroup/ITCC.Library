@@ -16,6 +16,8 @@ namespace ITCC.HTTP.Server.Encoders
             IsDefault = isDefault;
         }
 
+        #region IBodyEncoder
+
         public Encoding Encoding => Encoding.UTF8;
         public string Serialize(object body)
         {
@@ -32,5 +34,7 @@ namespace ITCC.HTTP.Server.Encoders
         public string ContentType => "application/xml";
         public bool AutoGzipCompression => true;
         public bool IsDefault { get; }
+
+        #endregion
     }
 }

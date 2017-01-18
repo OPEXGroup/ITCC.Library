@@ -14,6 +14,8 @@ namespace ITCC.HTTP.Server.Encoders
             IsDefault = isDefault;
         }
 
+        #region IBodyEncoder
+
         public Encoding Encoding => Encoding.UTF8;
         public string Serialize(object body) => JsonConvert.SerializeObject(body,
             new JsonSerializerSettings
@@ -23,5 +25,7 @@ namespace ITCC.HTTP.Server.Encoders
         public string ContentType => "application/json";
         public bool AutoGzipCompression => true;
         public bool IsDefault { get; }
+
+        #endregion
     }
 }

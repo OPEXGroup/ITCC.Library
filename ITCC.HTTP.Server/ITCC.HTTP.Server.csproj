@@ -83,6 +83,7 @@
     <Compile Include="Auth\AuthorizationResult.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Core\AcceptType.cs" />
+    <Compile Include="Encoders\CustomBodyEncoder.cs" />
     <Compile Include="Encoders\JsonBodyEncoder.cs" />
     <Compile Include="Encoders\PlainTextBodyEncoder.cs" />
     <Compile Include="Encoders\XmlBodyEncoder.cs" />

@@ -46,8 +46,6 @@ delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpL
 
 ### Core
 
-#### `class BodyEncoder`
-
 #### `class HandlerResult`
 
 Представляет результат обработки клиентского запроса на сервере. Ключевые свойства:
