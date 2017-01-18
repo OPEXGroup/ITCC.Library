@@ -33,6 +33,7 @@ namespace ITCC.HTTP.Server.Core
         {
             _encoders = encoders;
             _defaultEncoder = encoders.First(e => e.IsDefault);
+            _supportedContentTypes = _encoders.Select(e => e.ContentType).ToList();
         }
 
         public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult)
@@ -95,6 +96,7 @@ namespace ITCC.HTTP.Server.Core
             {
                 httpResponse.StatusCode = (int)HttpStatusCode.NotAcceptable;
                 httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
+                SetResponseBody(context, _defaultEncoder, _defaultEncoder.Serialize(_supportedContentTypes));
                 Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
@@ -107,10 +109,9 @@ namespace ITCC.HTTP.Server.Core
             string bodyString;
             if (!alreadyEncoded)
             {
-                if (NonSerializableTypes.Any(t => t.IsInstanceOfType(body)))
-                    bodyString = body.ToString();
-                else
-                    bodyString =  encoder.Serialize(body);
+                bodyString = NonSerializableTypes.Any(t => t.IsInstanceOfType(body))
+                    ? body.ToString()
+                    : encoder.Serialize(body);
             }
             else
             {
@@ -335,6 +336,7 @@ namespace ITCC.HTTP.Server.Core
         private static Dictionary<string, string> _commonHeaders;
         private static List<IBodyEncoder> _encoders;
         private static IBodyEncoder _defaultEncoder;
+        private static List<string> _supportedContentTypes;
 
         #endregion
 
