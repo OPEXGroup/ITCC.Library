@@ -148,7 +148,7 @@ git submodule update
 
 #### Prebuild
 
-При сборке `ITCC.HTTP.Client`, `ITCC.HTTP.SslConfigUtils` и `ITCC.Geocoding` выполняются prebuild-скрипты для установки nuget-пакетов в каталоги проектов (Prebuild.ps1).
+При сборке `ITCC.HTTP.Client`, `ITCC.HTTP.SslConfigUtils`, `ITCC.HTTP.Server` и `ITCC.Geocoding` выполняются prebuild-скрипты для установки nuget-пакетов в каталоги проектов (Prebuild.ps1).
 Для того, чтобы они могли выполниться, нужно в PowerShell выполнить
 
 ```
