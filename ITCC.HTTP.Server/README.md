@@ -46,18 +46,6 @@ delegate Task<HandlerResult> RequestHandler<in TAccount>(TAccount account, HttpL
 
 ### Core
 
-#### `class BodyEncoder`
-
-Класс для сериализации и кодирования тел ответов. Ключевые свойства:
-
-```
-public Encoding Encoding { get; set; } = Encoding.UTF8;                                 // Кодировка ответов
-public Delegates.BodySerializer Serializer { get; set; } = JsonConvert.SerializeObject; // Метод сериализации объектов в строки
-public string ContentType { get; set; } = "application/json";                           // Content-Type
-bool AutoGzipCompression { get; set; } = true;                                          // Используется ли клиентский заголовок Accept-Encoding: gzip
-```
-
-
 #### `class HandlerResult`
 
 Представляет результат обработки клиентского запроса на сервере. Ключевые свойства:
@@ -101,7 +89,7 @@ Delegates.Authentificator Authentificator { get; set; }                         
 Delegates.Authorizer<TAccount> Authorizer { get; set; }                           // Метод авторизации
 Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }                 // Метод авторизации для статистики
 
-List<BodyEncoder> BodyEncoders { get; set; }                                      // Допустимые способы кодирования ответов
+List<IBodyEncoder> BodyEncoders { get; set; }                                     // Допустимые способы кодирования ответов
 List<Type> NonSerializableTypes { get; set; } = new List<Type>();                 // Типы, сериализация которых производится простым ToString()
 
 bool LogResponseBodies { get; set; } = true;                                      // Писать ли в Trace-лог тела отправляемых ответов
@@ -174,6 +162,30 @@ Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream co
 FileOperationStatus DeleteFile(string sectionName, string filename);                      // Удаление файла
 ```
 
+### Encoders
+
+Готовые классы, реализующие `IBodyEncoder`
+
+#### `class CustomBodyEncoder : IBodyEncoder`
+
+Полностью настраиваемый сериализатор. Все должны быть установлены, метод сериализации передается через
+
+```
+Func<object, string> Serializer { get; set; }
+```
+
+#### `class JsonBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в JSON (`application/json`)
+
+#### `class PlainTextBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в текст (`text/plain`)
+
+#### `class XmlBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в XML (`application/xml`)
+
 ### Enums
 
 Используемые перечисления
@@ -238,6 +250,37 @@ UnknownError        // Прочие ошибки
 string Name { get; set; }           // Название секции. Не имеет прямого отношения к пути
 string Folder { get; set; }         // Папка (часть uri и часть пути в файловой системе
 long MaxFileSize {get; set; } = -1  // Максимально разрешенный размер файлов (на попытку создать бОльший сервер ответит 413)
+```
+
+### Interfaces
+
+Используемые интерфейсы
+
+#### `interface IBodyEncoder`
+
+Интерфейс сериализатора тел ответов сервера
+
+```
+Encoding Encoding { get; }          // Кодировка (charset)
+string Serialize(object body);      // Метод преобразования тела ответа (объекта) в строку для отправки
+/*
+ * Content-Type сериализатора. Отдается в заголовке ответа
+ * На основании ContentType и заголовка Accept в запросе клиента выбирается сериализатор
+ */
+string ContentType { get; }         
+bool AutoGzipCompression { get; }   // Нужно ли сжимать тело ответа в gzip после сериализации
+bool IsDefault { get; }             // Является ли сериализатором по умолчанию (не более 1 на сервер)
+```
+
+#### `interface IServiceController`
+
+Интерфейс обработчика специальных запросов. От обычного `RequestProcessor` отличается тем, что
+может быть выбран не только на основании URI и метода, но и произвольных характеристик запроса
+
+```
+bool RequestIsSuitable(HttpListenerRequest request);    // Метод проверки, подходит ли запрос для обработки
+Task HandleRequest(HttpListenerContext context);        // Метод обработки запроса
+string Name { get; }                                    // Имя сервиса
 ```
 
 ### Utils

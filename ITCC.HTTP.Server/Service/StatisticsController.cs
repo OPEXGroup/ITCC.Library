@@ -24,7 +24,7 @@ namespace ITCC.HTTP.Server.Service
             return CommonHelper.UriMatchesString(request.Url, "statistics") && StatisticsEnabled;
         }
 
-        public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
+        public async Task HandleRequest(HttpListenerContext context)
         {
             var response = context.Response;
             if (_statisticsAuthorizer != null)
@@ -46,8 +46,6 @@ namespace ITCC.HTTP.Server.Service
                 ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody, null, true);
                 response.ContentType = "text/plain";
             }
-
-            completionCallback(context, stopwatch);
         }
 
         public string Name => "Statistics";

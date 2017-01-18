@@ -36,11 +36,7 @@ namespace ITCC.HTTP.Server.Files
             return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-        public async Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
-        {
-            await HandleFileRequest(context).ConfigureAwait(false);
-            completionCallback(context, stopwatch);
-        }
+        public Task HandleRequest(HttpListenerContext context) => HandleFileRequest(context);
 
         public string Name => "Files";
         #endregion
@@ -276,8 +272,7 @@ namespace ITCC.HTTP.Server.Files
                 using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     await content.CopyToAsync(file).ConfigureAwait(false);
-                    file.Flush();
-                    file.Close();
+                    await file.FlushAsync();
                 }
             }
             catch (Exception ex)
@@ -397,8 +392,7 @@ namespace ITCC.HTTP.Server.Files
             using (var file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 await fileContent.CopyToAsync(file).ConfigureAwait(false);
-                file.Flush();
-                file.Close();
+                await file.FlushAsync();
             }
             GC.Collect(1);
             LogTrace($"Total memory: {GC.GetTotalMemory(true)}");

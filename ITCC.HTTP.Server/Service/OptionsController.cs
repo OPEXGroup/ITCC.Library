@@ -25,7 +25,7 @@ namespace ITCC.HTTP.Server.Service
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        public Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
+        public Task HandleRequest(HttpListenerContext context)
         {
             var allowValues = new List<string>();
             var request = context.Request;
@@ -51,7 +51,6 @@ namespace ITCC.HTTP.Server.Service
                 ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
             }
 
-            completionCallback(context, stopwatch);
             return Task.FromResult(0);
         }
 

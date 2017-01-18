@@ -16,11 +16,10 @@ namespace ITCC.HTTP.Server.Service
         public bool RequestIsSuitable(HttpListenerRequest request)
             => request != null && CommonHelper.UriMatchesString(request.Url, "ping");
 
-        public Task HandleRequest(HttpListenerContext context, Stopwatch stopwatch, Action<HttpListenerContext, Stopwatch> completionCallback)
+        public Task HandleRequest(HttpListenerContext context)
         {
             var responseBody = new PingResponse(CommonHelper.SerializeHttpRequest(context, true));
             ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody);
-            completionCallback(context, stopwatch);
             return Task.FromResult(0);
         }
 

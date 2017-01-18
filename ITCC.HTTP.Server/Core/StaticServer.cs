@@ -69,8 +69,11 @@ namespace ITCC.HTTP.Server.Core
 
                 ConfigureResponseBuilding(configuration);
 
-                if (!StartFileProcessing(configuration))
-                    return ServerStartStatus.BadParameters;
+                if (configuration.FilesEnabled)
+                {
+                    if (!StartFileProcessing(configuration))
+                        return ServerStartStatus.BadParameters;
+                }
 
                 _requestMaxServeTime = configuration.RequestMaxServeTime;
 
@@ -208,8 +211,10 @@ namespace ITCC.HTTP.Server.Core
             }
 
             ServiceRequestProcessors.Add(_optionsController);
-            ServiceRequestProcessors.Add(_fileRequestController);
-            ServiceRequestProcessors.Add(_statisticsController);
+            if (configuration.FilesEnabled)
+                ServiceRequestProcessors.Add(_fileRequestController);
+            if (configuration.StatisticsEnabled)
+                ServiceRequestProcessors.Add(_statisticsController);
             ServiceRequestProcessors.Add(_pingController);
             ServiceRequestProcessors.Add(_authentificationController);
         }
@@ -342,7 +347,8 @@ namespace ITCC.HTTP.Server.Core
                 if (serviceProcessor != null)
                 {
                     LogDebug($"Service {serviceProcessor.Name} requested");
-                    await serviceProcessor.HandleRequest(context, stopWatch, OnResponseReady);
+                    await serviceProcessor.HandleRequest(context);
+                    OnResponseReady(context, stopWatch);
                     return;
                 }
 

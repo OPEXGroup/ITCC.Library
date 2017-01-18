@@ -362,8 +362,6 @@ namespace ITCC.HTTP.Server.Service
         }
         #endregion
 
-
-
         #region fields
         /// <summary>
         ///     Milliseconds

@@ -67,10 +67,15 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.2-beta1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auth\AuthentificationController.cs" />
@@ -78,7 +83,10 @@
     <Compile Include="Auth\AuthorizationResult.cs" />
     <Compile Include="Common\Delegates.cs" />
     <Compile Include="Core\AcceptType.cs" />
-    <Compile Include="Core\BodyEncoder.cs" />
+    <Compile Include="Encoders\CustomBodyEncoder.cs" />
+    <Compile Include="Encoders\JsonBodyEncoder.cs" />
+    <Compile Include="Encoders\PlainTextBodyEncoder.cs" />
+    <Compile Include="Encoders\XmlBodyEncoder.cs" />
     <Compile Include="Enums\AcceptTypeMatch.cs" />
     <Compile Include="Enums\AuthorizationStatus.cs" />
     <Compile Include="Enums\FileOperationStatus.cs" />
@@ -105,6 +113,7 @@
     <Compile Include="Files\Requests\VideoRequest.cs" />
     <Compile Include="Core\HandlerResult.cs" />
     <Compile Include="Core\HttpServerConfiguration.cs" />
+    <Compile Include="Interfaces\IBodyEncoder.cs" />
     <Compile Include="Interfaces\IIntervalCounterProvider.cs" />
     <Compile Include="Interfaces\IServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -139,9 +148,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Prebuild.ps1" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>SET script=PreBuild.ps1
+SET "scripthpath="$(ProjectDir)%25script%25"
+ECHO "$(ProjectDir)"
+ECHO %25scripthpath%25
+Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
+exit 0</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

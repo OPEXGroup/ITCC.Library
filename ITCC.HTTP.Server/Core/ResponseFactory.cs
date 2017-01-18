@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using ITCC.HTTP.Common;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Enums;
+using ITCC.HTTP.Server.Interfaces;
 using ITCC.Logging.Core;
 
 namespace ITCC.HTTP.Server.Core
@@ -28,10 +29,11 @@ namespace ITCC.HTTP.Server.Core
             return true;
         }
 
-        public static void SetBodyEncoders(List<BodyEncoder> encoders)
+        public static void SetBodyEncoders(List<IBodyEncoder> encoders)
         {
             _encoders = encoders;
             _defaultEncoder = encoders.First(e => e.IsDefault);
+            _supportedContentTypes = _encoders.Select(e => e.ContentType).ToList();
         }
 
         public static void BuildResponse(HttpListenerContext context, AuthentificationResult authentificationResult)
@@ -94,6 +96,7 @@ namespace ITCC.HTTP.Server.Core
             {
                 httpResponse.StatusCode = (int)HttpStatusCode.NotAcceptable;
                 httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
+                SetResponseBody(context, _defaultEncoder, _defaultEncoder.Serialize(_supportedContentTypes));
                 Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
@@ -106,10 +109,9 @@ namespace ITCC.HTTP.Server.Core
             string bodyString;
             if (!alreadyEncoded)
             {
-                if (NonSerializableTypes.Any(t => t.IsInstanceOfType(body)))
-                    bodyString = body.ToString();
-                else
-                    bodyString = encoder.Serializer == null ? body.ToString() : encoder.Serializer(body);
+                bodyString = NonSerializableTypes.Any(t => t.IsInstanceOfType(body))
+                    ? body.ToString()
+                    : encoder.Serialize(body);
             }
             else
             {
@@ -198,7 +200,7 @@ namespace ITCC.HTTP.Server.Core
             }
         }
 
-        private static void SetResponseBody(HttpListenerContext context, BodyEncoder encoder, string bodyString)
+        private static void SetResponseBody(HttpListenerContext context, IBodyEncoder encoder, string bodyString)
         {
             var httpResponse = context.Response;
             var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
@@ -251,7 +253,7 @@ namespace ITCC.HTTP.Server.Core
             }
         }
 
-        private static BodyEncoder SelectEncoder(HttpListenerRequest request)
+        private static IBodyEncoder SelectEncoder(HttpListenerRequest request)
         {
             var acceptTypes = request.AcceptTypes;
             if (acceptTypes == null)
@@ -262,7 +264,7 @@ namespace ITCC.HTTP.Server.Core
                 .Where(pt => pt != null)
                 .OrderByDescending(at => at.Qvalue).ToList();
 
-            BodyEncoder selectedEncoder = null;
+            IBodyEncoder selectedEncoder = null;
             var maxMatch = 0.0;
 
             foreach (var parsedType in parsedTypes)
@@ -281,7 +283,7 @@ namespace ITCC.HTTP.Server.Core
             return selectedEncoder;
         }
 
-        private static bool RequestEnablesGzip(BodyEncoder encoder, HttpListenerRequest request)
+        private static bool RequestEnablesGzip(IBodyEncoder encoder, HttpListenerRequest request)
         {
             if (!encoder.AutoGzipCompression)
                 return false;
@@ -332,8 +334,9 @@ namespace ITCC.HTTP.Server.Core
         };
 
         private static Dictionary<string, string> _commonHeaders;
-        private static List<BodyEncoder> _encoders;
-        private static BodyEncoder _defaultEncoder;
+        private static List<IBodyEncoder> _encoders;
+        private static IBodyEncoder _defaultEncoder;
+        private static List<string> _supportedContentTypes;
 
         #endregion
 
