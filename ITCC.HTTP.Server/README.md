@@ -162,6 +162,30 @@ Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream co
 FileOperationStatus DeleteFile(string sectionName, string filename);                      // Удаление файла
 ```
 
+### Encoders
+
+Готовые классы, реализующие `IBodyEncoder`
+
+#### `class CustomBodyEncoder : IBodyEncoder`
+
+Полностью настраиваемый сериализатор. Все должны быть установлены, метод сериализации передается через
+
+```
+Func<object, string> Serializer { get; set; }
+```
+
+#### `class JsonBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в JSON (`application/json`)
+
+#### `class PlainTextBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в текст (`text/plain`)
+
+#### `class XmlBodyEncoder : IBodyEncoder`
+
+Класс для сериализации ответов в XML (`application/xml`)
+
 ### Enums
 
 Используемые перечисления
