@@ -85,7 +85,9 @@
     <Compile Include="Attributes\DatagridColumnStyleAttribute.cs" />
     <Compile Include="Attributes\DataGridIgnoreAttribute.cs" />
     <Compile Include="Attributes\HeaderTooltipAttribute.cs" />
+    <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Interfaces\IAsyncCommand.cs" />
     <Compile Include="Loggers\MessageLogger.cs" />
     <Compile Include="Loggers\ObservableLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
