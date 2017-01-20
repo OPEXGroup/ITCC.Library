@@ -1,3 +1,11 @@
+## 2.6.0 (2017-01-20)
+
+* **Edit**: **BREAKING CHANGE**: `IFlushableLogReceiver` interface changed (`void Flush() => Task FlushAsync()`).  
+* **Edit**: **BREAKING CHANGE**: `Logger` interface changed (`void FlushAll() => Task FlushAllAsync()`).  
+* **Edit**: **BREAKING CHANGE**: `UiThreadRunner` replaced by `AsyncUiThreadRunner`.  
+* **Edit**: **BREAKING CHANGE**: `ObservableLogger` now accepts `UiThreadRunner` instead of `AsyncUiThreadRunner`.  
+* **New**:  Commands added to `ITCC.WPF`: `DelegateCommand`, `IAsyncCommand`, `AsyncCommand`, `AsyncCommand<TResult>`, `NotifyTaskCompletion<TResult>`, `AsyncCommandFactory`  
+
 ## 2.5.0 (2017-01-18)
 
 * **Edit**: **BREAKING CHANGE**: `HttpServerConfiguration` now takes `IBodyEncoder` list instead of `BodyEncoder` list. Several implementations added.    
