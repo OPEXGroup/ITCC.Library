@@ -42,7 +42,7 @@ HeaderTooltipAttribute(string tooltipContent, bool isLongTooltip = false)
 /*
   Используется в ObservableLogger
 */
-delegate void UiThreadRunner(Action action);
+delegate Task AsyncUiThreadRunner(Action action);
 ```
 
 ### Loggers
@@ -60,21 +60,13 @@ MessageLogger(LogLevel level);
 
 Предоставляет `ObservableCollection` для отображения в интерфейсе. Используется с `LogWindow`.  Основной конструктор
 ```
-ObservableLogger(LogLevel level, int capacity, UiThreadRunner uiThreadRunner)
+ObservableLogger(LogLevel level, int capacity, AsyncUiThreadRunner asyncUiThreadRunner)
 ```
 
-**ВАЖНО**: `uiThreadRunner`, при неправильной реализации, потенциально может вызвать deadlock. Далее примеры для WPF
-
-Рекомендуемая реализация:
+Пример `AsyncUiThreadRunner` для WPF:
 
 ```
-void RunOnUiThread(Action action) => Current.Dispatcher.BeginInvoke(action);
-```
-
-**Нерекомендуемая реализация**:
-
-```
-void RunOnUiThread(Action action) => Current.Dispatcher.Invoke(action);
+async Task RunOnUiThread(Action action) => await Application.Current.Dispatcher.InvokeAsync(action);
 ```
 
 ### Utils

@@ -40,7 +40,7 @@ void AddBannedScope(object scope);                                           // 
 bool RegisterReceiver(ILogReceiver receiver, bool mutableReceiver = false);  // подписать получателя на события лога
 bool UnregisterReceiver(ILogReceiver receiver);                              // отписать получателя
 
-void FlushAll();                                                             // сброс очередей всех логгеров типа IFlushableLogReceiver
+Task FlushAllAsync();                                                        // асинхронный сброс очередей всех логгеров типа IFlushableLogReceiver
 ```
 
 Ключевые свойства
@@ -65,7 +65,7 @@ void WriteEntry(object sender, LogEntryEventArgs args);
 Интерфейс логгера с немгновенным сбросом очереди сообщений. Сигнатура:
 
 ```
-Task Flush();
+Task FlushAsync();
 ```
 
 ### Loggers
