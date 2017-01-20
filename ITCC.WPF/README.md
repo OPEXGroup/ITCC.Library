@@ -30,6 +30,80 @@ DataGridIgnoreAttribute(bool ignoreColumn = true)
 HeaderTooltipAttribute(string tooltipContent, bool isLongTooltip = false)
 ```
 
+### Commands
+
+#### `class AsyncCommand<TResult> : IAsyncCommand, INotifyPropertyChanged`
+
+Класс представляет асинхронную команду, вызываемую через GUI. Поддерживает асинхронную отмену, отслеживание возможности исполнения и отслеживание текущего статуса исполнения. Пример использования через привязки приведен в документации в исходном коде.
+Конструктор:
+
+```
+AsyncCommand(Func<object, CancellationToken, Task<TResult>> command, Func<bool> canExecuteCondition = null);
+```
+
+Все публичные свойства уведомляют о своем изменении. Свойства (не считая реализаций интерфейсов):
+
+```
+bool Enabled { get; }                               // Может ли команда быть исполнена
+NotifyTaskCompletion<TResult> Execution { get; }    // Объект для отслеживания текущего статуса
+ICommand CancelCommand { get; }                     // Команда, вызывающая отмену
+```
+
+#### `class AsyncCommand : AsyncCommand<object>`
+
+То же, что и `AsyncCommand<TResult>` за исключением того, что получение результата не поддерживается
+
+#### `static class AsyncCommandFactory`
+
+Класс для создания асинронных команд (популярные сценарии). Методы:
+
+```
+AsyncCommand Create(Func<Task> command, Func<bool> canExecuteCondition);
+AsyncCommand Create(Func<object, Task> command, Func<bool> canExecuteCondition);
+AsyncCommand<TResult> Create<TResult>(Func<Task<TResult>> command, Func<bool> canExecuteCondition);
+AsyncCommand<TResult> Create<TResult>(Func<object, Task<TResult>> command, Func<bool> canExecuteCondition);
+AsyncCommand Create(Func<CancellationToken, Task> command, Func<bool> canExecuteCondition);
+AsyncCommand Create(Func<object, CancellationToken, Task> command, Func<bool> canExecuteCondition);
+AsyncCommand<TResult> Create<TResult>(Func<CancellationToken, Task<TResult>> command, Func<bool> canExecuteCondition);
+AsyncCommand<TResult> Create<TResult>(Func<object, CancellationToken, Task<TResult>> command, Func<bool> canExecuteCondition);
+```
+
+#### `class DelegateCommand : ICommand, INotifyPropertyChanged`
+
+Класс представляет синхронную команду, вызываемую через GUI. Конструкторы:
+
+```
+public DelegateCommand(Action command, Func<bool> executionCondition = null);
+public DelegateCommand(Action<object> command, Func<bool> executionCondition = null);
+```
+
+Все публичные свойства уведомляют о своем изменении. Свойства (не считая реализаций интерфейсов):
+
+```
+bool Enabled { get; }                               // Может ли команда быть исполнена
+```
+
+#### `sealed class NotifyTaskCompletion<TResult> : INotifyPropertyChanged`
+
+Класс для отслеживания состояния выполнения асихронной команды. Конструируется только внутри команд. 
+Все публичные свойства уведомляют о своем изменении. Свойства (не считая реализаций интерфейсов):
+
+```
+Task<TResult> Task { get; }             // Отслеживаемая задача
+Task TaskCompletion { get; }            // Задача, завершающаяся вместе с отслеживаемой
+TResult Result { get; }                 // Результат выполнения задачи
+TaskStatus Status { get; }              // Текущий статус отслеживаемой задачи
+bool IsCompleted { get; }               // Завершена ли задача
+bool IsNotCompleted { get; }            // ! IsCompleted
+bool IsSuccessfullyCompleted { get; }   // Задача завершилась успехом
+bool IsCanceled { get; }                // Задача была отменена
+bool IsFaulted { get; }                 // При выполнении задачи произошла ошибка
+AggregateException Exception { get; }   // Исключение, возникшее 
+AggregateException Exception { get; }   // Исключение, возникшее в процессе выполнения задачи (обертка)
+Exception InnerException { get; }       // Реальное исключение, возникшее в процессе выполнения задачи
+string ErrorMessage { get; }            // Сообщение о возникшей ошибке
+```
+
 ### Common
 
 Общие классы

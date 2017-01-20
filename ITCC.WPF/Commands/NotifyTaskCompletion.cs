@@ -15,7 +15,7 @@ namespace ITCC.WPF.Commands
 
         #region public
 
-        public NotifyTaskCompletion(Task<TResult> task)
+        internal NotifyTaskCompletion(Task<TResult> task)
         {
             Task = task;
             if (!task.IsCompleted)
@@ -49,11 +49,6 @@ namespace ITCC.WPF.Commands
             try
             {
                 await task;
-            }
-            catch (NullReferenceException exception)
-            {
-                Logger.LogException("NOTIFY TASK", LogLevel.Warning, exception);
-                return;
             }
             catch (Exception exception)
             {
