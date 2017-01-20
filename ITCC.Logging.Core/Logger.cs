@@ -168,13 +168,15 @@ namespace ITCC.Logging.Core
         /// <summary>
         ///     Synchronously flushes all logger's output buffers (which implement <see cref="IFlushableLogReceiver"/>)
         /// </summary>
-        public static void FlushAll()
+        public static Task FlushAllAsync()
         {
+            IEnumerable<IFlushableLogReceiver> flushableLogReceivers;
             lock (LockObject)
             {
-                var flushTasks = Receivers.OfType<IFlushableLogReceiver>().Select(r => r.FlushAsync()).ToArray();
-                Task.WaitAll(flushTasks);
+                flushableLogReceivers = Receivers.OfType<IFlushableLogReceiver>();
             }
+            var flushTasks = flushableLogReceivers.Select(r => r.FlushAsync()).ToArray();
+            return Task.WhenAll(flushTasks);
         }
 
         /// <summary>

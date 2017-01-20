@@ -72,9 +72,8 @@ namespace ITCC.Logging.Testing
                 await Task.Delay(1000);
             }
 
-            Logger.FlushAll();
+            await Logger.FlushAllAsync();
 
-            await Task.Delay(1);
             Console.ReadLine();
         }
 
