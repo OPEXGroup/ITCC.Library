@@ -30,7 +30,7 @@ namespace ITCC.WPF.Loggers
                 await FlushAsync();
         }
 
-        public async Task FlushAsync()
+        public Task FlushAsync()
         {
             Action flushAction = () =>
             {
@@ -41,7 +41,7 @@ namespace ITCC.WPF.Loggers
                 }
             };
 
-            await _asyncUiThreadRunner.Invoke(flushAction);
+            return _asyncUiThreadRunner.Invoke(flushAction);
         }
 
         #endregion
