@@ -20,27 +20,28 @@ namespace ITCC.WPF.Loggers
         #region ILogReceiver
         public LogLevel Level { get; set; }
 
-        public void WriteEntry(object sender, LogEntryEventArgs args)
+        public async void WriteEntry(object sender, LogEntryEventArgs args)
         {
             if (args.Level > Level)
                 return;
             
             _eventQueue.Enqueue(args);
             if (_eventQueue.Count >= BufferSize)
-                Flush();
+                await FlushAsync();
         }
 
-        public Task Flush()
+        public async Task FlushAsync()
         {
-            _uiThreadRunner.Invoke(() => {
+            Action flushAction = () =>
+            {
                 LogEntryEventArgs args;
                 while (_eventQueue.TryDequeue(out args))
                 {
                     LogEntryCollection.AddLast(new LogEntryEventArgsViewModel(args));
                 }
-            });
+            };
 
-            return Task.FromResult(0);
+            await _asyncUiThreadRunner.Invoke(flushAction);
         }
 
         #endregion
@@ -56,19 +57,19 @@ namespace ITCC.WPF.Loggers
         #endregion
 
         #region public
-        public ObservableLogger(int capacity, Delegates.UiThreadRunner uiThreadRunner)
+        public ObservableLogger(int capacity, Delegates.AsyncUiThreadRunner asyncUiThreadRunner)
         {
             Level = Logger.Level;
             LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
-            _uiThreadRunner = uiThreadRunner;
+            _asyncUiThreadRunner = asyncUiThreadRunner;
             InitTimer();
         }
 
-        public ObservableLogger(LogLevel level, int capacity, Delegates.UiThreadRunner uiThreadRunner)
+        public ObservableLogger(LogLevel level, int capacity, Delegates.AsyncUiThreadRunner asyncUiThreadRunner)
         {
             Level = level;
             LogEntryCollection = new ObservableRingBuffer<LogEntryEventArgsViewModel>(capacity);
-            _uiThreadRunner = uiThreadRunner;
+            _asyncUiThreadRunner = asyncUiThreadRunner;
             InitTimer();
         }
 
@@ -81,12 +82,12 @@ namespace ITCC.WPF.Loggers
         private void InitTimer()
         {
             _flushTimer = new Timer(FlushInterval);
-            _flushTimer.Elapsed += (sender, args) => Flush();
+            _flushTimer.Elapsed += async (sender, args) => await FlushAsync();
             _flushTimer.Start();
         }
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _eventQueue = new ConcurrentQueue<LogEntryEventArgs>();
-        private readonly Delegates.UiThreadRunner _uiThreadRunner;
+        private readonly Delegates.AsyncUiThreadRunner _asyncUiThreadRunner;
         private Timer _flushTimer;
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace ITCC.WPF.Testing
@@ -10,7 +11,6 @@ namespace ITCC.WPF.Testing
     /// </summary>
     public partial class App : Application
     {
-        private static readonly object DispactherQueueLock = new object();
-        public static void RunOnUiThread(Action action) => Current?.Dispatcher?.BeginInvoke(action);
+        public static async Task RunOnUiThreadAsync(Action action) => await Current.Dispatcher.InvokeAsync(action);
     }
 }

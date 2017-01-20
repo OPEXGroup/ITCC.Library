@@ -20,7 +20,7 @@ namespace ITCC.Logging.Windows.Loggers
             _messageQueue.Enqueue(args);
         }
 
-        public Task Flush()
+        public Task FlushAsync()
         {
             FlushBuffer();
             return Task.FromResult(0);

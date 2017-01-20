@@ -172,7 +172,7 @@ namespace ITCC.Logging.Core
         {
             lock (LockObject)
             {
-                var flushTasks = Receivers.OfType<IFlushableLogReceiver>().Select(r => r.Flush()).ToArray();
+                var flushTasks = Receivers.OfType<IFlushableLogReceiver>().Select(r => r.FlushAsync()).ToArray();
                 Task.WaitAll(flushTasks);
             }
         }

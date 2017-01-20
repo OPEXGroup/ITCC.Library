@@ -35,7 +35,7 @@ namespace ITCC.Logging.Windows.Loggers
             }
         }
 
-        public async Task Flush() => await FlushAndRestartTimer(EmailLoggerFlushReason.ForceFlush);
+        public async Task FlushAsync() => await FlushAndRestartTimer(EmailLoggerFlushReason.ForceFlush);
 
         #endregion
 

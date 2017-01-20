@@ -21,7 +21,7 @@ namespace ITCC.WPF.Testing
             InitializeComponent();
 
             Logger.Level = LogLevel.Trace;
-            _observableLogger = new ObservableLogger(1000, App.RunOnUiThread);
+            _observableLogger = new ObservableLogger(1000, App.RunOnUiThreadAsync);
             Logger.RegisterReceiver(_observableLogger);
 
             Logger.LogEntry("Test", LogLevel.Info, "Started");
@@ -63,7 +63,7 @@ namespace ITCC.WPF.Testing
             var rnd = new Random();
             for (var i = 0; i < 50; ++i)
             {
-                var str = System.Guid.NewGuid().ToString();
+                var str = Guid.NewGuid().ToString();
                 var emptyCount = rnd.Next(5);
                 for (var j = 0; j < emptyCount; ++j)
                 {

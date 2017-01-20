@@ -10,6 +10,6 @@ namespace ITCC.Logging.Core.Interfaces
         ///     Used for loggers that use message queues internally
         /// </summary>
         /// <returns></returns>
-        Task Flush();
+        Task FlushAsync();
     }
 }
