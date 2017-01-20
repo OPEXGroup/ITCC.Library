@@ -8,6 +8,37 @@ using ITCC.WPF.Interfaces;
 
 namespace ITCC.WPF.Commands
 {
+    /// <summary>
+    ///     Class represents asynchronous command to be called from GUI
+    /// </summary>
+    /// <typeparam name="TResult">Command result type</typeparam>
+    /// <example>
+    ///     Add viewmodel to window resourses:
+    ///     <code>
+    ///         &lt;Window.DataContext&gt;
+    ///              &lt;vms:MyViewModel x:Name="ViewModel"&gt;&lt;/vms:MyViewModel&gt;
+    ///         &lt;/Window.DataContext&gt;
+    ///         ...
+    ///         &lt;Button Click={Binding UpdateCommand} /&gt;
+    ///     </code>
+    ///     In viewmodel:
+    ///     <code>
+    ///         class MyViewModel
+    ///         {
+    ///             public MyViewModel
+    ///             {
+    ///                 UpdateCommand = AsyncCommandFactory.Create(() => UpdateAsync);
+    ///             }
+    ///
+    ///             private async Task UpdateAsync()
+    ///             {
+    ///                 ...
+    ///             }
+    ///
+    ///             AsyncCommand UpdateCommand { get; }
+    ///         }
+    ///     </code>
+    /// </example>
     public class AsyncCommand<TResult> : IAsyncCommand, INotifyPropertyChanged
     {
         #region IAsyncCommand
@@ -91,8 +122,6 @@ namespace ITCC.WPF.Commands
         private bool _enabled;
 
         #endregion
-
-
     }
 
     public sealed class AsyncCommand : AsyncCommand<object>
