@@ -27,15 +27,15 @@ namespace ITCC.Logging.Windows.Loggers
             _messageQueue.Enqueue(args);
             if (args.Level <= FlushLevel)
             {
-                await FlushAndRestartTimer(EmailLoggerFlushReason.ImportantMessage);
+                await FlushAndRestartTimerAsync(EmailLoggerFlushReason.ImportantMessage);
             }
             else if (_messageQueue.Count >= MaxQueueSize)
             {
-                await FlushAndRestartTimer(EmailLoggerFlushReason.QueueFull);
+                await FlushAndRestartTimerAsync(EmailLoggerFlushReason.QueueFull);
             }
         }
 
-        public async Task FlushAsync() => await FlushAndRestartTimer(EmailLoggerFlushReason.ForceFlush);
+        public async Task FlushAsync() => await FlushAndRestartTimerAsync(EmailLoggerFlushReason.ForceFlush);
 
         #endregion
 
@@ -68,7 +68,7 @@ namespace ITCC.Logging.Windows.Loggers
             _updateTimer = new Timer(ReportPeriod * 1000);
             _updateTimer.Elapsed += UpdateTimerOnElapsed;
             _updateTimer.AutoReset = true;
-            Flush(EmailLoggerFlushReason.LoggerStarted).Wait();
+            FlushAsync(EmailLoggerFlushReason.LoggerStarted).Wait();
             _updateTimer.Start();
         }
 
@@ -122,17 +122,17 @@ namespace ITCC.Logging.Windows.Loggers
 
         private async void UpdateTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            await Flush(EmailLoggerFlushReason.RegularPeriodical);
+            await FlushAsync(EmailLoggerFlushReason.RegularPeriodical);
         }
 
-        private async Task FlushAndRestartTimer(EmailLoggerFlushReason reason)
+        private async Task FlushAndRestartTimerAsync(EmailLoggerFlushReason reason)
         {
             _updateTimer.Stop();
-            await Flush(reason);
+            await FlushAsync(reason);
             _updateTimer.Start();
         }
 
-        private async Task Flush(EmailLoggerFlushReason reason)
+        private async Task FlushAsync(EmailLoggerFlushReason reason)
         {
             if (_flushInProgress)
                 return;
@@ -193,12 +193,12 @@ namespace ITCC.Logging.Windows.Loggers
                 subject = $"{Subject} ({counter} new entries{alarmStr})";
             }
             Logger.LogEntry("MAIL LOG", LogLevel.Debug, logMessage);
-            await SendEmail(subject, body, priority);
+            await SendEmailAsync(subject, body, priority);
 
             _flushInProgress = false;
         }
 
-        private async Task SendEmail(string subject, string body, MailPriority priority)
+        private async Task SendEmailAsync(string subject, string body, MailPriority priority)
         {
             try
             {

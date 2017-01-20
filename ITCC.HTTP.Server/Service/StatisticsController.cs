@@ -24,7 +24,7 @@ namespace ITCC.HTTP.Server.Service
             return CommonHelper.UriMatchesString(request.Url, "statistics") && StatisticsEnabled;
         }
 
-        public async Task HandleRequest(HttpListenerContext context)
+        public async Task HandleRequestAsync(HttpListenerContext context)
         {
             var response = context.Response;
             if (_statisticsAuthorizer != null)

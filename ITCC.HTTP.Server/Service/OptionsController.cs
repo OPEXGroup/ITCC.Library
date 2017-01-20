@@ -25,7 +25,7 @@ namespace ITCC.HTTP.Server.Service
             return request.HttpMethod.ToUpper() == "OPTIONS";
         }
 
-        public Task HandleRequest(HttpListenerContext context)
+        public Task HandleRequestAsync(HttpListenerContext context)
         {
             var allowValues = new List<string>();
             var request = context.Request;

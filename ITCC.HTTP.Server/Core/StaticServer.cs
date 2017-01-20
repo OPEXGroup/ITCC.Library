@@ -184,7 +184,7 @@ namespace ITCC.HTTP.Server.Core
                     {
                         var context = _listener.GetContext();
                         LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
-                        Task.Run(async () => await OnMessage(context));
+                        Task.Run(async () => await OnMessageAsync(context));
                     }
                     catch (ThreadAbortException)
                     {
@@ -332,7 +332,7 @@ namespace ITCC.HTTP.Server.Core
 
         #region handlers
 
-        private static async Task OnMessage(HttpListenerContext context)
+        private static async Task OnMessageAsync(HttpListenerContext context)
         {
             var request = context.Request;
             // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
@@ -347,7 +347,7 @@ namespace ITCC.HTTP.Server.Core
                 if (serviceProcessor != null)
                 {
                     LogDebug($"Service {serviceProcessor.Name} requested");
-                    await serviceProcessor.HandleRequest(context);
+                    await serviceProcessor.HandleRequestAsync(context);
                     OnResponseReady(context, stopWatch);
                     return;
                 }
@@ -487,18 +487,18 @@ namespace ITCC.HTTP.Server.Core
         public static Stream GetFileStream(string sectionName, string filename)
             => !FilesEnabled ? null : _fileRequestController.GetFileStream(sectionName, filename);
 
-        public static async Task<string> GetFileString(string sectionName, string filename)
+        public static async Task<string> GetFileStringAsync(string sectionName, string filename)
         {
             if (!FilesEnabled)
                 return null;
-            return await _fileRequestController.GetFileString(sectionName, filename);
+            return await _fileRequestController.GetFileStringAsync(sectionName, filename);
         }
 
-        public static async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
+        public static async Task<FileOperationStatus> AddFileAsync(string sectionName, string filename, Stream content)
         {
             if (!FilesEnabled)
                 return FileOperationStatus.FilesNotEnabled;
-            return await _fileRequestController.AddFile(sectionName, filename, content);
+            return await _fileRequestController.AddFileAsync(sectionName, filename, content);
         }
 
         public static FileOperationStatus DeleteFile(string sectionName, string filename)

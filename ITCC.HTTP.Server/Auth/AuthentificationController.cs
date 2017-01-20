@@ -27,7 +27,7 @@ namespace ITCC.HTTP.Server.Auth
             return request.QueryString["login"] != null && request.QueryString["password"] != null;
         }
 
-        public async Task HandleRequest(HttpListenerContext context)
+        public async Task HandleRequestAsync(HttpListenerContext context)
         {
             AuthentificationResult authResult;
             var request = context.Request;

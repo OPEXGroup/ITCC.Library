@@ -36,7 +36,7 @@ namespace ITCC.HTTP.Server.Files
             return request.Url.LocalPath.Trim('/').StartsWith(FilesBaseUri);
         }
 
-        public Task HandleRequest(HttpListenerContext context) => HandleFileRequest(context);
+        public Task HandleRequestAsync(HttpListenerContext context) => HandleFileRequestAsync(context);
 
         public string Name => "Files";
         #endregion
@@ -116,7 +116,7 @@ namespace ITCC.HTTP.Server.Files
         #endregion
 
         #region public
-        public async Task HandleFileRequest(HttpListenerContext context)
+        public async Task HandleFileRequestAsync(HttpListenerContext context)
         {
             if (!_started)
             {
@@ -152,17 +152,17 @@ namespace ITCC.HTTP.Server.Files
                     case AuthorizationStatus.Ok:
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Get)
                         {
-                            await HandleFileGetRequest(context, filePath).ConfigureAwait(false);
+                            await HandleFileGetRequestAsync(context, filePath).ConfigureAwait(false);
                             return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Head)
                         {
-                            await HandleFileHeadRequest(context, filePath).ConfigureAwait(false);
+                            await HandleFileHeadRequestAsync(context, filePath).ConfigureAwait(false);
                             return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Post)
                         {
-                            await HandleFilePostRequest(context, section, filePath).ConfigureAwait(false);
+                            await HandleFilePostRequestAsync(context, section, filePath).ConfigureAwait(false);
                             return;
                         }
                         if (CommonHelper.HttpMethodToEnum(request.HttpMethod) == HttpMethod.Delete)
@@ -184,7 +184,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        public async Task HandleFavicon(HttpListenerContext context)
+        public async Task HandleFaviconAsync(HttpListenerContext context)
         {
             var response = context.Response;
             LogTrace($"Favicon requested, path: {FaviconPath}");
@@ -232,7 +232,7 @@ namespace ITCC.HTTP.Server.Files
             return File.Exists(filePath) ? new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null;
         }
 
-        public async Task<string> GetFileString(string sectionName, string filename)
+        public async Task<string> GetFileStringAsync(string sectionName, string filename)
         {
             var stream = GetFileStream(sectionName, filename);
             if (stream == null)
@@ -247,7 +247,7 @@ namespace ITCC.HTTP.Server.Files
             }
         }
 
-        public async Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content)
+        public async Task<FileOperationStatus> AddFileAsync(string sectionName, string filename, Stream content)
         {
             if (string.IsNullOrWhiteSpace(filename))
                 return FileOperationStatus.BadParameters;
@@ -328,7 +328,7 @@ namespace ITCC.HTTP.Server.Files
 
         #region private
 
-        private async Task HandleFileGetRequest(HttpListenerContext context, string filePath)
+        private async Task HandleFileGetRequestAsync(HttpListenerContext context, string filePath)
         {
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
@@ -347,7 +347,7 @@ namespace ITCC.HTTP.Server.Files
             await fileRequest.BuildResponse(context);
         }
 
-        private Task HandleFileHeadRequest(HttpListenerContext context, string filePath)
+        private Task HandleFileHeadRequestAsync(HttpListenerContext context, string filePath)
         {
             if (FilesPreprocessingEnabled && FilePreprocessController.FileInProgress(filePath))
             {
@@ -373,7 +373,7 @@ namespace ITCC.HTTP.Server.Files
             return Task.FromResult(0);
         }
 
-        private async Task HandleFilePostRequest(HttpListenerContext context, FileSection section, string filePath)
+        private async Task HandleFilePostRequestAsync(HttpListenerContext context, FileSection section, string filePath)
         {
             if (File.Exists(filePath))
             {
