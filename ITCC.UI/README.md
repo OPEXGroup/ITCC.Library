@@ -160,6 +160,31 @@ async Task RunOnUiThreadAsync(Action action) => await Application.Current.Dispat
 
 Небольшие служебные классы
 
+#### `class ConditionValidator`
+
+Класс для проверки наборов условий. **ВАЖНО**: прри добавлении метода его результат вычисляется сразу же.
+
+Ключевые методы:
+
+```
+void NonNull(object something, string message = null);
+void NonWhitespaceString(string text, string message = null);
+void DoesNotThrowException(Action action, string message = null);
+void AddSafeCondition(Func<bool> conditionMethod, string message = null);
+bool AddCondition(bool condition, string message = null);
+bool AddCondition(Func<bool> conditionMethod, string message = null);
+async Task<bool> AddConditionAsync(Task<bool> conditionTask, string message = null);
+async Task<bool> AddConditionAsync(Func<Task<bool>> conditionMethod, string message = null);
+```
+
+Ключевые свойства:
+
+```
+ValidationResult ValidationResult { get; }
+bool ValidationPassed { get; }
+string ErrorMessage { get; } // null тогда и только тогда, когда ValidationPassed == true
+```
+
 #### `static class EnumHelper`
 
 Работа с `LogLevel`. Методы:
@@ -183,6 +208,15 @@ ObservableRingBuffer(int capacity)
 
 ```
 int Capacity { get; }
+```
+
+#### `class ValidationResult`
+
+Используется в `ConditionValidator`. Ключевые свойства:
+
+```
+bool Condition { get; }
+string ErrorMessage { get; }
 ```
 
 ### ViewModels

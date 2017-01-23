@@ -96,11 +96,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Utils\ConditionValidator.cs" />
     <Compile Include="Utils\DataGridHelper.cs" />
     <Compile Include="Utils\PropertyHelper.cs" />
     <Compile Include="Utils\ScrollViewerExtensions.cs" />
-    <Compile Include="Utils\ValidationResult.cs" />
     <Compile Include="Windows\LogWindow.xaml.cs">
       <DependentUpon>LogWindow.xaml</DependentUpon>
     </Compile>
