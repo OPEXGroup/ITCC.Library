@@ -1,11 +1,12 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace ITCC.WPF.Utils
+namespace ITCC.UI.Utils
 {
     public class ObservableRingBuffer<T> : INotifyCollectionChanged, IEnumerable<T>
         where T: class
@@ -13,7 +14,7 @@ namespace ITCC.WPF.Utils
         #region INotifyCollectionChanged
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
+        private void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
         #endregion
 
         #region IEnumerable

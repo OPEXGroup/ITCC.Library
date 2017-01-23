@@ -1,12 +1,11 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-using System.ComponentModel;
-using System.Windows.Controls;
-using ITCC.Logging.Core;
-using ITCC.WPF.Attributes;
-using ITCC.WPF.Utils;
 
-namespace ITCC.WPF.ViewModels
+using ITCC.Logging.Core;
+using ITCC.UI.Attributes;
+using ITCC.UI.Utils;
+
+namespace ITCC.UI.ViewModels
 {
     public class LogEntryEventArgsViewModel
     {
@@ -17,25 +16,24 @@ namespace ITCC.WPF.ViewModels
             Subject = subject;
         }
 
-        
         [HeaderTooltip(@"Время добавления сообщения")]
-        [DisplayName(@"Время")]
+        [Header(@"Время")]
         public string Time => Subject.Time.ToString("HH:mm:ss.fff");
 
         [HeaderTooltip(@"Уровень сообщения")]
-        [DisplayName(@"Уровень")]
+        [Header(@"Уровень")]
         public string Level => EnumHelper.LogLevelName(Subject.Level);
 
         [HeaderTooltip(@"Источник сообщения")]
-        [DisplayName(@"Контекст")]
+        [Header(@"Контекст")]
         public string Scope => Subject.Scope.ToString();
 
         [HeaderTooltip(@"Идентификатор потока, с которого было отправлено сообщение. Служебное поле.", true)]
-        [DisplayName(@"ID потока")]
+        [Header(@"ID потока")]
         public int ThreadId => Subject.ThreadId;
 
-        [DatagridColumnStyle(wrappedText: true, columnPreferredWidth: 1, columnWidthUnitType: DataGridLengthUnitType.Star)]
-        [DisplayName(@"Сообщение")]
+        [DatagridColumnStyle(wrappedText: true, columnPreferredWidth: 1)]
+        [Header(@"Сообщение")]
         public string Message => Subject.Message;
     }
 }

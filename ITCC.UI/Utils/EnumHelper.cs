@@ -1,12 +1,13 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 using System.Collections.Generic;
 using System.Linq;
 using ITCC.Logging.Core;
 
-namespace ITCC.WPF.Utils
+namespace ITCC.UI.Utils
 {
-    internal static class EnumHelper
+    public static class EnumHelper
     {
         #region LogLevel
 

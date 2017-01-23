@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using ITCC.Logging.Core;
-using ITCC.WPF.Attributes;
+using ITCC.UI.Attributes;
 
 namespace ITCC.WPF.Utils
 {

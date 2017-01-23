@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ITCC.WPF.Interfaces
+namespace ITCC.UI.Interfaces
 {
     /// <summary>
     ///     Used for WPF bindings. 

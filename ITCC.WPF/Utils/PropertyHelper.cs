@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using ITCC.UI.Attributes;
 
 namespace ITCC.WPF.Utils
 {
@@ -19,11 +20,18 @@ namespace ITCC.WPF.Utils
                 {
                     return displayName.DisplayName;
                 }
+
+                var header = propertyDescriptor.Attributes[typeof(HeaderAttribute)] as HeaderAttribute;
+                if (header != null)
+                {
+                    return header.DisplayName;
+                }
             }
             else
             {
                 var propertyInfo = descriptor as PropertyInfo;
-                if (propertyInfo == null) return null;
+                if (propertyInfo == null)
+                    return null;
 
                 var attributes = propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), true);
                 foreach (var attr in attributes)
@@ -31,9 +39,18 @@ namespace ITCC.WPF.Utils
                     var displayName = attr as DisplayNameAttribute;
                     if (displayName == null || ReferenceEquals(displayName, DisplayNameAttribute.Default))
                         continue;
-                    var s = displayName.DisplayName;
-                    return s;
+                    return displayName.DisplayName;
                 }
+
+                var headerAttributes = propertyInfo.GetCustomAttributes(typeof(HeaderAttribute), true);
+                foreach (var attr in attributes)
+                {
+                    var headerAttribute = attr as HeaderAttribute;
+                    if (headerAttribute == null)
+                        continue;
+                    return headerAttribute.DisplayName;
+                }
+
                 return null;
             }
 

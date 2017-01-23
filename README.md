@@ -107,6 +107,14 @@ WPF-приложение для генерации и установки TLS-с�
 * `ITCC.Logging.Loggers.SystemEventLogger`  
 * `ITCC.Logging.Loggers.EmailLogger`  
 
+### ITCC.UI
+
+Библиотека классов для использования в GUI-приложениях на WPF, UWP и Xamarin Forms. Интересные классы:
+
+* `ITCC.UI.Commands.AsyncCommand`  
+* `ITCC.UI.Loggers.ObservableLogger`  
+* `ITCC.UI.Utils.ObservableRingBuffer`  
+
 ### ITCC.WPF
 
 Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов. Интересные классы:  
@@ -114,8 +122,6 @@ WPF-приложение для генерации и установки TLS-с�
 * `ITCC.WPF.Windows.LogWindow`  
 * `ITCC.WPF.Utils.DataGridHelper`  
 * `ITCC.WPF.Utils.ScrollViewerExtensions`  
-* `ITCC.WPF.Utils.ObservableRingBuffe`  
-
 
 ## Подключение
 

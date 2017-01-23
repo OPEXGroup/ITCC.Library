@@ -1,12 +1,14 @@
-﻿using System;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ITCC.WPF.Interfaces;
+using ITCC.UI.Interfaces;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     /// <summary>
     ///     Class represents asynchronous command to be called from GUI

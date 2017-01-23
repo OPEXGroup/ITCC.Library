@@ -1,20 +1,21 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
-using ITCC.WPF.Common;
-using ITCC.WPF.Utils;
-using ITCC.WPF.ViewModels;
+using ITCC.UI.Common;
+using ITCC.UI.Utils;
+using ITCC.UI.ViewModels;
 
-namespace ITCC.WPF.Loggers
+namespace ITCC.UI.Loggers
 {
     public class ObservableLogger : IFlushableLogReceiver, IDisposable
     {
-        public const double FlushInterval = 5;
+        public const int FlushInterval = 5;
         public const int BufferSize = 100;
 
         #region ILogReceiver
@@ -50,7 +51,7 @@ namespace ITCC.WPF.Loggers
 
         public void Dispose()
         {
-            _flushTimer.Stop();
+            _flushTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             _flushTimer.Dispose();
         }
 
@@ -81,9 +82,7 @@ namespace ITCC.WPF.Loggers
 
         private void InitTimer()
         {
-            _flushTimer = new Timer(FlushInterval);
-            _flushTimer.Elapsed += async (sender, args) => await FlushAsync();
-            _flushTimer.Start();
+            _flushTimer = new Timer(async sender => await FlushAsync(), null, FlushInterval, FlushInterval);
         }
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _eventQueue = new ConcurrentQueue<LogEntryEventArgs>();
