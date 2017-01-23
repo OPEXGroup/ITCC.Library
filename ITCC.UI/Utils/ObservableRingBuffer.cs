@@ -14,7 +14,7 @@ namespace ITCC.UI.Utils
         #region INotifyCollectionChanged
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
+        private void OnCollectionChanged(NotifyCollectionChangedEventArgs args) => CollectionChanged?.Invoke(this, args);
         #endregion
 
         #region IEnumerable

@@ -15,7 +15,7 @@ namespace ITCC.UI.Loggers
 {
     public class ObservableLogger : IFlushableLogReceiver, IDisposable
     {
-        public const int FlushInterval = 5000;
+        public const int FlushInterval = 5;
         public const int BufferSize = 100;
 
         #region ILogReceiver
