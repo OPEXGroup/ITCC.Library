@@ -113,6 +113,7 @@ WPF-приложение для генерации и установки TLS-с�
 
 * `ITCC.UI.Commands.AsyncCommand`  
 * `ITCC.UI.Loggers.ObservableLogger`  
+* `ITCC.UI.Utils.ObservableRingBuffer`  
 
 ### ITCC.WPF
 
@@ -121,8 +122,6 @@ WPF-приложение для генерации и установки TLS-с�
 * `ITCC.WPF.Windows.LogWindow`  
 * `ITCC.WPF.Utils.DataGridHelper`  
 * `ITCC.WPF.Utils.ScrollViewerExtensions`  
-* `ITCC.WPF.Utils.ObservableRingBuffer`  
-
 
 ## Подключение
 
