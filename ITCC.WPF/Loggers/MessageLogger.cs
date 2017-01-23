@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Interfaces;
+using ITCC.UI.Utils;
 using ITCC.WPF.Utils;
 
 namespace ITCC.WPF.Loggers

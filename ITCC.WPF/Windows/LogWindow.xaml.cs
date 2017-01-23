@@ -8,9 +8,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ITCC.Logging.Core;
-using ITCC.WPF.Loggers;
 using ITCC.WPF.Utils;
-using ITCC.WPF.ViewModels;
+using ITCC.UI.Loggers;
+using ITCC.UI.Utils;
+using ITCC.UI.ViewModels;
 
 namespace ITCC.WPF.Windows
 {
@@ -43,7 +44,8 @@ namespace ITCC.WPF.Windows
             LocalLogLevelComboBox.SelectedValue = EnumHelper.LogLevelName(Logger.Level); 
         }
 
-        private void LogDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e) => DataGridHelper.HandleAutoGeneratingColumn(sender, e);
+        private void LogDataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+            => DataGridHelper.HandleAutoGeneratingColumn(sender, e);
 
         private void LogDataGrid_OnLoadingRow(object sender, DataGridRowEventArgs e)
         {

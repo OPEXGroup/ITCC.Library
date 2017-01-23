@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ITCC.WPF.Interfaces;
+using ITCC.UI.Interfaces;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     /// <summary>
     ///     Class represents asynchronous command to be called from GUI

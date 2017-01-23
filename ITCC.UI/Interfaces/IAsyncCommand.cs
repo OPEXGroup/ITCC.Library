@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ITCC.WPF.Interfaces
+namespace ITCC.UI.Interfaces
 {
     /// <summary>
     ///     Used for WPF bindings. 

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Windows.Input;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     internal sealed class CancelAsyncCommand : ICommand
     {

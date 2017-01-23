@@ -140,6 +140,10 @@
       <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ITCC.UI\ITCC.UI.csproj">
+      <Project>{54796870-23ec-43d3-a427-50a894427d55}</Project>
+      <Name>ITCC.UI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.WPF\ITCC.WPF.csproj">
       <Project>{07D36841-8876-437C-B7A4-CBF1012513EB}</Project>
       <Name>ITCC.WPF</Name>

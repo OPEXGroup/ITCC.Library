@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     public static class AsyncCommandFactory
     {

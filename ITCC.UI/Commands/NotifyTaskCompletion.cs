@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using ITCC.Logging.Core;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     public sealed class NotifyTaskCompletion<TResult> : INotifyPropertyChanged
     {

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ITCC.Logging.Core;
+using ITCC.UI.Loggers;
 using ITCC.WPF.Loggers;
 using ITCC.WPF.Windows;
 
@@ -71,7 +72,7 @@ namespace ITCC.WPF.Testing
                 }
                 str += "END";
                 Logger.LogEntry("TEST", LogLevel.Trace, str);
-                await Task.Delay(20);
+                await Task.Delay(20).ConfigureAwait(false);
             }
 
             //Parallel.For(0, 6, i =>

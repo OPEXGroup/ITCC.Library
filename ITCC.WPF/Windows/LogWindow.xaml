@@ -45,6 +45,7 @@
                   VerticalScrollBarVisibility="Visible"
                   EnableColumnVirtualization="True"
                   EnableRowVirtualization="True"
-                  IsReadOnly="True"/>
+                  IsReadOnly="True">
+        </DataGrid>
     </Grid>
 </Window>

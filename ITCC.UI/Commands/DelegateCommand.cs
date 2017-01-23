@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace ITCC.WPF.Commands
+namespace ITCC.UI.Commands
 {
     public class DelegateCommand : ICommand, INotifyPropertyChanged
     {

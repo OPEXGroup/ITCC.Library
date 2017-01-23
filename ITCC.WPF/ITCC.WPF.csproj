@@ -82,18 +82,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\DatagridColumnStyleAttribute.cs" />
-    <Compile Include="Attributes\DataGridIgnoreAttribute.cs" />
-    <Compile Include="Attributes\HeaderTooltipAttribute.cs" />
-    <Compile Include="Commands\AsyncCommand.cs" />
-    <Compile Include="Commands\AsyncCommandFactory.cs" />
-    <Compile Include="Commands\CancelAsyncCommand.cs" />
-    <Compile Include="Commands\DelegateCommand.cs" />
-    <Compile Include="Commands\NotifyTaskCompletion.cs" />
-    <Compile Include="Common\Delegates.cs" />
-    <Compile Include="Interfaces\IAsyncCommand.cs" />
     <Compile Include="Loggers\MessageLogger.cs" />
-    <Compile Include="Loggers\ObservableLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -109,12 +98,9 @@
     </Compile>
     <Compile Include="Utils\ConditionValidator.cs" />
     <Compile Include="Utils\DataGridHelper.cs" />
-    <Compile Include="Utils\EnumHelper.cs" />
-    <Compile Include="Utils\ObservableRingBuffer.cs" />
     <Compile Include="Utils\PropertyHelper.cs" />
     <Compile Include="Utils\ScrollViewerExtensions.cs" />
     <Compile Include="Utils\ValidationResult.cs" />
-    <Compile Include="ViewModels\LogEntryEventArgsViewModel.cs" />
     <Compile Include="Windows\LogWindow.xaml.cs">
       <DependentUpon>LogWindow.xaml</DependentUpon>
     </Compile>
@@ -144,6 +130,10 @@
     <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
       <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.UI\ITCC.UI.csproj">
+      <Project>{54796870-23EC-43D3-A427-50A894427D55}</Project>
+      <Name>ITCC.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
