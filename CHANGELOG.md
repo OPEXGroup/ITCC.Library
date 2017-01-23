@@ -1,3 +1,9 @@
+## 2.7.0 (2017-01-23)
+
+* **New**:  `ITCC.UI` project added  
+* **New**:  github pages enabled (https://opexgroup.github.io/ITCC.Library)  
+* **Edit**: **BREAKING CHANGE**: A lot of classes moved from `ITCC.WPF` to `ITCC.UI`  
+
 ## 2.6.0 (2017-01-20)
 
 * **Edit**: **BREAKING CHANGE**: `IFlushableLogReceiver` interface changed (`void Flush() => Task FlushAsync()`).  
