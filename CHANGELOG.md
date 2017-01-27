@@ -1,3 +1,7 @@
+## 2.7.1 (2017-01-27)
+
+* **Edit**: Prebuild scripts should go to lib\ folder  
+
 ## 2.7.0 (2017-01-23)
 
 * **New**:  `ITCC.UI` project added  
