@@ -1,3 +1,7 @@
+## 2.7.2 (2017-01-29)
+
+* **Edit**: Newtonsoft.Json downgrade to 9.0.1  
+
 ## 2.7.1 (2017-01-27)
 
 * **Edit**: Prebuild scripts should go to lib\ folder  
