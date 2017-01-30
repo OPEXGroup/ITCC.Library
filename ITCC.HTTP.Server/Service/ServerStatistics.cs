@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -27,6 +28,9 @@ namespace ITCC.HTTP.Server.Service
             _threadsTimer.Stop();
             _memoryTimer.Dispose();
             _threadsTimer.Dispose();
+            _cpuTimer.Stop();
+            _cpuTimer.Dispose();
+            _cpuCounter.Dispose();
         }
 
         #endregion
@@ -47,6 +51,18 @@ namespace ITCC.HTTP.Server.Service
             _threadsTimer = new Timer(ThreadsSamplingPeriod);
             _threadsTimer.Elapsed += ThreadsTimerOnElapsed;
             _threadsTimer.Start();
+
+            _cpuCounter = new PerformanceCounter
+            {
+                CategoryName = "Processor",
+                CounterName = "% Processor Time",
+                InstanceName = GetCurrentProcessInstanceName(),
+                ReadOnly = true
+            };
+            _cpuCounter.InstanceName = "_Total";
+            _cpuTimer = new Timer(CpuSamplingPeriod);
+            _cpuTimer.Elapsed += CpuTimerOnElapsed;
+            _cpuTimer.Start();
         }
 
         public string Serialize()
@@ -59,6 +75,7 @@ namespace ITCC.HTTP.Server.Service
             SerializeDetailedRequestPerformanceStatistics(builder);
             SerializeGeneralRequestPerformanceStatistics(builder);
             SerializeMemoryUsageStatistics(builder);
+            SerializeCpuUsageStatistics(builder);
             SerializeThreadPoolUsageStatistics(builder);
             return builder.ToString();
         }
@@ -173,6 +190,27 @@ namespace ITCC.HTTP.Server.Service
 
                 if (MemoryWarningsEnabled)
                     ProcessPossibleMemoryOverhead();
+            }
+        }
+
+        private void CpuTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            lock (_cpuLock)
+            {
+                try
+                {
+                    var currentCpuUsage = _cpuCounter.NextValue();
+                    _minCpuUsage = (int)Math.Min(_minCpuUsage, currentCpuUsage);
+                    _maxCpuUsage = (int)Math.Max(_maxCpuUsage, currentCpuUsage);
+                    _currentCpu = currentCpuUsage;
+                    _totalCpuUsage += currentCpuUsage;
+
+                    _cpuSamples++;
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogException("SRV STAT", LogLevel.Warning, exception);
+                }
             }
         }
 
@@ -348,15 +386,32 @@ namespace ITCC.HTTP.Server.Service
                     builder.AppendLine();
                     builder.AppendLine("Thread statistics:");
                     builder.AppendLine("\tWorker threads:");
-                    var agrWorkerThreads = (double)_totalWorkerThreads / _threadingSamples;
+                    var avgWorkerThreads = (double)_totalWorkerThreads / _threadingSamples;
                     builder.AppendLine($"\t\tMax: {_maxWorkerThreads,5}");
-                    builder.AppendLine($"\t\tAvg: {agrWorkerThreads,5:F1}");
+                    builder.AppendLine($"\t\tAvg: {avgWorkerThreads,5:F1}");
                     builder.AppendLine($"\t\tCur: {_currentWorkerThreads,5}");
                     builder.AppendLine("\tIOCP threads:");
                     var ageIocpThreads = (double)_totalIocpThreads / _threadingSamples;
                     builder.AppendLine($"\t\tMax: {_maxIocpThreads,5}");
                     builder.AppendLine($"\t\tAvg: {ageIocpThreads,5:F1}");
                     builder.AppendLine($"\t\tCur: {_currentIocpThreads,5}");
+                }
+            }
+        }
+
+        private void SerializeCpuUsageStatistics(StringBuilder builder)
+        {
+            if (_cpuSamples > 0)
+            {
+                lock (_cpuLock)
+                {
+                    var averageCpu = _totalCpuUsage / _cpuSamples;
+                    builder.AppendLine();
+                    builder.AppendLine($"Cpu usage statistics (Total {Environment.ProcessorCount} cores):");
+                    builder.AppendLine($"\tMin: {(double)_minCpuUsage,4:F1} %");
+                    builder.AppendLine($"\tMax: {(double)_maxCpuUsage,4:F1} %");
+                    builder.AppendLine($"\tAvg: {averageCpu,4:F1} %");
+                    builder.AppendLine($"\tCur: {(double)_currentCpu,4:F1} %");
                 }
             }
         }
@@ -374,6 +429,11 @@ namespace ITCC.HTTP.Server.Service
         ///     Milliseconds
         /// </summary>
         private const double ThreadsSamplingPeriod = 1000;
+
+        /// <summary>
+        ///     Milliseconds
+        /// </summary>
+        private const double CpuSamplingPeriod = 1000;
 
         private readonly ConcurrentDictionary<int, int> _responseCodes = new ConcurrentDictionary<int, int>();
 
@@ -426,8 +486,19 @@ namespace ITCC.HTTP.Server.Service
         private long _totalIocpThreads;
         private long _threadingSamples;
 
+        private float _currentCpu;
+        private float _minCpuUsage;
+        private float _maxCpuUsage;
+        private double _totalCpuUsage;
+        private long _cpuSamples;
+
+        private readonly PerformanceCounter _cpuCounter;
+
+        private readonly Timer _cpuTimer;
+
         private readonly object _threadsLock = new object();
         private readonly object _memoryLock = new object();
+        private readonly object _cpuLock = new object();
         private readonly object _counterLock = new object();
 
         /// <summary>
@@ -448,6 +519,37 @@ namespace ITCC.HTTP.Server.Service
         private string _slowestRequest;
 
         private long _requestCount;
+        #endregion
+
+        #region process utils
+
+        private static string GetCurrentProcessInstanceName()
+        {
+            var proc = Process.GetCurrentProcess();
+            var pid = proc.Id;
+            return GetProcessInstanceName(pid);
+        }
+
+        private static string GetProcessInstanceName(int pid)
+        {
+            var counterCategory = new PerformanceCounterCategory("Process");
+
+            var instances = counterCategory.GetInstanceNames();
+            foreach (var instance in instances)
+            {
+                using (var cnt = new PerformanceCounter("Process",
+                     "ID Process", instance, true))
+                {
+                    var val = (int)cnt.RawValue;
+                    if (val == pid)
+                    {
+                        return instance;
+                    }
+                }
+            }
+            return null;
+        }
+
         #endregion
     }
 }
