@@ -550,6 +550,37 @@ namespace ITCC.HTTP.Client.Core
 
         #endregion
 
+        #region head
+
+        /// <summary>
+        ///     Basic HEAD method: returns status and body
+        /// </summary>
+        /// <param name="partialUri">Uri part after server address/fqdn and port</param>
+        /// <param name="parameters">Request parameters after `?`</param>
+        /// <param name="headers">Request headers</param>
+        /// <param name="authentificationProvider">Authentification provider</param>
+        /// <param name="cancellationToken">Task cancellation token</param>
+        /// <returns></returns>
+        public Task<RequestResult<string>> HeadRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+                => PerformRequestAsync<string, string>(
+                    HttpMethod.Head,
+                    partialUri,
+                    parameters,
+                    headers,
+                    null,
+                    authentificationProvider,
+                    null,
+                    AllowedRedirectCount,
+                    cancellationToken
+                    );
+
+        #endregion
+
         #region post
 
         /// <summary>
