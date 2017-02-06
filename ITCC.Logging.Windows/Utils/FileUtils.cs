@@ -10,24 +10,40 @@ namespace ITCC.Logging.Windows.Utils
     internal static class FileUtils
     {
         #region public
+
+        public const int BufferSize = 16 * 1024;
+
         public static void FlushLogQueue(string fileName, ConcurrentQueue<LogEntryEventArgs> argsQueue)
         {
             using (var fileStream = new FileStream(fileName, FileMode.Append, FileAccess.Write))
             {
                 using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
                 {
-                    var stringBuilder = new StringBuilder();
-                    while (!argsQueue.IsEmpty)
+                    while (true)
                     {
-                        LogEntryEventArgs message;
-                        if (argsQueue.TryDequeue(out message))
-                            stringBuilder.AppendLine(message.ToString());
+                        var stringBuilder = new StringBuilder();
+                        var count = 0;
+                        while (!argsQueue.IsEmpty)
+                        {
+                            LogEntryEventArgs message;
+                            if (argsQueue.TryDequeue(out message))
+                            {
+                                stringBuilder.AppendLine(message.ToString());
+                                count++;
+                                if (count == BufferSize)
+                                    break; // Stop dequeuing
+                            }
+                                
+                        }
+                        var resultingString = stringBuilder.ToString();
+                        if (string.IsNullOrWhiteSpace(resultingString))
+                            return;
+                        streamWriter.Write(resultingString);
+                        streamWriter.Flush();
+                        if (count < BufferSize)
+                            break;
                     }
-                    var resultingString = stringBuilder.ToString();
-                    if (string.IsNullOrWhiteSpace(resultingString))
-                        return;
-                    streamWriter.Write(stringBuilder.ToString());
-                    streamWriter.Flush();
+                    
                 }
             }
         }

@@ -25,7 +25,6 @@ namespace ITCC.Logging.Testing
             InitLoggers();
 
             SpawnLogThreads();
-            
 
             Logger.LogEntry("TEST", LogLevel.Info, "Done");
             await Logger.FlushAllAsync();
@@ -50,7 +49,7 @@ namespace ITCC.Logging.Testing
         {
             for (var i = 0; i < 10; ++i)
             {
-                for (var j = 0; j < 1000; ++j)
+                for (var j = 0; j < 100 * 1000; ++j)
                 {
                     Logger.LogEntry("TEST", LogLevel.Debug, "Message");
                 }
