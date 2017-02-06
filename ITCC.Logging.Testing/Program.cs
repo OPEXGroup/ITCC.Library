@@ -4,6 +4,7 @@
 // #define READ
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,84 +24,51 @@ namespace ITCC.Logging.Testing
         {
             InitLoggers();
 
-#if WRITE
-            const int outterCycleSize = 100;
-            const int innerCycleSize = 1000;
+            SpawnLogThreads();
+            
 
-            var random = new Random();
-
-            for (var i = 0; i < outterCycleSize; ++i)
-            {
-                var willBeDone = (i + 1) * (innerCycleSize + 1);
-                for (var j = 0; j < innerCycleSize; ++j)
-                {
-                    Logger.LogEntry("TEST", LogLevel.Trace, $"Message with random {random.Next()}");
-                }
-                Logger.LogEntry("TEST", LogLevel.Debug, $"Done {willBeDone}");
-            }
-            Logger.LogEntry("MAIN", LogLevel.Info, "Done");
-            Logger.FlushAll();
-            _fileLogger.Level = LogLevel.None;
-#endif
-
-#if READ
-            try
-            {
-                var reader = new LogReader(FileName);
-                foreach (var entry in reader.ReadAsEnumerable())
-                {
-                    if (entry == null)
-                    {
-                        Logger.LogEntry("MAIN", LogLevel.Debug, "Failed to parse");
-                        continue;
-                    }
-
-                    PrintEntry(entry);
-                    //Console.ReadLine();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException("MAIN", LogLevel.Warning, ex);
-            }
-#endif
-            for (var i = 0; i < 10; ++i)
-            {
-                Logger.LogEntry("TEST", LogLevel.Debug, "line");
-                Logger.LogEntry("TEST", LogLevel.Debug, "line");
-                Logger.LogEntry("TEST", LogLevel.Debug, "line");
-                await Task.Delay(1000);
-            }
-
+            Logger.LogEntry("TEST", LogLevel.Info, "Done");
             await Logger.FlushAllAsync();
 
             Console.ReadLine();
         }
 
-        private static void PrintEntry(LogEntryEventArgs args)
+        private static void SpawnLogThreads()
         {
-            Action<string> printAction = Console.WriteLine;
+            var threadCount = Environment.ProcessorCount;
+            var threads = new List<Thread>();
+            for (var i = 0; i < threadCount; ++i)
+            {
+                threads.Add(new Thread(ThreadFunc));
+            }
 
-            printAction($"DATE:           {args.Time}");
-            printAction($"LEVEL:          {args.Level}");
-            printAction($"THREAD:         {args.ThreadId}");
-            printAction($"SCOPE:          {args.Scope}");
-            printAction($"MESSAGE:        {args.Message}");
+            threads.ForEach(t => t.Start());
+            threads.ForEach(t => t.Join());
+        }
+
+        private static void ThreadFunc()
+        {
+            for (var i = 0; i < 10; ++i)
+            {
+                for (var j = 0; j < 1000; ++j)
+                {
+                    Logger.LogEntry("TEST", LogLevel.Debug, "Message");
+                }
+                Logger.LogEntry("TEST", LogLevel.Info, $"{i * 10}% done");
+            }
+                
         }
 
         private static void InitLoggers()
         {
             Logger.Level = LogLevel.Trace;
-            Logger.RegisterReceiver(new ColouredConsoleLogger(LogLevel.Trace));
-#if WRITE
-            _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
-#endif
-            _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 1000);
+            Logger.RegisterReceiver(new ColouredConsoleLogger(LogLevel.Info));
+            _fileLogger = new BufferedFileLogger(FileName, LogLevel.Trace, true, 5000, 10000);
             Logger.RegisterReceiver(_fileLogger);
             Console.OutputEncoding = Encoding.UTF8;
         }
 
         private static ILogReceiver _fileLogger;
-        private const string FileName = @"C:\Test\test.log";
+        private const string FileName = @"test.log";
     }
 }
