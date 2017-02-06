@@ -2,8 +2,6 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System;
 using System.Collections.Concurrent;
-using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.Logging.Core.Interfaces;
@@ -22,6 +20,8 @@ namespace ITCC.Logging.Core.Loggers
             if (args.Level > Level)
                 return;
             _messageQueue.Enqueue(args);
+            if (_messageQueue.Count >= QueueSizeLimit)
+                Task.Run(() => FlushBuffer());
         }
 
         public Task FlushAsync()
@@ -48,15 +48,19 @@ namespace ITCC.Logging.Core.Loggers
         /// </summary>
         public const double DefaultFrequency = 10000;
 
-        public PortableBufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency)
+        public const int DefaultQueueSize = int.MaxValue;
+
+        public PortableBufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
             : base(filename, clearFile)
         {
+            QueueSizeLimit = queueSize;
             InitTimer(frequency);
         }
 
-        public PortableBufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency)
+        public PortableBufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
             : base(filename, level, clearFile)
         {
+            QueueSizeLimit = queueSize;
             InitTimer(frequency);
         }
 
@@ -66,6 +70,10 @@ namespace ITCC.Logging.Core.Loggers
 
         private bool FlushBuffer()
         {
+            if (_isFlushing)
+                return true;
+            _isFlushing = true;
+
             try
             {
                 FileUtils.FlushLogQueue(Filename, _messageQueue);
@@ -76,9 +84,14 @@ namespace ITCC.Logging.Core.Loggers
                 Logger.LogException("FILELOGGING", LogLevel.Error, ex);
                 return false;
             }
+            finally
+            {
+                _isFlushing = false;
+            }
         }
 
         public int Frequency { get; private set; }
+        public int QueueSizeLimit { get; private set; }
         #endregion
 
         #region private
@@ -93,6 +106,7 @@ namespace ITCC.Logging.Core.Loggers
             Task.Run(() => FlushBuffer());
         }
 
+        private volatile bool _isFlushing;
         private Timer _queueTimer;
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _messageQueue = new ConcurrentQueue<LogEntryEventArgs>();

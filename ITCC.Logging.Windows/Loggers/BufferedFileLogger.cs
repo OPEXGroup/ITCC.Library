@@ -18,6 +18,8 @@ namespace ITCC.Logging.Windows.Loggers
             if (args.Level > Level)
                 return;
             _messageQueue.Enqueue(args);
+            if (_messageQueue.Count >= QueueSizeLimit)
+                Task.Run(() => FlushBuffer());
         }
 
         public Task FlushAsync()
@@ -44,15 +46,19 @@ namespace ITCC.Logging.Windows.Loggers
         /// </summary>
         public const double DefaultFrequency = 10000;
 
-        public BufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency)
+        public const int DefaultQueueSize = int.MaxValue;
+
+        public BufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
             : base(filename, clearFile)
         {
+            QueueSizeLimit = queueSize;
             InitTimer(frequency);
         }
 
-        public BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency)
+        public BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
             : base(filename, level, clearFile)
         {
+            QueueSizeLimit = queueSize;
             InitTimer(frequency);
         }
 
@@ -62,6 +68,10 @@ namespace ITCC.Logging.Windows.Loggers
 
         private bool FlushBuffer()
         {
+            if (_isFlushing)
+                return true;
+            _isFlushing = true;
+
             try
             {
                 FileUtils.FlushLogQueue(Filename, _messageQueue);
@@ -72,9 +82,14 @@ namespace ITCC.Logging.Windows.Loggers
                 Logger.LogException("FILELOGGING", LogLevel.Error, ex);
                 return false;
             }
+            finally
+            {
+                _isFlushing = false;
+            }
         }
 
         public int Frequency { get; private set; }
+        public int QueueSizeLimit { get; private set; }
         #endregion
 
         #region private
@@ -89,6 +104,7 @@ namespace ITCC.Logging.Windows.Loggers
             Task.Run(() => FlushBuffer());
         }
 
+        private volatile bool _isFlushing;
         private Timer _queueTimer;
 
         private readonly ConcurrentQueue<LogEntryEventArgs> _messageQueue = new ConcurrentQueue<LogEntryEventArgs>();
