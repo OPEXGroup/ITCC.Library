@@ -5,6 +5,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,15 +20,25 @@ namespace ITCC.Logging.Testing
 {
     internal class Program
     {
+        private const int ReportsPerThread = 10;
+        private const int MessagesPerReport = 100 * 1000;
+        private static int _threadCount;
+
         private static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
         private static async Task MainAsync()
         {
             InitLoggers();
+            _threadCount = Environment.ProcessorCount * 2;
+
+            var sw = Stopwatch.StartNew();
 
             SpawnLogThreads();
+            sw.Stop();
 
-            Logger.LogEntry("TEST", LogLevel.Info, "Done");
+            var messagesCount = _threadCount * ReportsPerThread * MessagesPerReport;
+            var avgMessageTime = (double) sw.ElapsedMilliseconds / messagesCount;
+            Logger.LogEntry("TEST", LogLevel.Info, $"Done {messagesCount} in {sw.ElapsedMilliseconds}ms (avg {avgMessageTime})");
             await Logger.FlushAllAsync();
 
             Console.ReadLine();
@@ -34,9 +46,8 @@ namespace ITCC.Logging.Testing
 
         private static void SpawnLogThreads()
         {
-            var threadCount = Environment.ProcessorCount;
             var threads = new List<Thread>();
-            for (var i = 0; i < threadCount; ++i)
+            for (var i = 0; i < _threadCount; ++i)
             {
                 threads.Add(new Thread(ThreadFunc));
             }
@@ -47,9 +58,9 @@ namespace ITCC.Logging.Testing
 
         private static void ThreadFunc()
         {
-            for (var i = 0; i < 10; ++i)
+            for (var i = 0; i < ReportsPerThread; ++i)
             {
-                for (var j = 0; j < 100 * 1000; ++j)
+                for (var j = 0; j < 1 * MessagesPerReport; ++j)
                 {
                     Logger.LogEntry("TEST", LogLevel.Debug, "Message");
                 }

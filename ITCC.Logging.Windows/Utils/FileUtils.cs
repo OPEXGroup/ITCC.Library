@@ -11,7 +11,7 @@ namespace ITCC.Logging.Windows.Utils
     {
         #region public
 
-        public const int BufferSize = 16 * 1024;
+        public const int BufferSize = 256 * 1024;
 
         public static void FlushLogQueue(string fileName, ConcurrentQueue<LogEntryEventArgs> argsQueue)
         {
@@ -30,7 +30,7 @@ namespace ITCC.Logging.Windows.Utils
                             {
                                 stringBuilder.AppendLine(message.ToString());
                                 count++;
-                                if (count == BufferSize)
+                                if (count >= BufferSize)
                                     break; // Stop dequeuing
                             }
                                 
