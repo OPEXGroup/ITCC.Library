@@ -29,7 +29,10 @@ namespace ITCC.HTTP.Testing
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
             StaticClient.ServerAddress = "http://localhost:8888/";
-            var result = await StaticClient.HeadRawAsync("files/Test/1.jpg");
+            var result = await StaticClient.PostRawAsync("ping",
+                null,
+                null,
+                "12345");
 
             await Task.Yield();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");

@@ -1106,6 +1106,22 @@ namespace ITCC.HTTP.Client.Core
                     }
                 }
 
+                if (response.Content?.Headers != null)
+                {
+                    foreach (var header in response.Content.Headers)
+                    {
+                        if (LogProhibitedHeaders.Contains(header.Key))
+                        {
+                            builder.AppendLine($"{header.Key}: {Constants.RemovedLogString}");
+                        }
+                        else
+                        {
+                            var normalValue = string.Join("", header.Value);
+                            builder.AppendLine($"{header.Key}: {normalValue}");
+                        }
+                    }
+                }
+
                 if (responseBody == null)
                     return builder.ToString();
 
