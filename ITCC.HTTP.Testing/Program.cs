@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ITCC.HTTP.Client.Core;
 using ITCC.HTTP.Client.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
@@ -27,13 +28,8 @@ namespace ITCC.HTTP.Testing
                 return;
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            var testObject = new TestClass
-            {
-                First = "First",
-                Second = "Second"
-            };
-            var serialized = JsonConvert.SerializeObject(testObject);
-            var dummy = JsonConvert.DeserializeObject<None>(serialized);
+            StaticClient.ServerAddress = "http://localhost:8888/";
+            var result = await StaticClient.HeadRawAsync("files/Test/1.jpg");
 
             await Task.Yield();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");
