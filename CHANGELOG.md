@@ -1,3 +1,12 @@
+## 2.8.0 (2017-02-07)
+
+* **Edit**: **BREAKING CHANGE**: ItemsFilter removed from submodules  
+* **New**:  `HEAD` requests API for `RegularClient`/`StaticClient`  
+* **New**:  `StaticServer` statistics now includes CPU usage. **Now for process, but machine total**  
+* **Edit**: `BufferedFileLogger`/`PortableBufferedFileLogger` now have optional `maxQueueSize` constructor parameter  
+* **Edit**: `RequestResult<TResult>::Headers` now include content headers (such as `Content-Length`)  
+* **Edit**: `RegularClient`/`StaticClient` logs now include content headers (such as `Content-Length`)  
+
 ## 2.7.2 (2017-01-29)
 
 * **Edit**: Newtonsoft.Json downgrade to 9.0.1  
