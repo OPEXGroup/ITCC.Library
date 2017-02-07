@@ -128,29 +128,28 @@ WPF-приложение для генерации и установки TLS-с�
 ### Клонирование
 
 ```
-git clone git@gitlab.itcc.company:OPEXGroup/ITCC.Library.git
+git clone https://github.com/OPEXGroup/ITCC.Library.git
 ```
 
 ### Подключение в качестве подмодуля
 
 ```
-git submodule add git@gitlab.itcc.company:OPEXGroup/ITCC.Library.git
+git submodule add https://github.com/OPEXGroup/ITCC.Library.git
 ```
 
 Потом, для подключения после клонирования родительского проекта
 
 ```
-git submodule init`
+git submodule init
 git submodule update
 ```
 
-Собирается из Visual Studio 2015, целевая среда - `.Net 4.6 (x64)`.
+Собирается из Visual Studio 2015. Целевая среда:
+
+* `netstandard 1.3` для проектов `ITCC.Logging.Core`, `ITCC.HTTP.API` и `ITCC.UI`
+* `.Net 4.6` для всех остальных
 
 ### Замечания по сборке
-
-#### Платформа
-
-Библиотека писалась под Windows 10 и на Linux работать не будет
 
 #### Prebuild
 
