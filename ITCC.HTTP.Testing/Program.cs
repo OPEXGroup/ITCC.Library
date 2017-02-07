@@ -1,6 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ITCC.HTTP.Client.Core;
@@ -28,11 +29,9 @@ namespace ITCC.HTTP.Testing
                 return;
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            StaticClient.ServerAddress = "http://localhost:8888/";
-            var result = await StaticClient.PostRawAsync("ping",
-                null,
-                null,
-                "12345");
+            StaticClient.ServerAddress = "https://yandex.ru/";
+            var result = await StaticClient.GetRawAsync(string.Empty);
+            Logger.LogEntry("TEST", LogLevel.Info, $"Headers:\n{string.Join("\n", result.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
 
             await Task.Yield();
             Logger.LogEntry("MAIN", LogLevel.Info, "Finished");

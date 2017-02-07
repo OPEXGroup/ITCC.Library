@@ -213,16 +213,7 @@ namespace ITCC.HTTP.Client.Core
                         LogTrace($"Sending request:\n{SerializeHttpRequestMessage(request, requestBody)}");
                         using (var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false))
                         {
-                            var responseHeaders =
-                                response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key,
-                                    httpResponseHeader => string.Join(", ", httpResponseHeader.Value));
-                            if (response.Content?.Headers?.Any() == true)
-                            {
-                                foreach (var contentHeader in response.Content.Headers)
-                                {
-                                    responseHeaders.Add(contentHeader.Key, string.Join(", ", contentHeader.Value));
-                                }
-                            }
+                            var responseHeaders = GetAllHeaders(response);
 
                             var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
                                 ? ServerResponseStatusDictionary[response.StatusCode]
@@ -1003,6 +994,25 @@ namespace ITCC.HTTP.Client.Core
         #endregion
 
         #region private
+
+        #region utils
+
+        private static IDictionary<string, string> GetAllHeaders(HttpResponseMessage response)
+        {
+            var result = response.Headers
+                .ToDictionary(httpResponseHeader => httpResponseHeader.Key,
+                              httpResponseHeader => string.Join(", ", httpResponseHeader.Value));
+            if (response.Content?.Headers?.Any() == true)
+            {
+                foreach (var contentHeader in response.Content.Headers)
+                {
+                    result.Add(contentHeader.Key, string.Join(", ", contentHeader.Value));
+                }
+            }
+            return result;
+        }
+
+        #endregion
 
         #region log
 
