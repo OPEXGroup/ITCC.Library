@@ -183,7 +183,7 @@ namespace ITCC.HTTP.Client.Core
                         }
                         authentificationProvider?.Invoke(request);
 
-                        string requestBody;
+                        var requestBody = string.Empty;
                         if (bodyArg != null)
                         {
                             if (typeof(TRequestBody) != typeof(string))
@@ -216,7 +216,7 @@ namespace ITCC.HTTP.Client.Core
                             var responseHeaders =
                                 response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key,
                                     httpResponseHeader => string.Join(", ", httpResponseHeader.Value));
-                            if (response.Content.Headers?.Any() == true)
+                            if (response.Content?.Headers?.Any() == true)
                             {
                                 foreach (var contentHeader in response.Content.Headers)
                                 {
