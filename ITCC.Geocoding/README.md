@@ -1,4 +1,8 @@
-﻿# ITCC.Geocoding
+﻿---
+permalink: /ITCC.Geocoding/README.md
+---
+
+# ITCC.Geocoding
 
 Библиотека небольших классов, полезных при работе с геокодерами
 
