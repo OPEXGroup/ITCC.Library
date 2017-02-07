@@ -29,8 +29,10 @@ namespace ITCC.HTTP.Testing
                 return;
             Logger.LogEntry("MAIN", LogLevel.Info, "Started");
 
-            StaticClient.ServerAddress = "https://yandex.ru/";
+            StaticClient.ServerAddress = "https://www.google.ru/";
+            StaticClient.AllowedRedirectCount = 2;
             var result = await StaticClient.GetRawAsync(string.Empty);
+            Logger.LogEntry("TEST", LogLevel.Info, $"Status: {result.Status}");
             Logger.LogEntry("TEST", LogLevel.Info, $"Headers:\n{string.Join("\n", result.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
 
             await Task.Yield();

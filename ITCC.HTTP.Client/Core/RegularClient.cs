@@ -223,6 +223,7 @@ namespace ITCC.HTTP.Client.Core
                             {
                                 if (redirectsLeft <= 0)
                                 {
+                                    LogDebug("Redirect limit exceeded");
                                     return
                                         new VariadicRequestResult<TResponseSuccess, TResponseError>(
                                             default(TResponseSuccess), ServerResponseStatus.Redirect, responseHeaders);
