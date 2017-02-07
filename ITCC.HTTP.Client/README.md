@@ -73,12 +73,25 @@ Task<VariadicRequestResult<TSuccess, ApiErrorView>> GetWithApiErrorAsync<TSucces
 * Сохранение тела ответа на `GET`-запрос в файл
 
 ```
-public async Task<RequestResult<string>> GetFileAsync(
+Task<RequestResult<string>> GetFileAsync(
             string partialUri,
             IDictionary<string, string> parameters = null,
             IDictionary<string, string> headers = null,
             string fileName = null,
             bool allowRewrite = true,
+            Delegates.AuthentificationDataAdder authentificationProvider = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+```
+
+##### HEAD-запросы
+
+* Получение ответа на `HEAD`-запрос (тело ответа должно быть пустым)
+
+```
+Task<RequestResult<string>> HeadRawAsync(
+            string partialUri,
+            IDictionary<string, string> parameters = null,
+            IDictionary<string, string> headers = null,
             Delegates.AuthentificationDataAdder authentificationProvider = null,
             CancellationToken cancellationToken = default(CancellationToken))
 ```

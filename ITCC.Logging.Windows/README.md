@@ -10,7 +10,11 @@
 
 Пишет лог в файл, буферизируя содержимое некоторое время (В текущей реализации через `ConcurrentQueue<LogEntryEventArgs>`). Основной конструктор 
 ```
-BufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = 10000);
+BufferedFileLogger(string filename,     // Имя файла с логом
+    LogLevel level,                     // Уровень лога
+    bool clearFile = false,             // Очищать ли файл (если нет - писать в конец)
+    double frequency = 10000,           // Частота сброса буфера в миллисекундах
+    int maxQueueSize = int.MaxValue);   // Размер очереди сообщений в памяти, после которого начинается сброс
 ```
 
 #### `class BufferedRotatingFileLogger : IFlushableLogReceiver`
