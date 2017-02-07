@@ -1,5 +1,5 @@
 ﻿---
-permalink: /ITCC.Geocoding/README.md
+permalink: /ITCC.Geocoding/
 ---
 
 # ITCC.Geocoding
