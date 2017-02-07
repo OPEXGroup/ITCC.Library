@@ -20,7 +20,7 @@ namespace ITCC.Logging.Core.Loggers
             if (args.Level > Level)
                 return;
             _messageQueue.Enqueue(args);
-            if (_messageQueue.Count >= QueueSizeLimit)
+            if (_messageQueue.Count >= MaxQueueSize)
                 Task.Run(() => FlushBuffer());
         }
 
@@ -50,17 +50,17 @@ namespace ITCC.Logging.Core.Loggers
 
         public const int DefaultQueueSize = int.MaxValue;
 
-        public PortableBufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
+        public PortableBufferedFileLogger(string filename, bool clearFile = false, double frequency = DefaultFrequency, int maxQueueSize = DefaultQueueSize)
             : base(filename, clearFile)
         {
-            QueueSizeLimit = queueSize;
+            MaxQueueSize = maxQueueSize;
             InitTimer(frequency);
         }
 
-        public PortableBufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency, int queueSize = DefaultQueueSize)
+        public PortableBufferedFileLogger(string filename, LogLevel level, bool clearFile = false, double frequency = DefaultFrequency, int maxQueueSize = DefaultQueueSize)
             : base(filename, level, clearFile)
         {
-            QueueSizeLimit = queueSize;
+            MaxQueueSize = maxQueueSize;
             InitTimer(frequency);
         }
 
@@ -91,7 +91,7 @@ namespace ITCC.Logging.Core.Loggers
         }
 
         public int Frequency { get; private set; }
-        public int QueueSizeLimit { get; private set; }
+        public int MaxQueueSize { get; private set; }
         #endregion
 
         #region private

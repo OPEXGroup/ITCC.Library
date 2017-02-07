@@ -183,7 +183,7 @@ namespace ITCC.HTTP.Client.Core
                         }
                         authentificationProvider?.Invoke(request);
 
-                        var requestBody = "";
+                        string requestBody;
                         if (bodyArg != null)
                         {
                             if (typeof(TRequestBody) != typeof(string))
@@ -215,7 +215,14 @@ namespace ITCC.HTTP.Client.Core
                         {
                             var responseHeaders =
                                 response.Headers.ToDictionary(httpResponseHeader => httpResponseHeader.Key,
-                                    httpResponseHeader => string.Join(";", httpResponseHeader.Value));
+                                    httpResponseHeader => string.Join(", ", httpResponseHeader.Value));
+                            if (response.Content.Headers?.Any() == true)
+                            {
+                                foreach (var contentHeader in response.Content.Headers)
+                                {
+                                    responseHeaders.Add(contentHeader.Key, string.Join(", ", contentHeader.Value));
+                                }
+                            }
 
                             var status = ServerResponseStatusDictionary.ContainsKey(response.StatusCode)
                                 ? ServerResponseStatusDictionary[response.StatusCode]
