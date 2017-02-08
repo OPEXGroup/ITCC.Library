@@ -97,6 +97,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utils\DataGridHelper.cs" />
+    <Compile Include="Utils\EnumDescriptionTypeConverter.cs" />
+    <Compile Include="Utils\LocalizedDescriptionAttribute.cs" />
     <Compile Include="Utils\PropertyHelper.cs" />
     <Compile Include="Utils\ScrollViewerExtensions.cs" />
     <Compile Include="Windows\LogWindow.xaml.cs">
