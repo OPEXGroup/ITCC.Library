@@ -1,3 +1,8 @@
+## 2.8.2 (2017-02-17)
+
+* **Fix**: `StaticServer::Start` error handlers fixed  
+* **Fix**: `ServerStatistics` CPU counter fixed  
+
 ## 2.8.1 (2017-02-10)
 
 * **New**:  `EnumDescriptionTypeConverter` and `LocalizedDescriptionAttribute` added to `ITCC.WPF`  
