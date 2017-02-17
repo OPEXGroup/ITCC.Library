@@ -56,10 +56,9 @@ namespace ITCC.HTTP.Server.Service
             {
                 CategoryName = "Processor",
                 CounterName = "% Processor Time",
-                InstanceName = GetCurrentProcessInstanceName(),
+                InstanceName = "_Total",
                 ReadOnly = true
             };
-            _cpuCounter.InstanceName = "_Total";
             _cpuTimer = new Timer(CpuSamplingPeriod);
             _cpuTimer.Elapsed += CpuTimerOnElapsed;
             _cpuTimer.Start();
@@ -519,37 +518,6 @@ namespace ITCC.HTTP.Server.Service
         private string _slowestRequest;
 
         private long _requestCount;
-        #endregion
-
-        #region process utils
-
-        private static string GetCurrentProcessInstanceName()
-        {
-            var proc = Process.GetCurrentProcess();
-            var pid = proc.Id;
-            return GetProcessInstanceName(pid);
-        }
-
-        private static string GetProcessInstanceName(int pid)
-        {
-            var counterCategory = new PerformanceCounterCategory("Process");
-
-            var instances = counterCategory.GetInstanceNames();
-            foreach (var instance in instances)
-            {
-                using (var cnt = new PerformanceCounter("Process",
-                     "ID Process", instance, true))
-                {
-                    var val = (int)cnt.RawValue;
-                    if (val == pid)
-                    {
-                        return instance;
-                    }
-                }
-            }
-            return null;
-        }
-
         #endregion
     }
 }
