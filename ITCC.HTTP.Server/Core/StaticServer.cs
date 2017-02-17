@@ -95,13 +95,13 @@ namespace ITCC.HTTP.Server.Core
             catch (SocketException)
             {
                 LogMessage(LogLevel.Critical, $"Error binding to port {configuration.Port}. Is it in use?");
-                _fileRequestController.Stop();
+                _fileRequestController?.Stop();
                 return ServerStartStatus.BindingError;
             }
             catch (Exception ex)
             {
                 LogException(LogLevel.Critical, ex);
-                _fileRequestController.Stop();
+                _fileRequestController?.Stop();
                 return ServerStartStatus.UnknownError;
             }
             finally
