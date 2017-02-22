@@ -1,3 +1,7 @@
+## 2.8.3 (2017-02-22)
+
+* **New**:  `StaticServer` now ensures all file sections exist at startup  
+
 ## 2.8.2 (2017-02-17)
 
 * **Fix**: `StaticServer::Start` error handlers fixed  
