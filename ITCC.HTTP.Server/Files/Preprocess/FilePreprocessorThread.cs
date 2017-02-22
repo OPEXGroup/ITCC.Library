@@ -69,7 +69,10 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                     lock (_stopLock)
                     {
                         if (_stopRequested)
+                        {
+                            LogMessage(LogLevel.Info, "File preprocessor thread stopped");
                             return;
+                        }
                     }
 
                     BaseFilePreprocessTask task;
