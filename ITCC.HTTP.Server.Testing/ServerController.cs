@@ -67,6 +67,12 @@ namespace ITCC.HTTP.Server.Testing
                     Folder = "Test",
                     MaxFileSize = -1,
                     Name = "Test"
+                },
+                new FileSection
+                {
+                    Folder = "Test2",
+                    MaxFileSize = -1,
+                    Name = "Test2"
                 }
             },
             FilesLocation = Configuration.FilesLocation,

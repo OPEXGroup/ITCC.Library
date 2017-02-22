@@ -72,6 +72,12 @@ namespace ITCC.HTTP.Server.Files
                 return false;
             }
 
+            if (!InitializeFileSections())
+            {
+                LogMessage(LogLevel.Warning, "Failed to initialize file sections");
+                return false;
+            }
+
             if (FilesPreprocessingEnabled && FilesEnabled)
             {
                 FilePreprocessController.Start(configuration.FilesPreprocessorThreads,
@@ -327,6 +333,33 @@ namespace ITCC.HTTP.Server.Files
         #endregion
 
         #region private
+
+        private bool InitializeFileSections()
+        {
+            try
+            {
+                CreateDirectoryIfNotExists(FilesLocation);
+                foreach (var fileSection in FileSections)
+                {
+                    var path = Path.Combine(FilesLocation, fileSection.Folder);
+                    CreateDirectoryIfNotExists(path);
+                    LogDebug($"File section {fileSection.Name} initialized in {path}");
+                }
+                LogDebug("All file sections initialized");
+                return true;
+            }
+            catch (Exception exception)
+            {
+                LogException(LogLevel.Warning, exception);
+                return false;
+            }
+        }
+
+        private static void CreateDirectoryIfNotExists(string path)
+        {
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+        }
 
         private async Task HandleFileGetRequestAsync(HttpListenerContext context, string filePath)
         {
