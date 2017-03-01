@@ -78,6 +78,25 @@ ApiViewCheckAttribute([CallerMemberName] string errorDescription = null);
 string ErrorDescription { get; }
 ```
 
+#### `class EnumValueInfoAttribute : Attribute`
+
+`[AttributeUsage(AttributeTargets.Field)]`
+
+Атрибут, добавляющий к полю имя и (опционально) описание. Применяется к элементам перечислений, в т.ч. помеченных атрибутом `[Flags]`.
+
+Конструктор:
+
+```
+EnumValueInfoAttribute(string displayName, string description = null);
+```
+
+Свойства:
+
+```
+string DisplayName { get; }
+string Description { get; }
+```
+
 ### Enums
 
 Используемые перечисления.
@@ -293,6 +312,52 @@ bool HasSecond => Second != null;
 ```
 string ApiContractTypeName(ApiContractType apiContractType);
 ApiContractType ApiContractTypeByName(string name);
+```
+
+#### `static class EnumInfoProvider`
+
+Служит для локализации элементов перечислений, использующих атрибут `EnumValueInfoAttribute`.
+
+Методы:
+
+```
+/*
+Получение имени для перечисления, при использовании 
+неверного типа или отсутствии атрибутов возвращает `null`
+*/
+string GetElementName(object element);
+
+/*
+Получение описание для перечисления, при использовании 
+неверного типа или отсутствии атрибутов возвращает `null`
+*/
+string GetElementDescription(object element);
+
+/*
+Получение значения перечисления по строке, полученной методом 
+GetElementName, при использовании неверного значения или отсутствии
+атрибутов возвращает элемеет TEnum со значением 0
+*/
+object GetEnumElementByName<TEnum>(string name);
+
+/*
+Получение словаря, в котором ключамя являются элементы перечислений типа
+enumType, а значениями - добавленные к ним атрибуты EnumValueInfoAttribute,
+неверного типа или отсутствии атрибутов возвращает `null`
+*/
+Dictionary<object, EnumValueInfoAttribute> GetInfoDictionaty(Type enumType);
+
+/*
+Обобщенная версия метода
+Dictionary<object, EnumValueInfoAttribute> GetInfoDictionaty(Type enumType);
+*/
+Dictionary<TEnum, EnumValueInfoAttribute> GetInfoDictionaty<TEnum>();
+
+/*
+Производит разделение перечисления, тип которого помечен атрибутом Flags на 
+отдельные составляющие.
+*/
+IEnumerable<TEnum> SplitEnum<TEnum>(TEnum value);
 ```
 
 #### `class ViewCheckResult`
