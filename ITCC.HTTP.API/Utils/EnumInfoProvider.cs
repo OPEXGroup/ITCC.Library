@@ -26,14 +26,43 @@ namespace ITCC.HTTP.API.Utils
             var attributes = GetAttributes(element);
             return attributes == null ? null : string.Join(Separator, attributes.Select(attr => attr.Description));
         }
-        public static object GetEnumElementByName<TEnum>(string name)
+        public static object GetEnumElementByName(string name, Type enumType)
         {
             if (name == null)
                 return null;
 
-            var dictionary = GetInfoDictionaty<TEnum>();
+            var dictionary = GetInfoDictionaty(enumType);
             if (dictionary == null)
                 return null;
+
+            if (IsFlagEnum(enumType))
+            {
+                var list = new List<object>();
+                var stringValues = name.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var stringValue in stringValues)
+                {
+                    if (dictionary.Values.Any(value => value?.DisplayName == stringValue))
+                        list.Add(dictionary.First(keyValuePair => keyValuePair.Value.DisplayName == stringValue).Key);
+                    else
+                        return null;
+                }
+
+                return list.Aggregate(0, (current, elem) => current | (int) elem);
+            }
+
+            if (dictionary.Values.All(value => value?.DisplayName != name))
+                return null;
+
+            return dictionary.First(keyValuePair => keyValuePair.Value.DisplayName == name).Key;
+        }
+        public static TEnum GetEnumElementByName<TEnum>(string name)
+        {
+            if (name == null)
+                return default(TEnum);
+
+            var dictionary = GetInfoDictionaty<TEnum>();
+            if (dictionary == null)
+                return default(TEnum);
 
             if (IsFlagEnum<TEnum>())
             {
@@ -44,14 +73,14 @@ namespace ITCC.HTTP.API.Utils
                     if (dictionary.Values.Any(value => value?.DisplayName == stringValue))
                         list.Add(dictionary.First(keyValuePair => keyValuePair.Value.DisplayName == stringValue).Key);
                     else
-                        return null;
+                        return default(TEnum);
                 }
 
-                return (TEnum)(object) list.Aggregate(0, (current, elem) => current | (int) (object) elem);
+                return (TEnum)(object)list.Aggregate(0, (current, elem) => current | (int)(object)elem);
             }
 
             if (dictionary.Values.All(value => value?.DisplayName != name))
-                return null;
+                return default(TEnum);
 
             return dictionary.First(keyValuePair => keyValuePair.Value.DisplayName == name).Key;
         }
@@ -110,7 +139,7 @@ namespace ITCC.HTTP.API.Utils
         private static IList<EnumValueInfoAttribute> GetAttributes(object value)
         {
             if (value == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(value));
 
             var objType = value.GetType();
 

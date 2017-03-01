@@ -82,7 +82,7 @@ string ErrorDescription { get; }
 
 `[AttributeUsage(AttributeTargets.Field)]`
 
-Атрибут, добавляющий к полю имя и (опционально) описание. Применяется к элементам перечислений, в т.ч. помеченных атрибутом `[Flags]`.
+Атрибут, добавляющий к полю имя и (опционально) описание. Применяется к элементам перечислений, в т.ч. помеченных атрибутом `Flags`.
 
 Конструктор:
 
@@ -336,9 +336,16 @@ string GetElementDescription(object element);
 /*
 Получение значения перечисления по строке, полученной методом 
 GetElementName, при использовании неверного значения или отсутствии
-атрибутов возвращает элемеет TEnum со значением 0
+атрибутов возвращает null
 */
-object GetEnumElementByName<TEnum>(string name);
+object GetEnumElementByName(string name, Type enumType)
+
+/*
+Обобщенная версия метода GetEnumElementByName(string name, Type enumType),
+при использовании неверного значения или отсутствии атрибутов 
+возвращает default(TEnum)
+*/
+TEnum GetEnumElementByName<TEnum>(string name);
 
 /*
 Получение словаря, в котором ключамя являются элементы перечислений типа

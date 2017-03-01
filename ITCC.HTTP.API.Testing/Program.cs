@@ -81,7 +81,7 @@ namespace ITCC.HTTP.API.Testing
                 }
                 LogMessage(LogLevel.Info, stringWriter.ToString());
 
-                LogMessage(LogLevel.Info, EnumInfoProvider.GetEnumElementByName<SimpleEnum>("1")?.ToString());
+                LogMessage(LogLevel.Info, EnumInfoProvider.GetEnumElementByName("1", typeof(SimpleEnum)).ToString());
                 var str = EnumInfoProvider.GetElementName(FlagsEnum.Second | FlagsEnum.Third);
                 LogMessage(LogLevel.Info, EnumInfoProvider.GetEnumElementByName<FlagsEnum>(str).ToString());
             }
