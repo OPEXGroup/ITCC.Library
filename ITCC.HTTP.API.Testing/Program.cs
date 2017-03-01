@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using ITCC.HTTP.API.Extensions;
+using ITCC.HTTP.API.Testing.Enums;
 using ITCC.HTTP.API.Testing.Views;
 using ITCC.HTTP.API.Utils;
 using ITCC.Logging.Core;
@@ -78,8 +80,11 @@ namespace ITCC.HTTP.API.Testing
                     xmlSerializer.Serialize(xmlWriter, apiErrorView);
                 }
                 LogMessage(LogLevel.Info, stringWriter.ToString());
+
+                LogMessage(LogLevel.Info, EnumInfoProvider.GetEnumElementByName("1", typeof(SimpleEnum)).ToString());
+                var str = EnumInfoProvider.GetElementName(FlagsEnum.Second | FlagsEnum.Third);
+                LogMessage(LogLevel.Info, EnumInfoProvider.GetEnumElementByName<FlagsEnum>(str).ToString());
             }
-            
         }
 
         private static void InitLoggers()
