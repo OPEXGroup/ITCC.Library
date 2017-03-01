@@ -45,6 +45,7 @@
     <Compile Include="Attributes\ApiContractAttribute.cs" />
     <Compile Include="Attributes\ApiViewAttribute.cs" />
     <Compile Include="Attributes\ApiViewCheckAttribute.cs" />
+    <Compile Include="Attributes\EnumValueInfoAttribute.cs" />
     <Compile Include="Enums\ApiContractType.cs" />
     <Compile Include="Enums\ApiErrorReason.cs" />
     <Compile Include="Enums\ApiHttpMethod.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Utils\ApiErrorViewFactory.cs" />
     <Compile Include="Utils\Either.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
+    <Compile Include="Utils\EnumInfoProvider.cs" />
     <Compile Include="Utils\ViewCheckResult.cs" />
     <Compile Include="ViewChecker.cs" />
   </ItemGroup>
