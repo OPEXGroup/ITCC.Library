@@ -1,3 +1,7 @@
+## 2.9.0 (2017-03-01)
+
+* **New**:  `EnumInfoProvider` and `EnumValueInfoAttribute` added to `ITCC.HTTP.API`   
+
 ## 2.8.3 (2017-02-22)
 
 * **New**:  `StaticServer` now ensures all file sections exist at startup  
