@@ -87,6 +87,14 @@
     <Folder Include="Core\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ITCC.HTTP.API\ITCC.HTTP.API.csproj">
+      <Project>{a0ad6ed0-19af-4980-aaf8-ba3a4a12a46d}</Project>
+      <Name>ITCC.HTTP.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{34edc98b-827d-4419-aa2d-9fdcacaa043d}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>

@@ -9,6 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using ITCC.HTTP.API.Attributes;
+using ITCC.HTTP.Common.Interfaces;
 
 namespace ITCC.HTTP.API.Documentation
 {
@@ -79,8 +81,17 @@ namespace ITCC.HTTP.API.Documentation
         private bool AssemblyIsValid() => DoSafe(() =>
         {
             var properties = GetAllProperties();
+            var isValid = true;
 
-            return true;
+            var apiMethodAnnotatedProperties = properties
+                .Where(p => p.GetCustomAttributes<ApiRequestProcessorAttribute>().Any())
+                .ToList();
+
+            var staticRequestProcessorProperties = properties
+                .Where(p => p.GetGetMethod().IsStatic && p.PropertyType.GetInterfaces().Contains(typeof(IRequestProcessor)))
+                .ToList();
+
+            return isValid;
         });
 
         private Task<bool> TryWriteResultAsync() => DoSafeAsync(async () =>
