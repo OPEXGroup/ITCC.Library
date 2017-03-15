@@ -4,16 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E0D80DB9-1D0E-4FDC-BA31-4D0DEB76BB56}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{29F5B081-9F1C-4DFA-B497-1CB38ACDEEE0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.Geocoding</RootNamespace>
-    <AssemblyName>ITCC.Geocoding</AssemblyName>
+    <RootNamespace>ITCC.HTTP.Server.Testing</RootNamespace>
+    <AssemblyName>ITCC.HTTP.Server.Testing</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,34 +23,15 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -58,6 +41,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -67,56 +51,78 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Geocoding, Version=3.6.0.0, Culture=neutral, PublicKeyToken=7c714700b88674c7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Geocoding.net.3.6.0\lib\net40\Geocoding.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\GeocodingApi.cs" />
-    <Compile Include="Geocoder.cs" />
+    <Compile Include="Enums\LoggerMode.cs" />
+    <Compile Include="Utils\AccountMock.cs" />
+    <Compile Include="Utils\Configuration.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\Point.cs" />
-    <Compile Include="Yandex\Enums\KindType.cs" />
-    <Compile Include="Yandex\Enums\LangType.cs" />
-    <Compile Include="Yandex\GeoBound.cs" />
-    <Compile Include="Yandex\GeoMetaData.cs" />
-    <Compile Include="Yandex\GeoObject.cs" />
-    <Compile Include="Yandex\GeoObjectCollection.cs" />
-    <Compile Include="Yandex\GeoPoint.cs" />
-    <Compile Include="Yandex\SearchArea.cs" />
-    <Compile Include="Yandex\YandexGeocoder.cs" />
+    <Compile Include="ServerController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
-      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
+      <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
+      <Name>ITCC.HTTP.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ITCC.HTTP.SslConfigUtil.Core\ITCC.HTTP.SslConfigUtil.Core.csproj">
+      <Project>{01DE0C5B-72D2-4622-9636-4F9257BD59D2}</Project>
+      <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
-      <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
+    <ProjectReference Include="..\..\src\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
+      <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Prebuild.ps1" />
-    <None Include="README.md" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>SET script=PreBuild.ps1
-SET "scripthpath="$(ProjectDir)%25script%25"
-ECHO "$(ProjectDir)"
-ECHO %25scripthpath%25
-Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
-exit 0</PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

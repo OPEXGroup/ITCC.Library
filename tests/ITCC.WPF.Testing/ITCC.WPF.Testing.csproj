@@ -4,13 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{097A520A-5AB7-45A1-86BA-F094C698F5E1}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{B2BA0903-819E-429B-9206-B93B67A29F4C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.HTTP.Testing</RootNamespace>
-    <AssemblyName>ITCC.HTTP.Testing</AssemblyName>
+    <RootNamespace>ITCC.WPF.Testing</RootNamespace>
+    <AssemblyName>ITCC.WPF.Testing</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -74,64 +76,78 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Geocoding, Version=3.6.0.0, Culture=neutral, PublicKeyToken=7c714700b88674c7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Geocoding.net.3.6.0\lib\net40\Geocoding.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Networking\AsynchronousClient.cs" />
-    <Compile Include="Networking\StateObject.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
-    <None Include="TLS\ITCCTestCA.cer" />
-    <None Include="TLS\ITCCTestCA.pvk" />
-    <None Include="TLS\ITCCTestSignedByCA.cer" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCC.Geocoding\ITCC.Geocoding.csproj">
-      <Project>{e0d80db9-1d0e-4fdc-ba31-4d0deb76bb56}</Project>
-      <Name>ITCC.Geocoding</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP.Client\ITCC.HTTP.Client.csproj">
-      <Project>{BC039125-94D3-49C6-9BC0-1B5692F95ECB}</Project>
-      <Name>ITCC.HTTP.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
-      <Name>ITCC.HTTP.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
-      <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
-      <Name>ITCC.HTTP.Server</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP.SslConfigUtil.Core\ITCC.HTTP.SslConfigUtil.Core.csproj">
-      <Project>{01DE0C5B-72D2-4622-9636-4F9257BD59D2}</Project>
-      <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+    <ProjectReference Include="..\..\src\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
+    <ProjectReference Include="..\..\src\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
       <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="TLS\certExample.txt" />
+    <ProjectReference Include="..\..\src\ITCC.UI\ITCC.UI.csproj">
+      <Project>{54796870-23ec-43d3-a427-50a894427d55}</Project>
+      <Name>ITCC.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ITCC.WPF\ITCC.WPF.csproj">
+      <Project>{07D36841-8876-437C-B7A4-CBF1012513EB}</Project>
+      <Name>ITCC.WPF</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A4D07E42-D588-4E9C-B83A-E37A5B97CB4F}</ProjectGuid>
+    <ProjectGuid>{70C84780-5CF1-4AB7-9ED4-5AEF50DBDA3E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.HTTP.API.Testing</RootNamespace>
-    <AssemblyName>ITCC.HTTP.API.Testing</AssemblyName>
+    <RootNamespace>ITCC.Logging.Testing</RootNamespace>
+    <AssemblyName>ITCC.Logging.Testing</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -84,26 +84,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\FlagsEnum.cs" />
-    <Compile Include="Enums\SimpleEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Views\NodeView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ITCC.HTTP.API\ITCC.HTTP.API.csproj">
-      <Project>{a0ad6ed0-19af-4980-aaf8-ba3a4a12a46d}</Project>
-      <Name>ITCC.HTTP.API</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
-      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
+    <ProjectReference Include="..\..\src\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
+      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
-      <Project>{bbc8b7e2-bfc2-4b03-bd01-5b6bd10649c1}</Project>
+    <ProjectReference Include="..\..\src\ITCC.Logging.Reader.Core\ITCC.Logging.Reader.Core.csproj">
+      <Project>{F40F3A35-170F-4E70-9E01-9BF4A950B6AF}</Project>
+      <Name>ITCC.Logging.Reader.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
+      <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
   </ItemGroup>

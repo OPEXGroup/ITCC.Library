@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{29F5B081-9F1C-4DFA-B497-1CB38ACDEEE0}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{31655D62-7075-410F-923E-2F636CA67CC2}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.HTTP.Server.Testing</RootNamespace>
-    <AssemblyName>ITCC.HTTP.Server.Testing</AssemblyName>
+    <RootNamespace>ITCC.HTTP.Server</RootNamespace>
+    <AssemblyName>ITCC.HTTP.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,7 +38,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -51,7 +47,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -61,7 +56,6 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -71,58 +65,102 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\LoggerMode.cs" />
-    <Compile Include="Utils\AccountMock.cs" />
-    <Compile Include="Utils\Configuration.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Auth\AuthentificationController.cs" />
+    <Compile Include="Auth\AuthentificationResult.cs" />
+    <Compile Include="Auth\AuthorizationResult.cs" />
+    <Compile Include="Common\Delegates.cs" />
+    <Compile Include="Core\AcceptType.cs" />
+    <Compile Include="Encoders\CustomBodyEncoder.cs" />
+    <Compile Include="Encoders\JsonBodyEncoder.cs" />
+    <Compile Include="Encoders\PlainTextBodyEncoder.cs" />
+    <Compile Include="Encoders\XmlBodyEncoder.cs" />
+    <Compile Include="Enums\AcceptTypeMatch.cs" />
+    <Compile Include="Enums\AuthorizationStatus.cs" />
+    <Compile Include="Enums\FileOperationStatus.cs" />
+    <Compile Include="Enums\FileType.cs" />
+    <Compile Include="Enums\MemoryAlarmStrategy.cs" />
+    <Compile Include="Enums\ServerStartStatus.cs" />
+    <Compile Include="Files\FileSection.cs" />
+    <Compile Include="Files\FileRequestController.cs" />
+    <Compile Include="Files\FileRequestControllerConfiguration.cs" />
+    <Compile Include="Files\FileTypeSelector.cs" />
+    <Compile Include="Files\IOHelper.cs" />
+    <Compile Include="Files\MimeTypes.cs" />
+    <Compile Include="Files\Preprocess\BaseFilePreprocessTask.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessController.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessorThread.cs" />
+    <Compile Include="Files\Preprocess\FilePreprocessTaskFactory.cs" />
+    <Compile Include="Files\Preprocess\ImagePreprocessTask.cs" />
+    <Compile Include="Files\Preprocess\VideoPreprocessTask.cs" />
+    <Compile Include="Files\Requests\BaseFileRequest.cs" />
+    <Compile Include="Files\Requests\DefaultFileRequest.cs" />
+    <Compile Include="Files\Requests\FileRequestFactory.cs" />
+    <Compile Include="Files\Requests\ImageRequest.cs" />
+    <Compile Include="Files\Requests\RequestRange.cs" />
+    <Compile Include="Files\Requests\VideoRequest.cs" />
+    <Compile Include="Core\HandlerResult.cs" />
+    <Compile Include="Core\HttpServerConfiguration.cs" />
+    <Compile Include="Interfaces\IBodyEncoder.cs" />
+    <Compile Include="Interfaces\IIntervalCounterProvider.cs" />
+    <Compile Include="Interfaces\IServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerController.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
+    <Compile Include="Core\RequestProcessor.cs" />
+    <Compile Include="Core\RequestProcessorSelectionResult.cs" />
+    <Compile Include="Core\ResponseFactory.cs" />
+    <Compile Include="Service\OptionsController.cs" />
+    <Compile Include="Service\PingController.cs" />
+    <Compile Include="Service\PingResponse.cs" />
+    <Compile Include="Service\ServerStatistics.cs" />
+    <Compile Include="Core\StaticServer.cs" />
+    <Compile Include="Service\StatisticsController.cs" />
+    <Compile Include="Utils\CommonHelper.cs" />
+    <Compile Include="Utils\ConstantCounterProvider.cs" />
+    <Compile Include="Utils\CounterProviderFactory.cs" />
+    <Compile Include="Utils\FibonacciCounterProvider.cs" />
+    <Compile Include="Utils\GeometricCounterProvider.cs" />
+    <Compile Include="Utils\LinearCounterProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
       <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
       <Name>ITCC.HTTP.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
-      <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
-      <Name>ITCC.HTTP.Server</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ITCC.HTTP.SslConfigUtil.Core\ITCC.HTTP.SslConfigUtil.Core.csproj">
-      <Project>{01DE0C5B-72D2-4622-9636-4F9257BD59D2}</Project>
+      <Project>{01de0c5b-72d2-4622-9636-4f9257bd59d2}</Project>
       <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
-      <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
-      <Name>ITCC.Logging.Windows</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Prebuild.ps1" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>SET script=PreBuild.ps1
+SET "scripthpath="$(ProjectDir)%25script%25"
+ECHO "$(ProjectDir)"
+ECHO %25scripthpath%25
+Powershell  -File "$(ProjectDir)%25script%25" -SolutionDir $(SolutionDir)
+exit 0</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
