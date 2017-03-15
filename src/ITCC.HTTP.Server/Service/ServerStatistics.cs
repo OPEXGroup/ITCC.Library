@@ -324,94 +324,94 @@ namespace ITCC.HTTP.Server.Service
 
         private void SerializeInternalErrorStatistics(StringBuilder builder)
         {
-            if (!_internalErrorCounters.IsEmpty)
+            if (_internalErrorCounters.IsEmpty)
+                return;
+
+            builder.AppendLine("Internal error statistics:");
+            var uris = _internalErrorCounters.Keys.ToList();
+            uris.Sort();
+            lock (_counterLock)
             {
-                builder.AppendLine("Internal error statistics:");
-                var uris = _internalErrorCounters.Keys.ToList();
-                uris.Sort();
-                lock (_counterLock)
+                uris.ForEach(u =>
                 {
-                    uris.ForEach(u =>
-                    {
-                        var codeDict = _internalErrorCounters[u];
-                        builder.AppendLine($"\t{u}");
-                        var codes = codeDict.Keys.ToList();
-                        codes.Sort();
-                        codes.ForEach(c => builder.AppendLine($"\t\t{c,-4}: {codeDict[c]}"));
-                    });
-                }
-                builder.AppendLine();
+                    var codeDict = _internalErrorCounters[u];
+                    builder.AppendLine($"\t{u}");
+                    var codes = codeDict.Keys.ToList();
+                    codes.Sort();
+                    codes.ForEach(c => builder.AppendLine($"\t\t{c,-4}: {codeDict[c]}"));
+                });
             }
+            builder.AppendLine();
         }
 
         private void SerializeGeneralRequestPerformanceStatistics(StringBuilder builder)
         {
-            if (_requestCount > 0)
-            {
-                builder.AppendLine("Request performance statistics:");
-                builder.AppendLine($"\tRequest count:        {_requestCount,10}");
-                builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount,10:f} ms");
-                builder.AppendLine($"\tMax     request time: {_maxRequestTime,10:f} ms");
-                builder.AppendLine($"\tMin     request time: {_minRequestTime,10:f} ms");
-                builder.AppendLine($"\tTotal   request time: {_totalRequestTime,10:f} ms");
-                builder.AppendLine($"\tSlowest request:      {_slowestRequest,10}");
-            }
+            if (_requestCount <= 0)
+                return;
+
+            builder.AppendLine("Request performance statistics:");
+            builder.AppendLine($"\tRequest count:        {_requestCount,10}");
+            builder.AppendLine($"\tAverage request time: {_totalRequestTime / _requestCount,10:f} ms");
+            builder.AppendLine($"\tMax     request time: {_maxRequestTime,10:f} ms");
+            builder.AppendLine($"\tMin     request time: {_minRequestTime,10:f} ms");
+            builder.AppendLine($"\tTotal   request time: {_totalRequestTime,10:f} ms");
+            builder.AppendLine($"\tSlowest request:      {_slowestRequest,10}");
         }
 
         private void SerializeProcessMemoryUsageStatistics(StringBuilder builder)
         {
-            if (_processMemorySamples > 0)
+            if (_processMemorySamples <= 0)
+                return;
+
+            lock (_processMemoryLock)
             {
-                lock (_processMemoryLock)
-                {
-                    var averageMemory = _processSumMemory / _processMemorySamples;
-                    const int bytesInMegabyte = 1024 * 1024;
-                    builder.AppendLine();
-                    builder.AppendLine("Process memory statistics:");
-                    builder.AppendLine($"\tMin: {(double)_processMinMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tMax: {(double)_processMaxMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tCur: {(double)_processCurrentMemory / bytesInMegabyte,8:F1} MB");
-                }
+                var averageMemory = _processSumMemory / _processMemorySamples;
+                const int bytesInMegabyte = 1024 * 1024;
+                builder.AppendLine();
+                builder.AppendLine("Process memory statistics:");
+                builder.AppendLine($"\tMin: {(double)_processMinMemory / bytesInMegabyte,8:F1} MB");
+                builder.AppendLine($"\tMax: {(double)_processMaxMemory / bytesInMegabyte,8:F1} MB");
+                builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
+                builder.AppendLine($"\tCur: {(double)_processCurrentMemory / bytesInMegabyte,8:F1} MB");
             }
         }
 
         private void SerializeThreadPoolUsageStatistics(StringBuilder builder)
         {
-            if (_threadingSamples > 0)
+            if (_threadingSamples <= 0)
+                return;
+
+            lock (_threadsLock)
             {
-                lock (_threadsLock)
-                {
-                    builder.AppendLine();
-                    builder.AppendLine("Thread statistics:");
-                    builder.AppendLine("\tWorker threads:");
-                    var avgWorkerThreads = (double)_totalWorkerThreads / _threadingSamples;
-                    builder.AppendLine($"\t\tMax: {_maxWorkerThreads,5}");
-                    builder.AppendLine($"\t\tAvg: {avgWorkerThreads,5:F1}");
-                    builder.AppendLine($"\t\tCur: {_currentWorkerThreads,5}");
-                    builder.AppendLine("\tIOCP threads:");
-                    var ageIocpThreads = (double)_totalIocpThreads / _threadingSamples;
-                    builder.AppendLine($"\t\tMax: {_maxIocpThreads,5}");
-                    builder.AppendLine($"\t\tAvg: {ageIocpThreads,5:F1}");
-                    builder.AppendLine($"\t\tCur: {_currentIocpThreads,5}");
-                }
+                builder.AppendLine();
+                builder.AppendLine("Thread statistics:");
+                builder.AppendLine("\tWorker threads:");
+                var avgWorkerThreads = (double)_totalWorkerThreads / _threadingSamples;
+                builder.AppendLine($"\t\tMax: {_maxWorkerThreads,5}");
+                builder.AppendLine($"\t\tAvg: {avgWorkerThreads,5:F1}");
+                builder.AppendLine($"\t\tCur: {_currentWorkerThreads,5}");
+                builder.AppendLine("\tIOCP threads:");
+                var ageIocpThreads = (double)_totalIocpThreads / _threadingSamples;
+                builder.AppendLine($"\t\tMax: {_maxIocpThreads,5}");
+                builder.AppendLine($"\t\tAvg: {ageIocpThreads,5:F1}");
+                builder.AppendLine($"\t\tCur: {_currentIocpThreads,5}");
             }
         }
 
         private void SerializeTotalCpuUsageStatistics(StringBuilder builder)
         {
-            if (_totalCpuSamples > 0)
+            if (_totalCpuSamples <= 0)
+                return;
+
+            lock (_totalCpuLock)
             {
-                lock (_totalCpuLock)
-                {
-                    var averageCpu = _totalSumCpuUsage / _totalCpuSamples;
-                    builder.AppendLine();
-                    builder.AppendLine($"Total CPU usage statistics ({Environment.ProcessorCount} cores):");
-                    builder.AppendLine($"\tMin: {(double)_totalMinCpuUsage,4:F1} %");
-                    builder.AppendLine($"\tMax: {(double)_totalMaxCpuUsage,4:F1} %");
-                    builder.AppendLine($"\tAvg: {averageCpu,4:F1} %");
-                    builder.AppendLine($"\tCur: {(double)_totalCurrentCpuUsage,4:F1} %");
-                }
+                var averageCpu = _totalSumCpuUsage / _totalCpuSamples;
+                builder.AppendLine();
+                builder.AppendLine($"Total CPU usage statistics ({Environment.ProcessorCount} cores):");
+                builder.AppendLine($"\tMin: {(double)_totalMinCpuUsage,4:F1} %");
+                builder.AppendLine($"\tMax: {(double)_totalMaxCpuUsage,4:F1} %");
+                builder.AppendLine($"\tAvg: {averageCpu,4:F1} %");
+                builder.AppendLine($"\tCur: {(double)_totalCurrentCpuUsage,4:F1} %");
             }
         }
         #endregion
