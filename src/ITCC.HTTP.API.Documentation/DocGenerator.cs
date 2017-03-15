@@ -14,7 +14,7 @@ namespace ITCC.HTTP.API.Documentation
     {
         #region public
 
-        public DocGenerator(StringBuilder builder)
+        public DocGenerator()
         {
             _builder = new StringBuilder();
         }
@@ -26,7 +26,35 @@ namespace ITCC.HTTP.API.Documentation
             if (!TryLoadTargetAssembly(markerType))
                 return false;
 
+            LogDebug("Writing header");
+            if (!await TryWriteHeaderAsync())
+            {
+                LogDebug("Failed to write header!");
+                return false;
+            }
+            LogDebug("Header written");
+
+            LogDebug("Writing footer");
+            if (!await TryWriteFooterAsync())
+            {
+                LogDebug("Failed to write footer!");
+                return false;
+            }
+            LogDebug("Footer written");
+
             return await TryWriteResultAsync();
+        }
+
+        protected virtual Task<bool> TryWriteHeaderAsync()
+        {
+            _builder.AppendLine("HEADER");
+            return Task.FromResult(true);
+        }
+
+        protected virtual Task<bool> TryWriteFooterAsync()
+        {
+            _builder.AppendLine("FOOTER");
+            return Task.FromResult(true);
         }
 
         #endregion
