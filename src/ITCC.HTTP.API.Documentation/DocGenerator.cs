@@ -3,7 +3,9 @@
 
 using ITCC.Logging.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +27,12 @@ namespace ITCC.HTTP.API.Documentation
 
             if (!TryLoadTargetAssembly(markerType))
                 return false;
+
+            if (!AssemblyIsValid())
+            {
+                LogDebug("Assembly configuration is invalid, generation cancelled");
+                return false;
+            }
 
             LogDebug("Writing header");
             if (!await TryWriteHeaderAsync())
@@ -61,13 +69,38 @@ namespace ITCC.HTTP.API.Documentation
 
         #region private
 
-        private bool TryLoadTargetAssembly(Type markerType)
+        private bool TryLoadTargetAssembly(Type markerType) => DoSafe(() =>
+        {
+            _targetAssembly = Assembly.GetAssembly(markerType);
+            LogDebug($"Assembly {_targetAssembly.FullName} loaded");
+            return true;
+        });
+
+        private bool AssemblyIsValid() => DoSafe(() =>
+        {
+            var properties = GetAllProperties();
+
+            return true;
+        });
+
+        private Task<bool> TryWriteResultAsync() => DoSafeAsync(async () =>
+        {
+            var result = _builder.ToString();
+            _builder.Clear();
+            using (var writer = new StreamWriter(_outputStream))
+            {
+                await writer.WriteAsync(result);
+                await writer.FlushAsync();
+            }
+
+            return true;
+        });
+
+        private bool DoSafe(Func<bool> method)
         {
             try
             {
-                _targetAssembly = Assembly.GetAssembly(markerType);
-                LogDebug($"Assembly {_targetAssembly.FullName} loaded");
-                return true;
+                return method.Invoke();
             }
             catch (Exception exception)
             {
@@ -76,19 +109,11 @@ namespace ITCC.HTTP.API.Documentation
             }
         }
 
-        private async Task<bool> TryWriteResultAsync()
+        private async Task<bool> DoSafeAsync(Func<Task<bool>> asyncMethod)
         {
             try
             {
-                var result = _builder.ToString();
-                _builder.Clear();
-                using (var writer = new StreamWriter(_outputStream))
-                {
-                    await writer.WriteAsync(result);
-                    await writer.FlushAsync();
-                }
-
-                return true;
+                return await asyncMethod.Invoke();
             }
             catch (Exception exception)
             {
@@ -97,8 +122,10 @@ namespace ITCC.HTTP.API.Documentation
             }
         }
 
-        private void LogDebug(string message) => Logger.LogDebug(LogScope, message);
-        private void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug(LogScope, exception);
+        private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetTypes().SelectMany(t => t.GetProperties()).ToList();
+
+        private static void LogDebug(string message) => Logger.LogDebug(LogScope, message);
+        private static void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug(LogScope, exception);
 
         private Stream _outputStream;
         private readonly StringBuilder _builder;
