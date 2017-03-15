@@ -24,13 +24,13 @@ namespace ITCC.HTTP.Server.Service
 
         public void Dispose()
         {
-            _memoryTimer.Stop();
+            _processMemoryTimer.Stop();
             _threadsTimer.Stop();
-            _memoryTimer.Dispose();
+            _processMemoryTimer.Dispose();
             _threadsTimer.Dispose();
-            _cpuTimer.Stop();
-            _cpuTimer.Dispose();
-            _cpuCounter.Dispose();
+            _totalCpuTimer.Stop();
+            _totalCpuTimer.Dispose();
+            _totalCpuCounter.Dispose();
         }
 
         #endregion
@@ -44,24 +44,24 @@ namespace ITCC.HTTP.Server.Service
             _memorySampleCount = _memoryIntervalSamplesLeft;
             _memoryOverheadOccured = false;
 
-            _memoryTimer = new Timer(MemorySamplingPeriod);
-            _memoryTimer.Elapsed += MemoryTimerOnElapsed;
-            _memoryTimer.Start();
+            _processMemoryTimer = new Timer(MemorySamplingPeriod);
+            _processMemoryTimer.Elapsed += ProcessMemoryTimerOnElapsed;
+            _processMemoryTimer.Start();
 
             _threadsTimer = new Timer(ThreadsSamplingPeriod);
             _threadsTimer.Elapsed += ThreadsTimerOnElapsed;
             _threadsTimer.Start();
 
-            _cpuCounter = new PerformanceCounter
+            _totalCpuCounter = new PerformanceCounter
             {
                 CategoryName = "Processor",
                 CounterName = "% Processor Time",
                 InstanceName = "_Total",
                 ReadOnly = true
             };
-            _cpuTimer = new Timer(CpuSamplingPeriod);
-            _cpuTimer.Elapsed += CpuTimerOnElapsed;
-            _cpuTimer.Start();
+            _totalCpuTimer = new Timer(CpuSamplingPeriod);
+            _totalCpuTimer.Elapsed += TotalCpuTimerOnElapsed;
+            _totalCpuTimer.Start();
         }
 
         public string Serialize()
@@ -73,8 +73,8 @@ namespace ITCC.HTTP.Server.Service
             SerializeInternalErrorStatistics(builder);
             SerializeDetailedRequestPerformanceStatistics(builder);
             SerializeGeneralRequestPerformanceStatistics(builder);
-            SerializeMemoryUsageStatistics(builder);
-            SerializeCpuUsageStatistics(builder);
+            SerializeProcessMemoryUsageStatistics(builder);
+            SerializeTotalCpuUsageStatistics(builder);
             SerializeThreadPoolUsageStatistics(builder);
             return builder.ToString();
         }
@@ -175,36 +175,36 @@ namespace ITCC.HTTP.Server.Service
             }
         }
 
-        private void MemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private void ProcessMemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             lock (_memoryLock)
             {
                 var currentMemory = GC.GetTotalMemory(false);
-                _minMemory = Math.Min(_minMemory, currentMemory);
-                _maxMemory = Math.Max(_maxMemory, currentMemory);
-                _currentMemory = currentMemory;
-                _totalMemory += currentMemory;
+                _processMinMemory = Math.Min(_processMinMemory, currentMemory);
+                _processMaxMemory = Math.Max(_processMaxMemory, currentMemory);
+                _processCurrentMemory = currentMemory;
+                _processSumMemory += currentMemory;
 
-                _memorySamples++;
+                _processMemorySamples++;
 
                 if (MemoryWarningsEnabled)
                     ProcessPossibleMemoryOverhead();
             }
         }
 
-        private void CpuTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private void TotalCpuTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             lock (_cpuLock)
             {
                 try
                 {
-                    var currentCpuUsage = _cpuCounter.NextValue();
-                    _minCpuUsage = (int)Math.Min(_minCpuUsage, currentCpuUsage);
-                    _maxCpuUsage = (int)Math.Max(_maxCpuUsage, currentCpuUsage);
-                    _currentCpu = currentCpuUsage;
-                    _totalCpuUsage += currentCpuUsage;
+                    var currentCpuUsage = _totalCpuCounter.NextValue();
+                    _totalMinCpuUsage = (int)Math.Min(_totalMinCpuUsage, currentCpuUsage);
+                    _totalMaxCpuUsage = (int)Math.Max(_totalMaxCpuUsage, currentCpuUsage);
+                    _totalCurrentCpuUsage = currentCpuUsage;
+                    _totalSumCpuUsage += currentCpuUsage;
 
-                    _cpuSamples++;
+                    _totalCpuSamples++;
                 }
                 catch (Exception exception)
                 {
@@ -215,7 +215,7 @@ namespace ITCC.HTTP.Server.Service
 
         private void ProcessPossibleMemoryOverhead()
         {
-            var memoryValueInMegabytes = (double) _currentMemory/(1024*1024);
+            var memoryValueInMegabytes = (double) _processCurrentMemory/(1024*1024);
             if (memoryValueInMegabytes > _criticalMemoryValue)
             {
                 _memoryOverheadOccured = true;
@@ -358,20 +358,20 @@ namespace ITCC.HTTP.Server.Service
             }
         }
 
-        private void SerializeMemoryUsageStatistics(StringBuilder builder)
+        private void SerializeProcessMemoryUsageStatistics(StringBuilder builder)
         {
-            if (_memorySamples > 0)
+            if (_processMemorySamples > 0)
             {
                 lock (_memoryLock)
                 {
-                    var averageMemory = _totalMemory / _memorySamples;
+                    var averageMemory = _processSumMemory / _processMemorySamples;
                     const int bytesInMegabyte = 1024 * 1024;
                     builder.AppendLine();
-                    builder.AppendLine("Memory statistics:");
-                    builder.AppendLine($"\tMin: {(double)_minMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tMax: {(double)_maxMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine("Process memory statistics:");
+                    builder.AppendLine($"\tMin: {(double)_processMinMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tMax: {(double)_processMaxMemory / bytesInMegabyte,8:F1} MB");
                     builder.AppendLine($"\tAvg: {averageMemory / bytesInMegabyte,8:F1} MB");
-                    builder.AppendLine($"\tCur: {(double)_currentMemory / bytesInMegabyte,8:F1} MB");
+                    builder.AppendLine($"\tCur: {(double)_processCurrentMemory / bytesInMegabyte,8:F1} MB");
                 }
             }
         }
@@ -398,19 +398,19 @@ namespace ITCC.HTTP.Server.Service
             }
         }
 
-        private void SerializeCpuUsageStatistics(StringBuilder builder)
+        private void SerializeTotalCpuUsageStatistics(StringBuilder builder)
         {
-            if (_cpuSamples > 0)
+            if (_totalCpuSamples > 0)
             {
                 lock (_cpuLock)
                 {
-                    var averageCpu = _totalCpuUsage / _cpuSamples;
+                    var averageCpu = _totalSumCpuUsage / _totalCpuSamples;
                     builder.AppendLine();
-                    builder.AppendLine($"Cpu usage statistics (Total {Environment.ProcessorCount} cores):");
-                    builder.AppendLine($"\tMin: {(double)_minCpuUsage,4:F1} %");
-                    builder.AppendLine($"\tMax: {(double)_maxCpuUsage,4:F1} %");
+                    builder.AppendLine($"Total CPU usage statistics ({Environment.ProcessorCount} cores):");
+                    builder.AppendLine($"\tMin: {(double)_totalMinCpuUsage,4:F1} %");
+                    builder.AppendLine($"\tMax: {(double)_totalMaxCpuUsage,4:F1} %");
                     builder.AppendLine($"\tAvg: {averageCpu,4:F1} %");
-                    builder.AppendLine($"\tCur: {(double)_currentCpu,4:F1} %");
+                    builder.AppendLine($"\tCur: {(double)_totalCurrentCpuUsage,4:F1} %");
                 }
             }
         }
@@ -453,13 +453,13 @@ namespace ITCC.HTTP.Server.Service
 
         private readonly DateTime _startTime = DateTime.Now;
 
-        private readonly Timer _memoryTimer;
+        private readonly Timer _processMemoryTimer;
 
-        private long _minMemory = long.MaxValue;
-        private long _maxMemory;
-        private long _currentMemory;
-        private double _totalMemory;
-        private long _memorySamples;
+        private long _processMinMemory = long.MaxValue;
+        private long _processMaxMemory;
+        private long _processCurrentMemory;
+        private double _processSumMemory;
+        private long _processMemorySamples;
 
         private readonly int _criticalMemoryValue;
         private readonly IIntervalCounterProvider _counterProvider;
@@ -485,15 +485,15 @@ namespace ITCC.HTTP.Server.Service
         private long _totalIocpThreads;
         private long _threadingSamples;
 
-        private float _currentCpu;
-        private float _minCpuUsage;
-        private float _maxCpuUsage;
-        private double _totalCpuUsage;
-        private long _cpuSamples;
+        private float _totalCurrentCpuUsage;
+        private float _totalMinCpuUsage;
+        private float _totalMaxCpuUsage;
+        private double _totalSumCpuUsage;
+        private long _totalCpuSamples;
 
-        private readonly PerformanceCounter _cpuCounter;
+        private readonly PerformanceCounter _totalCpuCounter;
 
-        private readonly Timer _cpuTimer;
+        private readonly Timer _totalCpuTimer;
 
         private readonly object _threadsLock = new object();
         private readonly object _memoryLock = new object();
