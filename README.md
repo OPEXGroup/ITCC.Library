@@ -33,6 +33,10 @@
 * `ITCC.HTTP.API.Attributes.ApiContractAttribute`
 * `ITCC.HTTP.API.Utils.Either<TFirst, TSecond>`
 
+### ITCC.HTTP.API.Documentation
+
+Библиотека для автоматической генерации документации на основе аннотаций методов API из ITCC.HTTP.API
+
 ### ITCC.HTTP.Client
 
 Реализация HTTP-клиентов. Интересные классы:
