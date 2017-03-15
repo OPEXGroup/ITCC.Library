@@ -12,5 +12,14 @@ namespace ITCC.HTTP.API.Attributes
     [AttributeUsage(AttributeTargets.Property)]
     public class ApiRequestProcessorAttribute : Attribute
     {
+        #region construction
+        #endregion
+
+        #region properties
+
+        public string Description { get; set; }
+
+
+        #endregion
     }
 }
