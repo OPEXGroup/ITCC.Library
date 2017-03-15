@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Project>{34EDC98B-827D-4419-AA2D-9FDCACAA043D}</Project>
       <Name>ITCC.HTTP.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.HTTP.SslConfigUtil.Core\ITCC.HTTP.SslConfigUtil.Core.csproj">

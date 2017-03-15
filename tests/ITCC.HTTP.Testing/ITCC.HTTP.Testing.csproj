@@ -109,10 +109,6 @@
       <Project>{BC039125-94D3-49C6-9BC0-1B5692F95ECB}</Project>
       <Name>ITCC.HTTP.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
-      <Name>ITCC.HTTP.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
       <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
       <Name>ITCC.HTTP.Server</Name>

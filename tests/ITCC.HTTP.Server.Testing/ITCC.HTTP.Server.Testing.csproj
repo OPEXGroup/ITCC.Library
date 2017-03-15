@@ -102,7 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
+      <Project>{34EDC98B-827D-4419-AA2D-9FDCACAA043D}</Project>
       <Name>ITCC.HTTP.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">

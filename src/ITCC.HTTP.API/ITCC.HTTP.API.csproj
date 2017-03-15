@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -36,6 +36,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <ProjectReference Include="..\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
+      <Project>{34edc98b-827d-4419-aa2d-9fdcacaa043d}</Project>
+      <Name>ITCC.HTTP.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
@@ -43,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ApiContractAttribute.cs" />
+    <Compile Include="Attributes\ApiRequestBodyTypeAttribute.cs" />
+    <Compile Include="Attributes\ApiRequestProcessorAttribute.cs" />
+    <Compile Include="Attributes\ApiResponseBodyTypeAttribute.cs" />
     <Compile Include="Attributes\ApiViewAttribute.cs" />
     <Compile Include="Attributes\ApiViewCheckAttribute.cs" />
     <Compile Include="Attributes\EnumValueInfoAttribute.cs" />
@@ -56,6 +63,7 @@
     <Compile Include="Utils\ApiErrorView.cs" />
     <Compile Include="Utils\ApiErrorViewFactory.cs" />
     <Compile Include="Utils\Either.cs" />
+    <Compile Include="Utils\Empty.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumInfoProvider.cs" />
     <Compile Include="Utils\ViewCheckResult.cs" />
