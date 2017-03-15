@@ -1,11 +1,12 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System.Net.Http;
+using ITCC.HTTP.Common.Interfaces;
 using ITCC.HTTP.Server.Common;
 
 namespace ITCC.HTTP.Server.Core
 {
-    public class RequestProcessor<TAccount>
+    public class RequestProcessor<TAccount> : IRequestProcessor
     {
         /// <summary>
         ///     True iff some credentials must be provided
