@@ -177,7 +177,7 @@ namespace ITCC.HTTP.Server.Service
 
         private void ProcessMemoryTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            lock (_memoryLock)
+            lock (_processMemoryLock)
             {
                 var currentMemory = GC.GetTotalMemory(false);
                 _processMinMemory = Math.Min(_processMinMemory, currentMemory);
@@ -194,7 +194,7 @@ namespace ITCC.HTTP.Server.Service
 
         private void TotalCpuTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            lock (_cpuLock)
+            lock (_totalCpuLock)
             {
                 try
                 {
@@ -362,7 +362,7 @@ namespace ITCC.HTTP.Server.Service
         {
             if (_processMemorySamples > 0)
             {
-                lock (_memoryLock)
+                lock (_processMemoryLock)
                 {
                     var averageMemory = _processSumMemory / _processMemorySamples;
                     const int bytesInMegabyte = 1024 * 1024;
@@ -402,7 +402,7 @@ namespace ITCC.HTTP.Server.Service
         {
             if (_totalCpuSamples > 0)
             {
-                lock (_cpuLock)
+                lock (_totalCpuLock)
                 {
                     var averageCpu = _totalSumCpuUsage / _totalCpuSamples;
                     builder.AppendLine();
@@ -490,14 +490,12 @@ namespace ITCC.HTTP.Server.Service
         private float _totalMaxCpuUsage;
         private double _totalSumCpuUsage;
         private long _totalCpuSamples;
-
         private readonly PerformanceCounter _totalCpuCounter;
-
         private readonly Timer _totalCpuTimer;
 
         private readonly object _threadsLock = new object();
-        private readonly object _memoryLock = new object();
-        private readonly object _cpuLock = new object();
+        private readonly object _processMemoryLock = new object();
+        private readonly object _totalCpuLock = new object();
         private readonly object _counterLock = new object();
 
         /// <summary>
