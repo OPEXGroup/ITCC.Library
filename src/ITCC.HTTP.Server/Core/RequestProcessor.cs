@@ -10,21 +10,21 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     True iff some credentials must be provided
         /// </summary>
-        public bool AuthorizationRequired;
+        public bool AuthorizationRequired { get; set; }
 
         /// <summary>
         ///     Actual request handler
         /// </summary>
-        public Delegates.RequestHandler<TAccount> Handler;
+        public Delegates.RequestHandler<TAccount> Handler { get; set; }
 
         /// <summary>
         ///     Request method
         /// </summary>
-        public HttpMethod Method = HttpMethod.Get;
+        public HttpMethod Method { get; set; } = HttpMethod.Get;
 
         /// <summary>
         ///     Request SubUri
         /// </summary>
-        public string SubUri;
+        public string SubUri { get; set; }
     }
 }
