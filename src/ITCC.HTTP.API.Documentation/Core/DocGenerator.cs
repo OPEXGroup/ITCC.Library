@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.HTTP.API.Attributes;
+using ITCC.HTTP.API.Documentation.Enums;
 using ITCC.HTTP.API.Documentation.Utils;
 using ITCC.HTTP.API.Enums;
 using ITCC.HTTP.API.Interfaces;
@@ -350,9 +351,43 @@ namespace ITCC.HTTP.API.Documentation.Core
             _builder.AppendLine();
         }
 
+        private string GetCountDescription(BodyTypeInfo bodyTypeInfo)
+        {
+            switch (bodyTypeInfo.CountType)
+            {
+                case ObjectCountType.Single:
+                    return SingleObjectPattern;
+                case ObjectCountType.List:
+                    return ObjectListPattern;
+                case ObjectCountType.SingleOrList:
+                    return SingleObjectOrListPattern;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void WriteBodyTypeInfo(BodyTypeInfo bodyTypeInfo)
+        {
+            var type = bodyTypeInfo.Type;
+            if (type == typeof(Empty))
+            {
+                _builder.AppendLine(EmptyBodyPattern);
+                return;
+            }
+
+            var countDescription = GetCountDescription(bodyTypeInfo);
+            _builder.AppendLine($"{countDescription} `{type.FullName}`");
+        }
+
         private void WriteTypeAttributeDescription(ITypeAttribute attribute)
         {
-            
+            var bodyTypeInfos = attribute.GetTypes();
+
+            foreach (var bodyTypeInfo in bodyTypeInfos)
+            {
+                WriteBodyTypeInfo(bodyTypeInfo);
+                _builder.AppendLine();
+            }
         }
 
         private void WriteRequestProcessorRequestDescription(PropertyInfo info)
