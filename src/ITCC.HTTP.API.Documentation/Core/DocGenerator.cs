@@ -141,6 +141,10 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// </summary>
         protected virtual string AuthDescriptionPattern => @"Authorization required:";
         /// <summary>
+        ///     String to preceed request processor HTTP method and suburi
+        /// </summary>
+        protected virtual string MethodHeaderPrefixPattern => @"#### ";
+        /// <summary>
         ///     Header used for request body description
         /// </summary>
         protected virtual string RequestBodyTypePattern => @"##### Request body";
@@ -269,14 +273,28 @@ namespace ITCC.HTTP.API.Documentation.Core
         {
             foreach (var propertyInfo in section.RequestProcessorInfos)
             {
-                WriteRequestProcessorInfo(propertyInfo);
                 _builder.AppendLine(MethodSeparatorPattern);
+                WriteRequestProcessorInfo(propertyInfo);
+                _builder.AppendLine();
             }
         }
 
         private void WriteRequestProcessorInfo(PropertyInfo info)
         {
-            
+            WriteRequestProcessorHeader(info);
+        }
+
+        private void WriteRequestProcessorHeader(PropertyInfo info)
+        {
+            var processorAttribute = info.GetCustomAttribute<ApiRequestProcessorAttribute>();
+            if (processorAttribute == null)
+                throw new InvalidOperationException("ApiRequestProcessorAttribute not found");
+
+            var uriInfo = $"{processorAttribute.Method.ToString().ToUpperInvariant()} {processorAttribute.SubUri}";
+            _builder.AppendLine($"{MethodHeaderPrefixPattern}{uriInfo}");
+            _builder.AppendLine();
+            _builder.AppendLine(processorAttribute.Description);
+            _builder.AppendLine();
         }
 
         private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
