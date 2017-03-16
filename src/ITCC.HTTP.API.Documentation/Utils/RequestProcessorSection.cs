@@ -11,8 +11,17 @@ namespace ITCC.HTTP.API.Documentation.Utils
     /// </summary>
     public class RequestProcessorSection
     {
+        /// <summary>
+        ///     Section title
+        /// </summary>
         public string TitlePattern { get; set; }
+        /// <summary>
+        ///     Section description (optional)
+        /// </summary>
         public string DescriptionPattern { get; set; }
+        /// <summary>
+        ///     Section methods (ordered)
+        /// </summary>
         public List<PropertyInfo> RequestProcessorInfos { get; set; }
     }
 }
