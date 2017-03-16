@@ -47,6 +47,14 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
             LogDebug("Header written");
 
+            LogDebug("Writing sections");
+            if (!WriteAllSections())
+            {
+                LogDebug("Failed to write sections!");
+                return false;
+            }
+            LogDebug("Sections written");
+
             LogDebug("Writing footer");
             if (!await TryWriteFooterAsync())
             {
@@ -95,6 +103,26 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <remarks>Should not throw</remarks>
         protected virtual string GetApiContractPartDescription(ApiContractType contractType)
             => EnumHelper.ApiContractTypeName(contractType);
+
+        /// <summary>
+        ///     Method used to separate API method into sections (flat structure)
+        /// </summary>
+        /// <param name="rawPropertyInfos">All API request processor infos</param>
+        /// <returns>List of method sections.</returns>
+        /// <remarks>
+        ///     1) Should not throw. <br/>
+        ///     2) Should order infos inside each section.
+        /// </remarks>
+        protected virtual IEnumerable<RequestProcessorSection> SplitSections(List<PropertyInfo> rawPropertyInfos)
+            => new List<RequestProcessorSection>
+            {
+                new RequestProcessorSection
+                {
+                    TitlePattern = "### All methods",
+                    DescriptionPattern = null,
+                    RequestProcessorInfos = rawPropertyInfos
+                }
+            };
 
         #endregion
 
@@ -150,6 +178,15 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// </summary>
         protected virtual string NoPropertyDescriptionPattern => "No description provided";
 
+        /// <summary>
+        ///     String used to separate API method descriptions from each other
+        /// </summary>
+        protected virtual string MethodSeparatorPattern => @"------------------------------";
+        /// <summary>
+        ///     String used to separate API method sections from each other
+        /// </summary>
+        protected virtual string SectionSeparatorPattern => @"------------------------------";
+
         #endregion
 
         #endregion
@@ -197,6 +234,24 @@ namespace ITCC.HTTP.API.Documentation.Core
             _apiMemberPropertyInfos = apiMethodAnnotatedProperties;
             return true;
         });
+
+        private bool WriteAllSections() => Wrappers.DoSafe(() =>
+        {
+            var sections = SplitSections(_apiMemberPropertyInfos);
+
+            foreach (var section in sections)
+            {
+                WriteOneSection(section);
+                _builder.AppendLine(SectionSeparatorPattern);
+            }
+
+            return true;
+        });
+
+        private void WriteOneSection(RequestProcessorSection section)
+        {
+            
+        }
 
         private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
         {
