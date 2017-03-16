@@ -211,7 +211,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             return true;
         });
 
-        private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetTypes().SelectMany(t => t.GetProperties()).ToList();
+        private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetLoadableTypes().SelectMany(t => t.GetProperties()).ToList();
 
         private static void LogDebug(string message) => Logger.LogDebug(LogScope, message);
         private static void LogWarning(string message) => Logger.LogEntry(LogScope, LogLevel.Warning, message);
