@@ -284,11 +284,18 @@ namespace ITCC.HTTP.API.Documentation.Core
             WriteRequestProcessorHeader(info);
         }
 
-        private void WriteRequestProcessorHeader(PropertyInfo info)
+        private static ApiRequestProcessorAttribute GetApiRequestProcessorAttributeUnsafe(MemberInfo info)
         {
             var processorAttribute = info.GetCustomAttribute<ApiRequestProcessorAttribute>();
             if (processorAttribute == null)
                 throw new InvalidOperationException("ApiRequestProcessorAttribute not found");
+
+            return processorAttribute;
+        }
+
+        private void WriteRequestProcessorHeader(PropertyInfo info)
+        {
+            var processorAttribute = GetApiRequestProcessorAttributeUnsafe(info);
 
             var uriInfo = $"{processorAttribute.Method.ToString().ToUpperInvariant()} {processorAttribute.SubUri}";
             _builder.AppendLine($"{MethodHeaderPrefixPattern}{uriInfo}");
