@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using ITCC.HTTP.Api.Documentation.Testing.Utils;
 using ITCC.HTTP.API.Documentation.Core;
@@ -26,6 +27,7 @@ namespace ITCC.HTTP.Api.Documentation.Testing
 
         private static void InitLoggers()
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Logger.Level = LogLevel.Trace;
             Logger.RegisterReceiver(new ColouredConsoleLogger());
         }
