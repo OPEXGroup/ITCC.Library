@@ -139,11 +139,27 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <summary>
         ///     Phrase used to mark if method requires authorization
         /// </summary>
-        protected virtual string AuthDescriptionPattern => @"Authorization required:";
+        protected virtual string AuthDescriptionPattern => @"Authorization required: ";
         /// <summary>
         ///     String to preceed request processor HTTP method and suburi
         /// </summary>
         protected virtual string MethodHeaderPrefixPattern => @"#### ";
+        /// <summary>
+        ///     Header used for query params description
+        /// </summary>
+        protected virtual string QueryParamsPattern => @"##### Query params";
+        /// <summary>
+        ///     Sign used to preceed every query param
+        /// </summary>
+        protected virtual string QueryParamPrefixPattern => @"*";
+        /// <summary>
+        ///     String used to signal than query parameter is required
+        /// </summary>
+        protected virtual string QueryParamRequiredPattern => @"**Required**";
+        /// <summary>
+        ///     String used to signal than query parameter is optiional
+        /// </summary>
+        protected virtual string QueryParamOptionalPattern => @"**Optional**";
         /// <summary>
         ///     Header used for request body description
         /// </summary>
@@ -282,6 +298,9 @@ namespace ITCC.HTTP.API.Documentation.Core
         private void WriteRequestProcessorInfo(PropertyInfo info)
         {
             WriteRequestProcessorHeader(info);
+            WriteRequestProcessorQueryParams(info);
+
+            WriteRequestProcessorRemarks(info);
         }
 
         private static ApiRequestProcessorAttribute GetApiRequestProcessorAttributeUnsafe(MemberInfo info)
@@ -293,15 +312,47 @@ namespace ITCC.HTTP.API.Documentation.Core
             return processorAttribute;
         }
 
-        private void WriteRequestProcessorHeader(PropertyInfo info)
+        private void WriteRequestProcessorHeader(MemberInfo info)
         {
             var processorAttribute = GetApiRequestProcessorAttributeUnsafe(info);
 
             var uriInfo = $"{processorAttribute.Method.ToString().ToUpperInvariant()} {processorAttribute.SubUri}";
             _builder.AppendLine($"{MethodHeaderPrefixPattern}{uriInfo}");
+            AppendPaddedLines(processorAttribute.Description);
+            var authWord = processorAttribute.AuthRequired ? YesWordPattern : NoWordPattern;
+            AppendPaddedLines($"{AuthDescriptionPattern}{authWord}");
+        }
+
+        private void WriteSingleQueryParamDescription(ApiQueryParamAttribute attribute)
+        {
+            var paramRequirement = attribute.Optional ? QueryParamOptionalPattern : QueryParamRequiredPattern;
+            var line = $"{QueryParamPrefixPattern} `{attribute.Name}` - {attribute.Description}. {paramRequirement}";
+            _builder.AppendLine(line);
+        }
+
+        private void WriteRequestProcessorQueryParams(MemberInfo info)
+        {
+            var queryParamAttributes = info.GetCustomAttributes<ApiQueryParamAttribute>().ToList();
+            if (!queryParamAttributes.Any())
+                return;
+
+            AppendPaddedLines(QueryParamsPattern);
+
+            foreach (var queryParamAttribute in queryParamAttributes)
+            {
+                WriteSingleQueryParamDescription(queryParamAttribute);
+            }
             _builder.AppendLine();
-            _builder.AppendLine(processorAttribute.Description);
-            _builder.AppendLine();
+        }
+
+        private void WriteRequestProcessorRemarks(MemberInfo info)
+        {
+            var processorAttribute = GetApiRequestProcessorAttributeUnsafe(info);
+
+            if (string.IsNullOrWhiteSpace(processorAttribute.Remarks))
+                return;
+
+            AppendPaddedLines(RemarksHeaderPattern, processorAttribute.Remarks);
         }
 
         private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
@@ -316,6 +367,19 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             return true;
         });
+
+        private void AppendPaddedLines(params string[] lines)
+        {
+            if (lines.Length == 0)
+                return;
+
+            _builder.AppendLine();
+            foreach (var line in lines)
+            {
+                _builder.AppendLine(line);
+                _builder.AppendLine();
+            }
+        }
 
         private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetLoadableTypes().SelectMany(t => t.GetProperties()).ToList();
 
