@@ -32,7 +32,7 @@ namespace ITCC.HTTP.API.Documentation
 
             if (!AssemblyIsValid())
             {
-                LogDebug("Assembly configuration is invalid, generation cancelled");
+                LogWarning("Assembly configuration is invalid, generation cancelled");
                 return false;
             }
 
@@ -81,17 +81,36 @@ namespace ITCC.HTTP.API.Documentation
         private bool AssemblyIsValid() => DoSafe(() =>
         {
             var properties = GetAllProperties();
-            var isValid = true;
 
             var apiMethodAnnotatedProperties = properties
                 .Where(p => p.GetCustomAttributes<ApiRequestProcessorAttribute>().Any())
                 .ToList();
+            if (!apiMethodAnnotatedProperties.Any())
+            {
+                LogWarning("Assembly does not contain any annotated API members, failed to generate docs");
+                return false;
+            }
 
             var staticRequestProcessorProperties = properties
-                .Where(p => p.GetGetMethod().IsStatic && p.PropertyType.GetInterfaces().Contains(typeof(IRequestProcessor)))
+                .Where(p => p.GetGetMethod().IsStatic
+                    && p.PropertyType.GetInterfaces().Contains(typeof(IRequestProcessor)))
                 .ToList();
 
-            return isValid;
+            var incorrectAnnotatedProperties = apiMethodAnnotatedProperties
+                .Except(staticRequestProcessorProperties)
+                .ToList();
+            if (incorrectAnnotatedProperties.Any())
+            {
+                var incorrectAnnotatedPropertiesDescription = string.Join("\n",
+                    incorrectAnnotatedProperties.Select(
+                        p => $"{p.PropertyType.GetGenericArguments().First().FullName}.{p.Name}"));
+                LogWarning(
+                    $"The following properties are annotated as API members but do not implement IRequestProcessor:\n{incorrectAnnotatedPropertiesDescription}");
+                return false;
+            }
+
+            _apiMemberPropertyInfos = apiMethodAnnotatedProperties;
+            return true;
         });
 
         private Task<bool> TryWriteResultAsync() => DoSafeAsync(async () =>
@@ -107,7 +126,7 @@ namespace ITCC.HTTP.API.Documentation
             return true;
         });
 
-        private bool DoSafe(Func<bool> method)
+        private static bool DoSafe(Func<bool> method)
         {
             try
             {
@@ -120,7 +139,7 @@ namespace ITCC.HTTP.API.Documentation
             }
         }
 
-        private async Task<bool> DoSafeAsync(Func<Task<bool>> asyncMethod)
+        private static async Task<bool> DoSafeAsync(Func<Task<bool>> asyncMethod)
         {
             try
             {
@@ -136,11 +155,13 @@ namespace ITCC.HTTP.API.Documentation
         private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetTypes().SelectMany(t => t.GetProperties()).ToList();
 
         private static void LogDebug(string message) => Logger.LogDebug(LogScope, message);
+        private static void LogWarning(string message) => Logger.LogEntry(LogScope, LogLevel.Warning, message);
         private static void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug(LogScope, exception);
 
         private Stream _outputStream;
         private readonly StringBuilder _builder;
         private Assembly _targetAssembly;
+        private List<PropertyInfo> _apiMemberPropertyInfos;
 
         private const string LogScope = "DOC GENER";
 
