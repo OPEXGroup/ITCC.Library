@@ -83,17 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Containers\ApiMethodContainer.cs" />
-    <Compile Include="Enums\FirstEnum.cs" />
-    <Compile Include="Enums\SecondEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\CustomRequestProcessor.cs" />
-    <Compile Include="Utils\TestMarkerType.cs" />
-    <Compile Include="Views\FirstListEntryView.cs" />
-    <Compile Include="Views\FirstRootView.cs" />
-    <Compile Include="Views\SecondChildView.cs" />
-    <Compile Include="Views\SecondRootView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -119,6 +110,10 @@
     <ProjectReference Include="..\..\src\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">
       <Project>{BBC8B7E2-BFC2-4B03-BD01-5B6BD10649C1}</Project>
       <Name>ITCC.Logging.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ITCC.HTTP.API.Samples.Testing\ITCC.HTTP.API.Samples.Testing.csproj">
+      <Project>{0670E62A-B54F-4480-B91A-8D4A594F762B}</Project>
+      <Name>ITCC.HTTP.API.Samples.Testing</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

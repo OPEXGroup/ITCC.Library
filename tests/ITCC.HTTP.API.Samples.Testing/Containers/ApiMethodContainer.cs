@@ -2,20 +2,20 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System.Collections.Generic;
-using ITCC.HTTP.Api.Documentation.Testing.Utils;
-using ITCC.HTTP.Api.Documentation.Testing.Views;
 using ITCC.HTTP.API.Attributes;
+using ITCC.HTTP.API.Enums;
+using ITCC.HTTP.API.Samples.Testing.Utils;
+using ITCC.HTTP.API.Samples.Testing.Views;
 using ITCC.HTTP.API.Utils;
-using static ITCC.HTTP.API.Enums.ApiHttpMethod;
 
-namespace ITCC.HTTP.Api.Documentation.Testing.Containers
+namespace ITCC.HTTP.API.Samples.Testing.Containers
 {
     public static class ApiMethodContainer
     {
         [ApiRequestProcessor(
             description: "Gets data from database",
             subUri: "/items",
-            method: Get,
+            method: ApiHttpMethod.Get,
             authRequired: false)]
         [ApiQueryParam("from", "Initial timestamp", false)]
         [ApiQueryParam("to", "Initial timestamp", false)]
@@ -26,7 +26,7 @@ namespace ITCC.HTTP.Api.Documentation.Testing.Containers
         [ApiRequestProcessor(
             description: "Inserts data into database",
             subUri: "/insert",
-            method: Post,
+            method: ApiHttpMethod.Post,
             authRequired: true,
             remarks: "Dont use too much.")]
         [ApiRequestBodyType(typeof(SecondRootView), typeof(List<SecondRootView>))]

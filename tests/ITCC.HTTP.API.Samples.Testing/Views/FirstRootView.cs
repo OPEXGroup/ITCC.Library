@@ -4,22 +4,21 @@
 using System.Collections.Generic;
 using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Enums;
-using static ITCC.HTTP.API.Enums.ApiContractType;
 
-namespace ITCC.HTTP.Api.Documentation.Testing.Views
+namespace ITCC.HTTP.API.Samples.Testing.Views
 {
     [ApiView(ApiHttpMethod.Get)]
     public class FirstRootView
     {
         [ApiViewPropertyDescription("Unique identifier")]
-        [ApiContract(NotNullGuidString)]
+        [ApiContract(ApiContractType.NotNullGuidString)]
         public string Guid { get; set; }
 
         [ApiViewPropertyDescription("Child elements")]
-        [ApiContract(NotNull | CanBeEmpty | ItemsNotNull)]
+        [ApiContract(ApiContractType.NotNull | ApiContractType.CanBeEmpty | ApiContractType.ItemsNotNull)]
         public List<FirstListEntryView> Children { get; set; } = new List<FirstListEntryView>();
 
-        [ApiContract(NotNullNonEmptyGuidList)]
+        [ApiContract(ApiContractType.NotNullNonEmptyGuidList)]
         public List<string> SomeGuids { get; set; } = new List<string>();
     }
 }

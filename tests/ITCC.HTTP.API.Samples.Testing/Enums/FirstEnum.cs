@@ -3,7 +3,7 @@
 
 using ITCC.HTTP.API.Attributes;
 
-namespace ITCC.HTTP.Api.Documentation.Testing.Enums
+namespace ITCC.HTTP.API.Samples.Testing.Enums
 {
     public enum FirstEnum
     {

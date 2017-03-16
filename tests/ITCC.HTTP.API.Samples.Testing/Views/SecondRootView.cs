@@ -4,19 +4,18 @@
 using System.Collections.Generic;
 using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Enums;
-using static ITCC.HTTP.API.Enums.ApiContractType;
 
-namespace ITCC.HTTP.Api.Documentation.Testing.Views
+namespace ITCC.HTTP.API.Samples.Testing.Views
 {
     [ApiView(ApiHttpMethod.Post)]
     public class SecondRootView
     {
         [ApiViewPropertyDescription("Unique identifier")]
-        [ApiContract(NotNullGuidString)]
+        [ApiContract(ApiContractType.NotNullGuidString)]
         public string Guid { get; set; }
 
         [ApiViewPropertyDescription("Child elements")]
-        [ApiContract(NotNull | CanBeEmpty | ItemsNotNull)]
+        [ApiContract(ApiContractType.NotNull | ApiContractType.CanBeEmpty | ApiContractType.ItemsNotNull)]
         public List<SecondChildView> Children { get; set; } = new List<SecondChildView>();
     }
 }

@@ -4,8 +4,8 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using ITCC.HTTP.Api.Documentation.Testing.Utils;
 using ITCC.HTTP.API.Documentation.Core;
+using ITCC.HTTP.API.Samples.Testing.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Windows.Loggers;
