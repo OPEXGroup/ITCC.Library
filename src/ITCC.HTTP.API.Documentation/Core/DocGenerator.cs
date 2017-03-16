@@ -87,6 +87,12 @@ namespace ITCC.HTTP.API.Documentation.Core
             return Task.FromResult(true);
         }
 
+        /// <summary>
+        ///     Method used to describe single API contract bullet
+        /// </summary>
+        /// <param name="contractType">Contract type</param>
+        /// <returns>Description string</returns>
+        /// <remarks>Should not throw</remarks>
         protected virtual string GetApiContractPartDescription(ApiContractType contractType)
             => EnumHelper.ApiContractTypeName(contractType);
 
