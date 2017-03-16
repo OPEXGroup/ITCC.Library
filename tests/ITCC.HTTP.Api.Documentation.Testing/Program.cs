@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ITCC.HTTP.Api.Documentation.Testing.Utils;
 using ITCC.HTTP.API.Documentation.Core;
 using ITCC.Logging.Core;
+using ITCC.Logging.Core.Loggers;
 using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.HTTP.Api.Documentation.Testing
@@ -21,14 +22,25 @@ namespace ITCC.HTTP.Api.Documentation.Testing
             LogMessage(LogLevel.Info, "Started");
             var generator = new DocGenerator();
             var outputStream = Console.OpenStandardOutput();
-            await generator.GenerateApiDocumentationAsync(typeof(TestMarkerType), outputStream);
+
+            try
+            {
+                await generator.GenerateApiDocumentationAsync(typeof(TestMarkerType), outputStream);
+            }
+            catch (Exception exception)
+            {
+                Logger.LogException("DOC TEST", LogLevel.Warning, exception);
+            }
+            
             LogMessage(LogLevel.Info, "Done");
+            Console.ReadLine();
         }
 
         private static void InitLoggers()
         {
             Console.OutputEncoding = Encoding.UTF8;
             Logger.Level = LogLevel.Trace;
+            Logger.RegisterReceiver(new DebugLogger());
             Logger.RegisterReceiver(new ColouredConsoleLogger());
         }
 
