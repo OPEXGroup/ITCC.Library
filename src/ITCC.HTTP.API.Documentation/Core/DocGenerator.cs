@@ -10,6 +10,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.HTTP.API.Attributes;
+using ITCC.HTTP.API.Enums;
+using ITCC.HTTP.API.Utils;
 using ITCC.HTTP.Common.Interfaces;
 
 namespace ITCC.HTTP.API.Documentation
@@ -59,17 +61,85 @@ namespace ITCC.HTTP.API.Documentation
 
         #region protected
 
+        #region methods
+        /// <summary>
+        ///     Method used to write global doc header (before any API sections).
+        ///     Defaults to `# API Description` header
+        /// </summary>
+        /// <returns>Success status</returns>
+        /// <remarks>Should not throw</remarks>
         protected virtual Task<bool> TryWriteHeaderAsync()
         {
-            _builder.AppendLine("HEADER");
+            _builder.AppendLine("# API Description");
             return Task.FromResult(true);
         }
 
+        /// <summary>
+        ///     Method used to write global doc footer (after all API sections).
+        ///     Defaults to empty footer.
+        /// </summary>
+        /// <returns>Success status</returns>
+        /// <remarks>Should not throw</remarks>
         protected virtual Task<bool> TryWriteFooterAsync()
         {
-            _builder.AppendLine("FOOTER");
+            _builder.AppendLine();
             return Task.FromResult(true);
         }
+
+        protected virtual string GetApiContractPartDescription(ApiContractType contractType)
+            => EnumHelper.ApiContractTypeName(contractType);
+
+        #endregion
+
+        #region substitutions
+
+        /// <summary>
+        ///     Word used as `Yes`
+        /// </summary>
+        protected virtual string YesWordPattern => @"Yes";
+        /// <summary>
+        ///     Word used as `No`
+        /// </summary>
+        protected virtual string NoWordPattern => @"No";
+        /// <summary>
+        ///     Phrase used to mark if method requires authorization
+        /// </summary>
+        protected virtual string AuthDescriptionPattern => @"Authorization required:";
+        /// <summary>
+        ///     Header used for request body description
+        /// </summary>
+        protected virtual string RequestBodyTypePattern => @"##### Request body";
+        /// <summary>
+        ///     Header used for response body description
+        /// </summary>
+        protected virtual string ResponseBodyTypePattern => @"##### Response body";
+        /// <summary>
+        ///     Phrase used when the body option is <see cref="API.Utils.Empty"/>
+        /// </summary>
+        protected virtual string EmptyBodyPattern => @"Empty body";
+        /// <summary>
+        ///     Pattern used to describe that request/response body can be a single object of a particular type
+        /// </summary>
+        protected virtual string SingleObjectPattern => @"Object of type";
+        /// <summary>
+        ///     Pattern used to describe that request/response body can be list of objects of a particular type
+        /// </summary>
+        protected virtual string ObjectListPattern => @"List of objects of type";
+        /// <summary>
+        ///     Pattern used to describe that request/response body can be either a single object or object list of a particular type
+        /// </summary>
+        protected virtual string SingleObjectOrListPattern => @"Single object or object list of type";
+        /// <summary>
+        ///     Header used for method remarks section
+        /// </summary>
+        protected virtual string RemarksHeaderPattern => @"##### Remarks";
+
+        /// <summary>
+        ///     Used when no contract is applied to API view property
+        /// </summary>
+        protected virtual string NoPropertyContractPattern => "None";
+
+        #endregion
 
         #endregion
 
