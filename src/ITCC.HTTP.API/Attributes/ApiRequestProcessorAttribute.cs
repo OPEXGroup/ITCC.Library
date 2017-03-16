@@ -13,17 +13,19 @@ namespace ITCC.HTTP.API.Attributes
     [AttributeUsage(AttributeTargets.Property)]
     public class ApiRequestProcessorAttribute : Attribute
     {
-        public ApiRequestProcessorAttribute(string description, string subUri, ApiHttpMethod method, string remarks = null)
+        public ApiRequestProcessorAttribute(string description, string subUri, ApiHttpMethod method, bool authRequired, string remarks = null)
         {
             Description = description;
             SubUri = subUri;
             Method = method;
+            AuthRequired = authRequired;
             Remarks = remarks;
         }
 
         public string Description { get; }
         public string SubUri { get; }
         public ApiHttpMethod Method { get; }
+        public bool AuthRequired { get; }
         public string Remarks { get; }
     }
 }

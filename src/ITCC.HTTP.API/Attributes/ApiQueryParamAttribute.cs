@@ -9,7 +9,7 @@ namespace ITCC.HTTP.API.Attributes
     ///     Describes API method HTTP query param
     ///     Must ONLY be used with properties implementing <see cref="Common.Interfaces.IRequestProcessor"/>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class ApiQueryParamAttribute : Attribute
     {
         public ApiQueryParamAttribute(string name, string description, bool optional = true)
