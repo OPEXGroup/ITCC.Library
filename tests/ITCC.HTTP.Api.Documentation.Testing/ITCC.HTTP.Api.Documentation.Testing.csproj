@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers\ApiMethodContainer.cs" />
     <Compile Include="Enums\FirstEnum.cs" />
     <Compile Include="Enums\SecondEnum.cs" />
     <Compile Include="Program.cs" />
@@ -96,9 +97,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Containers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\src\ITCC.HTTP.API.Documentation\ITCC.HTTP.API.Documentation.csproj">
       <Project>{38FDA7E8-E503-4654-B256-E0DA253F1ECC}</Project>

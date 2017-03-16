@@ -2,28 +2,25 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
-using ITCC.HTTP.API.Enums;
 
 namespace ITCC.HTTP.API.Attributes
 {
     /// <summary>
-    ///     Marks static property of a static class as an API request processor. 
+    ///     Describes API method HTTP query param
     ///     Must ONLY be used with properties implementing <see cref="Common.Interfaces.IRequestProcessor"/>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class ApiRequestProcessorAttribute : Attribute
+    public class ApiQueryParamAttribute : Attribute
     {
-        public ApiRequestProcessorAttribute(string description, string subUri, ApiHttpMethod method, string remarks = null)
+        public ApiQueryParamAttribute(string name, string description, bool optional = true)
         {
+            Name = name;
             Description = description;
-            SubUri = subUri;
-            Method = method;
-            Remarks = remarks;
+            Optional = optional;
         }
 
+        public string Name { get; }
         public string Description { get; }
-        public string SubUri { get; }
-        public ApiHttpMethod Method { get; }
-        public string Remarks { get; }
+        public bool Optional { get; }
     }
 }

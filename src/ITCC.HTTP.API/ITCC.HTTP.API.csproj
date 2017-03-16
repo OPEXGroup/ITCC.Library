@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ApiContractAttribute.cs" />
+    <Compile Include="Attributes\ApiQueryParamAttribute.cs" />
     <Compile Include="Attributes\ApiRequestBodyTypeAttribute.cs" />
     <Compile Include="Attributes\ApiRequestProcessorAttribute.cs" />
     <Compile Include="Attributes\ApiResponseBodyTypeAttribute.cs" />
