@@ -70,7 +70,6 @@
     <Compile Include="Utils\Empty.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumInfoProvider.cs" />
-    <Compile Include="Utils\TypeAttributeHelper.cs" />
     <Compile Include="Utils\ViewCheckResult.cs" />
     <Compile Include="ViewChecker.cs" />
   </ItemGroup>

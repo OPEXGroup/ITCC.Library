@@ -5,7 +5,7 @@ using System;
 
 namespace ITCC.HTTP.API.Interfaces
 {
-    internal interface ITypeAttribute
+    public interface ITypeAttribute
     {
         Type Type1 { get; }
         Type Type2 { get; }
