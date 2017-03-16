@@ -47,6 +47,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
             LogDebug("Header written");
 
+            _builder.AppendLine();
             LogDebug("Writing sections");
             if (!WriteAllSections())
             {
