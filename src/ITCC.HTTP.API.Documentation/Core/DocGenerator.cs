@@ -148,7 +148,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <summary>
         ///     Used when no description (or null description) is provided
         /// </summary>
-        public virtual string NoPropertyDescriptionPattern => "No description provided";
+        protected virtual string NoPropertyDescriptionPattern => "No description provided";
 
         #endregion
 
@@ -215,7 +215,6 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         private static void LogDebug(string message) => Logger.LogDebug(LogScope, message);
         private static void LogWarning(string message) => Logger.LogEntry(LogScope, LogLevel.Warning, message);
-        
 
         private Stream _outputStream;
         private readonly StringBuilder _builder;
