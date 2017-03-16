@@ -55,6 +55,10 @@ namespace ITCC.HTTP.API.Documentation
             return await TryWriteResultAsync();
         }
 
+        #endregion
+
+        #region protected
+
         protected virtual Task<bool> TryWriteHeaderAsync()
         {
             _builder.AppendLine("HEADER");
