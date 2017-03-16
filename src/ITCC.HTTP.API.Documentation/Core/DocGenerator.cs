@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Documentation.Utils;
 using ITCC.HTTP.API.Enums;
+using ITCC.HTTP.API.Interfaces;
 using ITCC.HTTP.API.Utils;
 using ITCC.HTTP.Common.Interfaces;
 using ITCC.Logging.Core;
@@ -301,6 +302,9 @@ namespace ITCC.HTTP.API.Documentation.Core
             WriteRequestProcessorHeader(info);
             WriteRequestProcessorQueryParams(info);
 
+            WriteRequestProcessorRequestDescription(info);
+            WriteRequestProcessorResponseDescription(info);
+
             WriteRequestProcessorRemarks(info);
         }
 
@@ -344,6 +348,35 @@ namespace ITCC.HTTP.API.Documentation.Core
                 WriteSingleQueryParamDescription(queryParamAttribute);
             }
             _builder.AppendLine();
+        }
+
+        private void WriteTypeAttributeDescription(ITypeAttribute attribute)
+        {
+            
+        }
+
+        private void WriteRequestProcessorRequestDescription(PropertyInfo info)
+        {
+            var requestBodyTypeAttribute = info.GetCustomAttributes<ApiRequestBodyTypeAttribute>().FirstOrDefault();
+            if (requestBodyTypeAttribute == null)
+                return;
+
+            _builder.AppendLine(RequestBodyTypePattern);
+            _builder.AppendLine();
+            
+            WriteTypeAttributeDescription(requestBodyTypeAttribute);
+        }
+
+        private void WriteRequestProcessorResponseDescription(PropertyInfo info)
+        {
+            var responseBodyTypeAttribute = info.GetCustomAttributes<ApiResponseBodyTypeAttribute>().FirstOrDefault();
+            if (responseBodyTypeAttribute == null)
+                return;
+
+            _builder.AppendLine(ResponseBodyTypePattern);
+            _builder.AppendLine();
+
+            WriteTypeAttributeDescription(responseBodyTypeAttribute);
         }
 
         private void WriteRequestProcessorRemarks(MemberInfo info)
