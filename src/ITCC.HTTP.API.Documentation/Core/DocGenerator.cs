@@ -250,6 +250,32 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         private void WriteOneSection(RequestProcessorSection section)
         {
+            WriteSectionHeader(section);
+            WriteSectionContents(section);
+        }
+
+        private void WriteSectionHeader(RequestProcessorSection section)
+        {
+            _builder.AppendLine(section.TitlePattern);
+            _builder.AppendLine();
+
+            if (section.DescriptionPattern == null)
+                return;
+            _builder.AppendLine(section.DescriptionPattern);
+            _builder.AppendLine();
+        }
+
+        private void WriteSectionContents(RequestProcessorSection section)
+        {
+            foreach (var propertyInfo in section.RequestProcessorInfos)
+            {
+                WriteRequestProcessorInfo(propertyInfo);
+                _builder.AppendLine(MethodSeparatorPattern);
+            }
+        }
+
+        private void WriteRequestProcessorInfo(PropertyInfo info)
+        {
             
         }
 
