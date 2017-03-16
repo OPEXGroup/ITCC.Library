@@ -52,6 +52,7 @@
     <Compile Include="Attributes\ApiResponseBodyTypeAttribute.cs" />
     <Compile Include="Attributes\ApiViewAttribute.cs" />
     <Compile Include="Attributes\ApiViewCheckAttribute.cs" />
+    <Compile Include="Attributes\ApiViewPropertyDescriptionAttribute.cs" />
     <Compile Include="Attributes\EnumValueInfoAttribute.cs" />
     <Compile Include="Enums\ApiContractType.cs" />
     <Compile Include="Enums\ApiErrorReason.cs" />

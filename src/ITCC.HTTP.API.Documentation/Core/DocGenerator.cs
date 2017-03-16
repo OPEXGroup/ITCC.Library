@@ -1,7 +1,6 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-using ITCC.Logging.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,11 +9,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ITCC.HTTP.API.Attributes;
+using ITCC.HTTP.API.Documentation.Utils;
 using ITCC.HTTP.API.Enums;
 using ITCC.HTTP.API.Utils;
 using ITCC.HTTP.Common.Interfaces;
+using ITCC.Logging.Core;
 
-namespace ITCC.HTTP.API.Documentation
+namespace ITCC.HTTP.API.Documentation.Core
 {
     public class DocGenerator
     {
@@ -138,6 +139,10 @@ namespace ITCC.HTTP.API.Documentation
         ///     Used when no contract is applied to API view property
         /// </summary>
         protected virtual string NoPropertyContractPattern => "None";
+        /// <summary>
+        ///     Used when no description (or null description) is provided
+        /// </summary>
+        public virtual string NoPropertyDescriptionPattern => "No description provided";
 
         #endregion
 
@@ -145,14 +150,14 @@ namespace ITCC.HTTP.API.Documentation
 
         #region private
 
-        private bool TryLoadTargetAssembly(Type markerType) => DoSafe(() =>
+        private bool TryLoadTargetAssembly(Type markerType) => Wrappers.DoSafe(() =>
         {
             _targetAssembly = Assembly.GetAssembly(markerType);
             LogDebug($"Assembly {_targetAssembly.FullName} loaded");
             return true;
         });
 
-        private bool AssemblyIsValid() => DoSafe(() =>
+        private bool AssemblyIsValid() => Wrappers.DoSafe(() =>
         {
             var properties = GetAllProperties();
 
@@ -187,7 +192,7 @@ namespace ITCC.HTTP.API.Documentation
             return true;
         });
 
-        private Task<bool> TryWriteResultAsync() => DoSafeAsync(async () =>
+        private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
         {
             var result = _builder.ToString();
             _builder.Clear();
@@ -200,37 +205,11 @@ namespace ITCC.HTTP.API.Documentation
             return true;
         });
 
-        private static bool DoSafe(Func<bool> method)
-        {
-            try
-            {
-                return method.Invoke();
-            }
-            catch (Exception exception)
-            {
-                LogExceptionDebug(exception);
-                return false;
-            }
-        }
-
-        private static async Task<bool> DoSafeAsync(Func<Task<bool>> asyncMethod)
-        {
-            try
-            {
-                return await asyncMethod.Invoke();
-            }
-            catch (Exception exception)
-            {
-                LogExceptionDebug(exception);
-                return false;
-            }
-        }
-
         private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetTypes().SelectMany(t => t.GetProperties()).ToList();
 
         private static void LogDebug(string message) => Logger.LogDebug(LogScope, message);
         private static void LogWarning(string message) => Logger.LogEntry(LogScope, LogLevel.Warning, message);
-        private static void LogExceptionDebug(Exception exception) => Logger.LogExceptionDebug(LogScope, exception);
+        
 
         private Stream _outputStream;
         private readonly StringBuilder _builder;
