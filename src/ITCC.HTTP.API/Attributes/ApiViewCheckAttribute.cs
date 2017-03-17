@@ -16,11 +16,11 @@ namespace ITCC.HTTP.API.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class ApiViewCheckAttribute : Attribute
     {
-        public ApiViewCheckAttribute(string errorDescription = null)
+        public ApiViewCheckAttribute(string checkDescription = null)
         {
-            ErrorDescription = errorDescription;
+            CheckDescription = checkDescription;
         }
 
-        public string ErrorDescription { get; }
+        public string CheckDescription { get; }
     }
 }

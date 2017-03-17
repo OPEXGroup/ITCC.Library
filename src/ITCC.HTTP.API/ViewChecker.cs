@@ -163,7 +163,7 @@ namespace ITCC.HTTP.API
                 if (!checkResult)
                 {
                     var apiErrorView = ApiErrorViewFactory.ViewContractViolation(view,
-                        methodInfo.GetCustomAttribute<ApiViewCheckAttribute>().ErrorDescription);
+                        methodInfo.GetCustomAttribute<ApiViewCheckAttribute>().CheckDescription);
                     result.Add(apiErrorView);
                 }
             }
