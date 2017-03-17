@@ -29,6 +29,12 @@ namespace ITCC.HTTP.API.Documentation.Core
             _viewDocGenerator = new ViewDocGenerator(_builder);
         }
 
+        public DocGenerator(int capacity)
+        {
+            _builder = new StringBuilder(capacity);
+            _viewDocGenerator = new ViewDocGenerator(_builder);
+        }
+
         public async Task<bool> GenerateApiDocumentationAsync(Type markerType, Stream outputStream, IEnumerable<IExampleSerializer> serializers)
         {
             _outputStream = outputStream;
@@ -491,8 +497,6 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             return true;
         });
-
-        
 
         private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetLoadableTypes().SelectMany(t => t.GetProperties()).ToList();
 
