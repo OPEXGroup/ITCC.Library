@@ -16,7 +16,7 @@ namespace ITCC.HTTP.API.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class ApiViewCheckAttribute : Attribute
     {
-        public ApiViewCheckAttribute([CallerMemberName] string errorDescription = null)
+        public ApiViewCheckAttribute(string errorDescription = null)
         {
             ErrorDescription = errorDescription;
         }

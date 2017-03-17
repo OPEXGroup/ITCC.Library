@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System.Collections.Generic;
+using System.Linq;
 using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Enums;
 
@@ -20,5 +21,9 @@ namespace ITCC.HTTP.API.Samples.Testing.Views
 
         [ApiContract(ApiContractType.NotNullNonEmptyGuidList)]
         public List<string> SomeGuids { get; set; } = new List<string>();
+
+        [ApiViewCheck("All guids in list must be distinct")]
+        // ReSharper disable once UnusedMember.Global
+        public bool SomeGuidsMustBeDistinct() => SomeGuids.Count == SomeGuids.Distinct().Count();
     }
 }

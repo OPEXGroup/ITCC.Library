@@ -488,6 +488,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
         {
             var result = _builder.ToString();
+            LogDebug($"Total symbols: {_builder.Length} (Capacity used: {_builder.Capacity})");
             _builder.Clear();
             using (var writer = new StreamWriter(_outputStream))
             {
