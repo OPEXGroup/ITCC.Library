@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using ITCC.Logging.Core;
 
@@ -32,6 +33,19 @@ namespace ITCC.HTTP.API.Documentation.Utils
             {
                 LogExceptionDebug(exception);
                 return false;
+            }
+        }
+
+        public static void AppendPaddedLines(StringBuilder builder, params string[] lines)
+        {
+            if (lines.Length == 0)
+                return;
+
+            builder.AppendLine();
+            foreach (var line in lines)
+            {
+                builder.AppendLine(line);
+                builder.AppendLine();
             }
         }
 

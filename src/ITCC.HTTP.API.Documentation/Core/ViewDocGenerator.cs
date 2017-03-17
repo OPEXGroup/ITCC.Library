@@ -30,12 +30,23 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         public void WriteBodyDescription(Type type)
         {
-            
+            WriteBodyExamples(type);
+            WriteBodyDescriptionAndRestrictions(type);
         }
 
         #endregion
 
         #region private
+
+        private void WriteBodyExamples(Type type)
+        {
+            
+        }
+
+        private void WriteBodyDescriptionAndRestrictions(Type type)
+        {
+            
+        }
 
         private ViewDocGeneratorSettings _settings;
         private StringBuilder _builder;

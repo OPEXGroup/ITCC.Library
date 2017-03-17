@@ -366,9 +366,9 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             var uriInfo = $"{processorAttribute.Method.ToString().ToUpperInvariant()} {processorAttribute.SubUri}";
             _builder.AppendLine($"{MethodHeaderPrefixPattern}{uriInfo}");
-            AppendPaddedLines(processorAttribute.Description);
+            Wrappers.AppendPaddedLines(_builder, processorAttribute.Description);
             var authWord = processorAttribute.AuthRequired ? YesWordPattern : NoWordPattern;
-            AppendPaddedLines($"{AuthDescriptionPattern}{authWord}");
+            Wrappers.AppendPaddedLines(_builder, $"{AuthDescriptionPattern}{authWord}");
         }
 
         private void WriteSingleQueryParamDescription(ApiQueryParamAttribute attribute)
@@ -384,7 +384,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             if (!queryParamAttributes.Any())
                 return;
 
-            AppendPaddedLines(QueryParamsPattern);
+            Wrappers.AppendPaddedLines(_builder, QueryParamsPattern);
 
             foreach (var queryParamAttribute in queryParamAttributes)
             {
@@ -434,7 +434,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
         }
 
-        private void WriteRequestProcessorRequestDescription(PropertyInfo info)
+        private void WriteRequestProcessorRequestDescription(MemberInfo info)
         {
             var requestBodyTypeAttribute = info.GetCustomAttributes<ApiRequestBodyTypeAttribute>().FirstOrDefault();
             if (requestBodyTypeAttribute == null)
@@ -446,7 +446,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             WriteTypeAttributeDescription(requestBodyTypeAttribute);
         }
 
-        private void WriteRequestProcessorResponseDescription(PropertyInfo info)
+        private void WriteRequestProcessorResponseDescription(MemberInfo info)
         {
             var responseBodyTypeAttribute = info.GetCustomAttributes<ApiResponseBodyTypeAttribute>().FirstOrDefault();
             if (responseBodyTypeAttribute == null)
@@ -465,7 +465,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             if (string.IsNullOrWhiteSpace(processorAttribute.Remarks))
                 return;
 
-            AppendPaddedLines(RemarksHeaderPattern, processorAttribute.Remarks);
+            Wrappers.AppendPaddedLines(_builder, RemarksHeaderPattern, processorAttribute.Remarks);
         }
 
         private Task<bool> TryWriteResultAsync() => Wrappers.DoSafeAsync(async () =>
@@ -481,18 +481,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             return true;
         });
 
-        private void AppendPaddedLines(params string[] lines)
-        {
-            if (lines.Length == 0)
-                return;
-
-            _builder.AppendLine();
-            foreach (var line in lines)
-            {
-                _builder.AppendLine(line);
-                _builder.AppendLine();
-            }
-        }
+        
 
         private List<PropertyInfo> GetAllProperties() => _targetAssembly.GetLoadableTypes().SelectMany(t => t.GetProperties()).ToList();
 
