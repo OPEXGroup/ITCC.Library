@@ -75,7 +75,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         private ViewDocGeneratorSettings _settings;
         private readonly StringBuilder _builder;
 
-        private ViewDescriptionGenerator _descriptionGenerator;
+        private readonly ViewDescriptionGenerator _descriptionGenerator;
 
         #endregion
     }
