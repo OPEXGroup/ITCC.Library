@@ -28,7 +28,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             _builder = new StringBuilder();
         }
 
-        public async Task<bool> GenerateApiDocumentationAsync(Type markerType, Stream outputStream)
+        public async Task<bool> GenerateApiDocumentationAsync(Type markerType, Stream outputStream, IEnumerable<IExampleSerializer> serializers)
         {
             _outputStream = outputStream;
 

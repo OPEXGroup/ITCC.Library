@@ -2,9 +2,12 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using ITCC.HTTP.Api.Documentation.Testing.Serializers;
 using ITCC.HTTP.API.Documentation.Core;
+using ITCC.HTTP.API.Interfaces;
 using ITCC.HTTP.API.Samples.Testing.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Core.Loggers;
@@ -25,7 +28,13 @@ namespace ITCC.HTTP.Api.Documentation.Testing
 
             try
             {
-                await generator.GenerateApiDocumentationAsync(typeof(TestMarkerType), outputStream);
+                await generator.GenerateApiDocumentationAsync(typeof(TestMarkerType),
+                    outputStream,
+                    new List<IExampleSerializer>
+                    {
+                        new JsonExampleSerializer(),
+                        new XmlExampleSerializer()
+                    });
             }
             catch (Exception exception)
             {
