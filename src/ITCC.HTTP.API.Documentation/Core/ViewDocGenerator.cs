@@ -43,7 +43,8 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         private void WriteBodyExamples(Type type)
         {
-            Wrappers.AppendPaddedLines(_builder, _settings.ExamplesHeaderPattern);
+            _builder.AppendLine();
+            _builder.AppendLine(_settings.ExamplesHeaderPattern);
 
             if (!_hasSerializers)
             {
@@ -54,6 +55,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             var exampleObject = ViewExampleGenerator.GenerateViewExample(type);
             foreach (var serializer in _settings.Serializers)
             {
+                _builder.AppendLine();
                 _builder.AppendLine(serializer.ExampleHeader);
                 _builder.AppendLine();
                 _builder.AppendLine(_settings.ExampleStartPattern);
