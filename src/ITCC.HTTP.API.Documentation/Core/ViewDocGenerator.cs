@@ -18,6 +18,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         public ViewDocGenerator(StringBuilder builder)
         {
             _builder = builder;
+            _descriptionGenerator = new ViewDescriptionGenerator(_builder);
         }
 
         public bool SetSettings(ViewDocGeneratorSettings settings)
@@ -63,12 +64,16 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         private void WriteBodyDescriptionAndRestrictions(Type type)
         {
-            
+            Wrappers.AppendPaddedLines(_builder, _settings.DescriptionAndRestrictionsPattern);
+
+            _descriptionGenerator.GenerateViewDescription(type);
         }
 
         private bool _hasSerializers;
         private ViewDocGeneratorSettings _settings;
         private readonly StringBuilder _builder;
+
+        private ViewDescriptionGenerator _descriptionGenerator;
 
         #endregion
     }
