@@ -26,6 +26,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         public DocGenerator()
         {
             _builder = new StringBuilder();
+            _viewDocGenerator = new ViewDocGenerator(_builder);
         }
 
         public async Task<bool> GenerateApiDocumentationAsync(Type markerType, Stream outputStream, IEnumerable<IExampleSerializer> serializers)
@@ -296,7 +297,7 @@ namespace ITCC.HTTP.API.Documentation.Core
                 ExamplesHeaderPattern = ExamplesHeaderPattern,
                 DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern
             };
-            return ViewDocGenerator.SetSettings(settings);
+            return _viewDocGenerator.SetSettings(settings);
         }
 
         private bool WriteAllSections() => Wrappers.DoSafe(() =>
@@ -418,6 +419,8 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             var countDescription = GetCountDescription(bodyTypeInfo);
             _builder.AppendLine($"{countDescription} `{type.FullName}`");
+
+            _viewDocGenerator.WriteBodyDescription(bodyTypeInfo.Type);
         }
 
         private void WriteTypeAttributeDescription(ITypeAttribute attribute)
@@ -500,6 +503,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         private readonly StringBuilder _builder;
         private Assembly _targetAssembly;
         private List<PropertyInfo> _apiMemberPropertyInfos;
+        private ViewDocGenerator _viewDocGenerator;
 
         private const string LogScope = "DOC GENER";
 
