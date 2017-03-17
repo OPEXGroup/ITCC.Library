@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
+using System.Linq;
 using System.Text;
 using ITCC.HTTP.API.Documentation.Utils;
 
@@ -25,6 +26,7 @@ namespace ITCC.HTTP.API.Documentation.Core
                 return false;
 
             _settings = settings;
+            _hasSerializers = _settings.Serializers != null && _settings.Serializers.Any();
             return true;
         }
 
@@ -40,7 +42,23 @@ namespace ITCC.HTTP.API.Documentation.Core
 
         private void WriteBodyExamples(Type type)
         {
-            
+            Wrappers.AppendPaddedLines(_builder, _settings.ExamplesHeaderPattern);
+
+            if (!_hasSerializers)
+            {
+                _builder.AppendLine(_settings.NoExampleAvailablePattern);
+                return;
+            }
+
+            var exampleObject = ViewExampleGenerator.GenerateViewExample(type);
+            foreach (var serializer in _settings.Serializers)
+            {
+                _builder.AppendLine(serializer.ExampleHeader);
+                _builder.AppendLine();
+                _builder.AppendLine(_settings.ExampleStartPattern);
+                _builder.AppendLine(serializer.Serialize(exampleObject));
+                _builder.AppendLine(_settings.ExampleEndPattern);
+            }
         }
 
         private void WriteBodyDescriptionAndRestrictions(Type type)
@@ -48,8 +66,9 @@ namespace ITCC.HTTP.API.Documentation.Core
             
         }
 
+        private bool _hasSerializers;
         private ViewDocGeneratorSettings _settings;
-        private StringBuilder _builder;
+        private readonly StringBuilder _builder;
 
         #endregion
     }

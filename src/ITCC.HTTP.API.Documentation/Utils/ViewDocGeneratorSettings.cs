@@ -18,6 +18,8 @@ namespace ITCC.HTTP.API.Documentation.Utils
         public string NoPropertyContractPattern { get; set; }
         public string NoPropertyDescriptionPattern { get; set; }
         public string NoExampleAvailablePattern { get; set; }
+        public string ExampleStartPattern { get; set; }
+        public string ExampleEndPattern { get; set; }
         public string ExamplesHeaderPattern { get; set; }
         public string DescriptionAndRestrictionsPattern { get; set; }
 

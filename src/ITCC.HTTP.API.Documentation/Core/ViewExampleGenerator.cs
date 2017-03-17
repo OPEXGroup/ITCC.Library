@@ -10,17 +10,16 @@ namespace ITCC.HTTP.API.Documentation.Core
     {
         #region public
 
-        public static object GenerateViewExample(PropertyInfo info)
-        {
-            var type = info.PropertyType;
-            return Activator.CreateInstance(type);
-        }
+        public static object GenerateViewExample(Type type) => GenerateViewExampleInner(type, null);
 
         #endregion
 
         #region private
 
-        
+        private static object GenerateViewExampleInner(Type type, PropertyInfo info)
+        {
+            return Activator.CreateInstance(type);
+        }
 
         #endregion
     }

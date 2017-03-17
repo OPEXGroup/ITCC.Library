@@ -227,7 +227,15 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <summary>
         ///     Set if example serializers are null or empty
         /// </summary>
-        public string NoExampleAvailablePattern { get; set; } = @"No example available";
+        protected virtual string NoExampleAvailablePattern => @"No example available";
+        /// <summary>
+        ///     View example starts with a following line
+        /// </summary>
+        protected virtual string ExampleStartPattern => @"```";
+        /// <summary>
+        ///     View example ends with a following line
+        /// </summary>
+        protected virtual string ExampleEndPattern => @"```";
         /// <summary>
         ///     Examples section header (for method request and response bodies)
         /// </summary>
@@ -294,6 +302,9 @@ namespace ITCC.HTTP.API.Documentation.Core
                 Serializers = serializers,
                 NoPropertyContractPattern = NoPropertyContractPattern,
                 NoPropertyDescriptionPattern = NoPropertyDescriptionPattern,
+                NoExampleAvailablePattern = NoExampleAvailablePattern,
+                ExampleStartPattern = ExampleStartPattern,
+                ExampleEndPattern = ExampleEndPattern,
                 ExamplesHeaderPattern = ExamplesHeaderPattern,
                 DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern
             };
