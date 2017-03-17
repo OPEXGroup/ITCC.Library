@@ -124,13 +124,13 @@ string GetTypeByExtenstion(string extension); // Получение станда
 
 Представляет обработчик запроса. Ключевые поля:
 ```
-bool AuthorizationRequired;                  // Требуется ли авторизация для выполнения запроса
-Delegates.RequestHandler<TAccount> Handler;  // Функция-обработчик
+bool AuthorizationRequired { get; set; }                  // Требуется ли авторизация для выполнения запроса
+Delegates.RequestHandler<TAccount> Handler { get; set; }  // Функция-обработчик
 /*
   **ВАЖНО**: `StaticServer` не поддерживает регистрацию обработчиков с методами `HEAD` и `OPTIONS`. Запросы с этими методами обрабатываются в соответствием со стандартом.
 */
-HttpMethod Method;                           // Метод запроса. 
-string SubUri;                               // URI, к которому нужно обратиться для вызова метода
+HttpMethod Method { get; set; }                           // Метод запроса. 
+string SubUri { get; set; }                               // URI, к которому нужно обратиться для вызова метода
 ```
 
 #### `static class StaticServer<TAccount> where TAccount : class`

@@ -29,4 +29,16 @@ Http,
 Https   // С шифрованием данных
 ```
 
+### Interfaces
+
+Используемые интерфейсы
+
+#### `interface IRequestProcessor`
+
+Интерфейс обработчика `HTTP`-запросов
+
+```
+bool AuthorizationRequired { get; } // Требует ли вызов метода какой-либо авторизации
+HttpMethod Method { get; }          // HTTP-метод запроса
+string SubUri { get; }              // URI, на который должен быть отправлен запрос
 ```

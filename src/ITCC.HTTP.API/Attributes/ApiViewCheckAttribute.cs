@@ -1,7 +1,6 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 using System;
-using System.Runtime.CompilerServices;
 
 namespace ITCC.HTTP.API.Attributes
 {
@@ -16,11 +15,11 @@ namespace ITCC.HTTP.API.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class ApiViewCheckAttribute : Attribute
     {
-        public ApiViewCheckAttribute([CallerMemberName] string errorDescription = null)
+        public ApiViewCheckAttribute(string checkDescription = null)
         {
-            ErrorDescription = errorDescription;
+            CheckDescription = checkDescription;
         }
 
-        public string ErrorDescription { get; }
+        public string CheckDescription { get; }
     }
 }

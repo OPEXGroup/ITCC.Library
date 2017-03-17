@@ -84,7 +84,26 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Net.Http.4.3.1\lib\net46\System.Net.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net46\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net46\System.Security.Cryptography.X509Certificates.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -108,10 +127,6 @@
     <ProjectReference Include="..\..\src\ITCC.HTTP.Client\ITCC.HTTP.Client.csproj">
       <Project>{BC039125-94D3-49C6-9BC0-1B5692F95ECB}</Project>
       <Name>ITCC.HTTP.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{F863E912-CC9D-47C5-9EA0-A110961CF234}</Project>
-      <Name>ITCC.HTTP.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ITCC.HTTP.Server\ITCC.HTTP.Server.csproj">
       <Project>{31655D62-7075-410F-923E-2F636CA67CC2}</Project>
