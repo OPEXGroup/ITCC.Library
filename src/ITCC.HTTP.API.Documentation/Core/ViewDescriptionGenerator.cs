@@ -2,8 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Documentation.Utils;
 
 namespace ITCC.HTTP.API.Documentation.Core
@@ -41,9 +44,13 @@ namespace ITCC.HTTP.API.Documentation.Core
             return string.Empty;
         }
 
-        private void IsApiViewOrApiViewList(Type type)
+        private bool IsApiViewOrApiViewList(Type type)
         {
-            
+            var targetType = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
+                ? type.GenericTypeArguments[0]
+                : type;
+
+            return targetType.GetCustomAttributes<ApiViewAttribute>().Any();
         }
 
         private readonly StringBuilder _builder;
