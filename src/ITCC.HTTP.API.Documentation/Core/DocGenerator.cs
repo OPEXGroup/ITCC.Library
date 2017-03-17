@@ -49,6 +49,14 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
             LogDebug("Header written");
 
+            LogDebug("Configuring view doc generator");
+            if (!TrySetViewDocGeneratorSettings(serializers))
+            {
+                LogDebug("Failed configure doc generator!");
+                return false;
+            }
+            LogDebug("View doc generator configured");
+
             _builder.AppendLine();
             LogDebug("Writing sections");
             if (!WriteAllSections())
@@ -257,6 +265,15 @@ namespace ITCC.HTTP.API.Documentation.Core
             _apiMemberPropertyInfos = apiMethodAnnotatedProperties;
             return true;
         });
+
+        private bool TrySetViewDocGeneratorSettings(IEnumerable<IExampleSerializer> serializers)
+        {
+            var settings = new ViewDocGeneratorSettings
+            {
+                Serializers = serializers
+            };
+            return ViewDocGenerator.SetSettings(settings);
+        }
 
         private bool WriteAllSections() => Wrappers.DoSafe(() =>
         {

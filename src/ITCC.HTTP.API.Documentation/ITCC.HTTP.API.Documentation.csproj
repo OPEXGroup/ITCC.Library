@@ -83,6 +83,7 @@
     <Compile Include="Utils\RequestProcessorSection.cs" />
     <Compile Include="Utils\AssemblyHelper.cs" />
     <Compile Include="Utils\TypeAttributeHelper.cs" />
+    <Compile Include="Utils\ViewDocGeneratorSettings.cs" />
     <Compile Include="Utils\Wrappers.cs" />
   </ItemGroup>
   <ItemGroup>
