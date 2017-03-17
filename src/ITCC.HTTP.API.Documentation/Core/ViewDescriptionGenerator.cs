@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using System.Text;
+using ITCC.HTTP.API.Documentation.Utils;
 
 namespace ITCC.HTTP.API.Documentation.Core
 {
@@ -13,6 +14,15 @@ namespace ITCC.HTTP.API.Documentation.Core
         public ViewDescriptionGenerator(StringBuilder builder)
         {
             _builder = builder;
+        }
+
+        public bool SetSettings(ViewDescriptionGeneratorSettings settings)
+        {
+            if (settings == null || !settings.Valid())
+                return false;
+
+            _settings = settings;
+            return true;
         }
 
         public void GenerateViewDescription(Type type) => GenerateViewDescriptionInner(type, null);
@@ -26,7 +36,18 @@ namespace ITCC.HTTP.API.Documentation.Core
             
         }
 
+        private string GetSimpleTypeDescription(Type type, PropertyInfo info)
+        {
+            return string.Empty;
+        }
+
+        private void IsApiViewOrApiViewList(Type type)
+        {
+            
+        }
+
         private readonly StringBuilder _builder;
+        private ViewDescriptionGeneratorSettings _settings;
 
         #endregion
     }

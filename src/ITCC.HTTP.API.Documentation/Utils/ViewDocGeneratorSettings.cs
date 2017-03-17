@@ -1,6 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ITCC.HTTP.API.Interfaces;
@@ -22,6 +23,7 @@ namespace ITCC.HTTP.API.Documentation.Utils
         public string ExampleEndPattern { get; set; }
         public string ExamplesHeaderPattern { get; set; }
         public string DescriptionAndRestrictionsPattern { get; set; }
+        public Func<Type, string> TypeNameFunc { get; set; }
 
         #endregion
 

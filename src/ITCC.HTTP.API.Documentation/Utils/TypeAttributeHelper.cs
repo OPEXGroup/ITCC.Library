@@ -11,7 +11,7 @@ namespace ITCC.HTTP.API.Documentation.Utils
 {
     internal static class TypeAttributeHelper
     {
-        public static List<BodyTypeInfo> GetTypes(this ITypeAttribute attribute)
+        public static IEnumerable<BodyTypeInfo> GetTypes(this ITypeAttribute attribute)
         {
             if (attribute == null)
                 throw new ArgumentNullException(nameof(attribute));
@@ -66,6 +66,6 @@ namespace ITCC.HTTP.API.Documentation.Utils
             return listType.GenericTypeArguments[0] == singleType;
         }
 
-        private static bool IsGenericList(this Type type) => type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>));
+        private static bool IsGenericList(this Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
     }
 }

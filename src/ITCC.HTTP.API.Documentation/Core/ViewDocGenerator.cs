@@ -28,7 +28,13 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             _settings = settings;
             _hasSerializers = _settings.Serializers != null && _settings.Serializers.Any();
-            return true;
+
+            var descriptionGeneratorSettings = new ViewDescriptionGeneratorSettings
+            {
+                TypeNameFunc = _settings.TypeNameFunc
+            };
+
+            return _descriptionGenerator.SetSettings(descriptionGeneratorSettings);
         }
 
         public void WriteBodyDescription(Type type)

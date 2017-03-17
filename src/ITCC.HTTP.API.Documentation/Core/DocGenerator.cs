@@ -123,6 +123,17 @@ namespace ITCC.HTTP.API.Documentation.Core
             => EnumHelper.ApiContractTypeName(contractType);
 
         /// <summary>
+        ///     Gets simple type name (such as int, string, List of ints...)
+        /// </summary>
+        /// <param name="type">Type</param>
+        /// <returns>Name string</returns>
+        /// <remarks>Should not throw</remarks>
+        protected virtual string GetSimpleTypeName(Type type)
+            => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
+                ? $"List of {type.Name}"
+                : type.Name;
+
+        /// <summary>
         ///     Method used to separate API method into sections (flat structure)
         /// </summary>
         /// <param name="rawPropertyInfos">All API request processor infos</param>
@@ -312,7 +323,8 @@ namespace ITCC.HTTP.API.Documentation.Core
                 ExampleStartPattern = ExampleStartPattern,
                 ExampleEndPattern = ExampleEndPattern,
                 ExamplesHeaderPattern = ExamplesHeaderPattern,
-                DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern
+                DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern,
+                TypeNameFunc = type => GetSimpleTypeName(type)
             };
             return _viewDocGenerator.SetSettings(settings);
         }
@@ -508,7 +520,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         private readonly StringBuilder _builder;
         private Assembly _targetAssembly;
         private List<PropertyInfo> _apiMemberPropertyInfos;
-        private ViewDocGenerator _viewDocGenerator;
+        private readonly ViewDocGenerator _viewDocGenerator;
 
         private const string LogScope = "DOC GENER";
 
