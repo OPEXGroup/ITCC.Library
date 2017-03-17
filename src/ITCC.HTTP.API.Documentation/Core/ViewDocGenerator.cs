@@ -21,6 +21,8 @@ namespace ITCC.HTTP.API.Documentation.Core
             return true;
         }
 
+
+
         #endregion
 
         #region private

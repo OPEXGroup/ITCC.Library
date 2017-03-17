@@ -200,14 +200,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// </summary>
         protected virtual string RemarksHeaderPattern => @"##### Remarks";
 
-        /// <summary>
-        ///     Used when no contract is applied to API view property
-        /// </summary>
-        protected virtual string NoPropertyContractPattern => "None";
-        /// <summary>
-        ///     Used when no description (or null description) is provided
-        /// </summary>
-        protected virtual string NoPropertyDescriptionPattern => "No description provided";
+        #region separators
 
         /// <summary>
         ///     String used to separate API method descriptions from each other
@@ -217,6 +210,33 @@ namespace ITCC.HTTP.API.Documentation.Core
         ///     String used to separate API method sections from each other
         /// </summary>
         protected virtual string SectionSeparatorPattern => @"------------------------------";
+
+        #endregion
+
+        #region views
+
+        /// <summary>
+        ///     Used when no contract is applied to API view property
+        /// </summary>
+        protected virtual string NoPropertyContractPattern => @"None";
+        /// <summary>
+        ///     Used when no description (or null description) is provided
+        /// </summary>
+        protected virtual string NoPropertyDescriptionPattern => @"No description provided";
+        /// <summary>
+        ///     Set if example serializers are null or empty
+        /// </summary>
+        public string NoExampleAvailablePattern { get; set; } = @"No example available";
+        /// <summary>
+        ///     Examples section header (for method request and response bodies)
+        /// </summary>
+        protected virtual string ExamplesHeaderPattern => @"###### Examples";
+        /// <summary>
+        ///     Description and restrictions section header (for method request and response bodies)
+        /// </summary>
+        protected virtual string DescriptionAndRestrictionsPattern => @"###### Description and restrictions";
+
+        #endregion
 
         #endregion
 
@@ -270,7 +290,11 @@ namespace ITCC.HTTP.API.Documentation.Core
         {
             var settings = new ViewDocGeneratorSettings
             {
-                Serializers = serializers
+                Serializers = serializers,
+                NoPropertyContractPattern = NoPropertyContractPattern,
+                NoPropertyDescriptionPattern = NoPropertyDescriptionPattern,
+                ExamplesHeaderPattern = ExamplesHeaderPattern,
+                DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern
             };
             return ViewDocGenerator.SetSettings(settings);
         }

@@ -15,10 +15,11 @@ namespace ITCC.HTTP.API.Documentation.Utils
         ///     Example serializers
         /// </summary>
         public IEnumerable<IExampleSerializer> Serializers { get; set; } = new List<IExampleSerializer>();
-        /// <summary>
-        ///     Set if Serializers are null or empty
-        /// </summary>
-        public string NoExampleAvailablePattern { get; set; } = "No example available";
+        public string NoPropertyContractPattern { get; set; }
+        public string NoPropertyDescriptionPattern { get; set; }
+        public string NoExampleAvailablePattern { get; set; }
+        public string ExamplesHeaderPattern { get; set; }
+        public string DescriptionAndRestrictionsPattern { get; set; }
 
         #endregion
 
