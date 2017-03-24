@@ -17,6 +17,7 @@ namespace ITCC.HTTP.API.Samples.Testing.Containers
             subUri: "/items",
             method: ApiHttpMethod.Get,
             authRequired: false)]
+        [ApiMethodStatus(ApiMethodState.WorksFine)]
         [ApiQueryParam("from", "Initial timestamp", false)]
         [ApiQueryParam("to", "Initial timestamp", false)]
         [ApiRequestBodyType(typeof(Empty))]
@@ -29,6 +30,7 @@ namespace ITCC.HTTP.API.Samples.Testing.Containers
             method: ApiHttpMethod.Post,
             authRequired: true,
             remarks: "Dont use too much.")]
+        [ApiMethodStatus(ApiMethodState.WorksWithBugs, "Sometimes it just crashes")]
         [ApiRequestBodyType(typeof(SecondRootView), typeof(List<SecondRootView>))]
         [ApiResponseBodyType(typeof(Empty))]
         public static CustomRequestProcessor SetProcessor { get; set; }
