@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ApiContractAttribute.cs" />
+    <Compile Include="Attributes\ApiMethodStatusAttribute.cs" />
     <Compile Include="Attributes\ApiQueryParamAttribute.cs" />
     <Compile Include="Attributes\ApiRequestBodyTypeAttribute.cs" />
     <Compile Include="Attributes\ApiRequestProcessorAttribute.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Enums\ApiContractType.cs" />
     <Compile Include="Enums\ApiErrorReason.cs" />
     <Compile Include="Enums\ApiHttpMethod.cs" />
+    <Compile Include="Enums\ApiMethodState.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Interfaces\IExampleSerializer.cs" />

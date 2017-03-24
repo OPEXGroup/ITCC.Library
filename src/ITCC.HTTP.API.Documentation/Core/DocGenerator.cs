@@ -123,6 +123,14 @@ namespace ITCC.HTTP.API.Documentation.Core
             => EnumHelper.ApiContractTypeName(contractType);
 
         /// <summary>
+        ///     Method used to describe API method state. Defaults to <see cref="EnumInfoProvider.GetElementName"/>
+        /// </summary>
+        /// <param name="state">Api method state</param>
+        /// <returns>State description</returns>
+        protected virtual string GetApiMethodStateName(ApiMethodState state)
+            => EnumInfoProvider.GetElementName(state);
+
+        /// <summary>
         ///     Gets simple type name (such as int, string, List of ints...)
         /// </summary>
         /// <param name="type">Type</param>
@@ -130,7 +138,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <remarks>Should not throw</remarks>
         protected virtual string GetSimpleTypeName(Type type)
             => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
-                ? $"List of {type.Name}"
+                ? $"List of {type.GenericTypeArguments[0].Name}"
                 : type.Name;
 
         /// <summary>
@@ -165,6 +173,10 @@ namespace ITCC.HTTP.API.Documentation.Core
         ///     Word used as `No`
         /// </summary>
         protected virtual string NoWordPattern => @"No";
+        /// <summary>
+        ///     Phrase used to mark method state
+        /// </summary>
+        protected virtual string StateDesccriptionPattern => @"Method state: ";
         /// <summary>
         ///     Phrase used to mark if method requires authorization
         /// </summary>
@@ -261,6 +273,10 @@ namespace ITCC.HTTP.API.Documentation.Core
         ///     Description and restrictions section header (for method request and response bodies)
         /// </summary>
         protected virtual string DescriptionAndRestrictionsPattern => @"###### Description and restrictions";
+        /// <summary>
+        ///     Header used to preceed <see cref="ApiViewCheckAttribute"/> descriptions section
+        /// </summary>
+        protected virtual string AdditionalChecksHeaderPattern => @"Additional checks:";
 
         #endregion
 
@@ -324,7 +340,8 @@ namespace ITCC.HTTP.API.Documentation.Core
                 ExampleEndPattern = ExampleEndPattern,
                 ExamplesHeaderPattern = ExamplesHeaderPattern,
                 DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern,
-                TypeNameFunc = type => GetSimpleTypeName(type)
+                TypeNameFunc = type => GetSimpleTypeName(type),
+                AdditionalChecksHeaderPattern = AdditionalChecksHeaderPattern
             };
             return _viewDocGenerator.SetSettings(settings);
         }
@@ -369,7 +386,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
         }
 
-        private void WriteRequestProcessorInfo(PropertyInfo info)
+        private void WriteRequestProcessorInfo(MemberInfo info)
         {
             WriteRequestProcessorHeader(info);
             WriteRequestProcessorQueryParams(info);
@@ -396,8 +413,23 @@ namespace ITCC.HTTP.API.Documentation.Core
             var uriInfo = $"{processorAttribute.Method.ToString().ToUpperInvariant()} {processorAttribute.SubUri}";
             _builder.AppendLine($"{MethodHeaderPrefixPattern}{uriInfo}");
             Wrappers.AppendPaddedLines(_builder, processorAttribute.Description);
+            WriteRequestProcessorState(info);
             var authWord = processorAttribute.AuthRequired ? YesWordPattern : NoWordPattern;
-            Wrappers.AppendPaddedLines(_builder, $"{AuthDescriptionPattern}{authWord}");
+            _builder.AppendLine($"{AuthDescriptionPattern}{authWord}");
+            _builder.AppendLine();
+        }
+
+        private void WriteRequestProcessorState(MemberInfo info)
+        {
+            var statusAttribute = info.GetCustomAttributes<ApiMethodStatusAttribute>().FirstOrDefault();
+            if (statusAttribute == null)
+                return;
+
+            var statusDescription = $"{StateDesccriptionPattern}{GetApiMethodStateName(statusAttribute.State)}";
+            if (!string.IsNullOrWhiteSpace(statusAttribute.Comment))
+                statusDescription += $" ({statusAttribute.Comment})";
+
+            _builder.AppendLine(statusDescription);
         }
 
         private void WriteSingleQueryParamDescription(ApiQueryParamAttribute attribute)

@@ -31,7 +31,8 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             var descriptionGeneratorSettings = new ViewDescriptionGeneratorSettings
             {
-                TypeNameFunc = _settings.TypeNameFunc
+                TypeNameFunc = _settings.TypeNameFunc,
+                AdditionalChecksHeaderPattern = _settings.AdditionalChecksHeaderPattern
             };
 
             return _descriptionGenerator.SetSettings(descriptionGeneratorSettings);
