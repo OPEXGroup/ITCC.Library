@@ -42,8 +42,27 @@ namespace ITCC.HTTP.API.Documentation.Core
             }
 
             var unwrapped = UnwrapListType(type);
+
+            WritePropertySelfDescription(type, info, propertyLevel);
             WritePropertiesDescription(unwrapped, info, propertyLevel);
             WriteAdditionalChecksDescription(unwrapped, propertyLevel);
+        }
+
+        private string GetPropertyDescription(MemberInfo info) => info
+            .GetCustomAttributes<ApiViewPropertyDescriptionAttribute>()
+            .FirstOrDefault()?
+            .Description;
+
+        private void WritePropertySelfDescription(Type type, PropertyInfo info, int propertyLevel)
+        {
+            if (info == null)
+                return;
+
+            var fullDescription = $"* {info.Name} - {_settings.TypeNameFunc(type)}. ";
+            var propertyDescription = GetPropertyDescription(info);
+            if (!string.IsNullOrWhiteSpace(propertyDescription))
+                fullDescription += propertyDescription;
+            WriteLine(fullDescription, propertyLevel);
         }
 
         private void WritePropertiesDescription(Type type, PropertyInfo info, int propertyLevel)

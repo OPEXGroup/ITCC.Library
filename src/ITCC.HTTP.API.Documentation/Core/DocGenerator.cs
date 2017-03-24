@@ -138,7 +138,7 @@ namespace ITCC.HTTP.API.Documentation.Core
         /// <remarks>Should not throw</remarks>
         protected virtual string GetSimpleTypeName(Type type)
             => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
-                ? $"List of {type.Name}"
+                ? $"List of {type.GenericTypeArguments[0].Name}"
                 : type.Name;
 
         /// <summary>
