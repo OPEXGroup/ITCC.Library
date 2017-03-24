@@ -24,6 +24,7 @@ namespace ITCC.HTTP.API.Documentation.Utils
         public string ExamplesHeaderPattern { get; set; }
         public string DescriptionAndRestrictionsPattern { get; set; }
         public Func<Type, string> TypeNameFunc { get; set; }
+        public string AdditionalChecksHeaderPattern { get; set; }
 
         #endregion
 

@@ -9,12 +9,16 @@ namespace ITCC.HTTP.API.Documentation.Utils
     {
         #region properties
         public Func<Type, string> TypeNameFunc { get; set; }
+        public string AdditionalChecksHeaderPattern { get; set; }
         #endregion
 
         #region methods
 
         public bool Valid()
         {
+            if (TypeNameFunc == null)
+                return false;
+
             return true;
         }
 

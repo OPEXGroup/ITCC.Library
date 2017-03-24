@@ -273,6 +273,10 @@ namespace ITCC.HTTP.API.Documentation.Core
         ///     Description and restrictions section header (for method request and response bodies)
         /// </summary>
         protected virtual string DescriptionAndRestrictionsPattern => @"###### Description and restrictions";
+        /// <summary>
+        ///     Header used to preceed <see cref="ApiViewCheckAttribute"/> descriptions section
+        /// </summary>
+        protected virtual string AdditionalChecksHeaderPattern => @"Additional checks:";
 
         #endregion
 
@@ -336,7 +340,8 @@ namespace ITCC.HTTP.API.Documentation.Core
                 ExampleEndPattern = ExampleEndPattern,
                 ExamplesHeaderPattern = ExamplesHeaderPattern,
                 DescriptionAndRestrictionsPattern = DescriptionAndRestrictionsPattern,
-                TypeNameFunc = type => GetSimpleTypeName(type)
+                TypeNameFunc = type => GetSimpleTypeName(type),
+                AdditionalChecksHeaderPattern = AdditionalChecksHeaderPattern
             };
             return _viewDocGenerator.SetSettings(settings);
         }
