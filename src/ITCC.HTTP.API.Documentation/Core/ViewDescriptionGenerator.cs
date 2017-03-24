@@ -28,7 +28,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             return true;
         }
 
-        public void GenerateViewDescription(Type type) => WriteViewDescriptionInner(type, null, 0);
+        public void GenerateViewDescription(Type type) => WriteViewDescriptionInner(type, null, -1);
         #endregion
 
         #region private
@@ -45,7 +45,7 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             WritePropertySelfDescription(type, info, propertyLevel);
             WritePropertiesDescription(unwrapped, propertyLevel);
-            WriteAdditionalChecksDescription(unwrapped, propertyLevel);
+            WriteAdditionalChecksDescription(unwrapped, propertyLevel + 1);
         }
 
         private static string GetPropertyDescription(MemberInfo info) => info
