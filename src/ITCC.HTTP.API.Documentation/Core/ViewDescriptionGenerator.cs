@@ -63,11 +63,13 @@ namespace ITCC.HTTP.API.Documentation.Core
             WriteLine($"* {propertyName} - {typeName}", propertyLevel);
         }
 
-        private bool IsApiViewOrApiViewList(Type type)
-        {
-            var targetType = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
+        private Type UnwrapListType(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)
                 ? type.GenericTypeArguments[0]
                 : type;
+
+        private bool IsApiViewOrApiViewList(Type type)
+        {
+            var targetType = UnwrapListType(type);
 
             return targetType.GetCustomAttributes<ApiViewAttribute>().Any();
         }
