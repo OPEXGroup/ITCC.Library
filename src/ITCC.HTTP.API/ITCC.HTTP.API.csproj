@@ -58,6 +58,7 @@
     <Compile Include="Enums\ApiContractType.cs" />
     <Compile Include="Enums\ApiErrorReason.cs" />
     <Compile Include="Enums\ApiHttpMethod.cs" />
+    <Compile Include="Enums\ApiMethodState.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Interfaces\IExampleSerializer.cs" />
