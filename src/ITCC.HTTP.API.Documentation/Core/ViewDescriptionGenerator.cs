@@ -44,11 +44,11 @@ namespace ITCC.HTTP.API.Documentation.Core
             var unwrapped = UnwrapListType(type);
 
             WritePropertySelfDescription(type, info, propertyLevel);
-            WritePropertiesDescription(unwrapped, info, propertyLevel);
+            WritePropertiesDescription(unwrapped, propertyLevel);
             WriteAdditionalChecksDescription(unwrapped, propertyLevel);
         }
 
-        private string GetPropertyDescription(MemberInfo info) => info
+        private static string GetPropertyDescription(MemberInfo info) => info
             .GetCustomAttributes<ApiViewPropertyDescriptionAttribute>()
             .FirstOrDefault()?
             .Description;
@@ -65,7 +65,7 @@ namespace ITCC.HTTP.API.Documentation.Core
             WriteLine(fullDescription, propertyLevel);
         }
 
-        private void WritePropertiesDescription(Type type, PropertyInfo info, int propertyLevel)
+        private void WritePropertiesDescription(IReflect type, int propertyLevel)
         {
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var propertyInfo in properties)
