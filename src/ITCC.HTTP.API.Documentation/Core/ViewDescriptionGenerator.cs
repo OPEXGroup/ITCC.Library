@@ -41,8 +41,9 @@ namespace ITCC.HTTP.API.Documentation.Core
                 return;
             }
 
-            WritePropertiesDescription(type, info, propertyLevel);
-            WriteAdditionalChecksDescription(type, propertyLevel);
+            var unwrapped = UnwrapListType(type);
+            WritePropertiesDescription(unwrapped, info, propertyLevel);
+            WriteAdditionalChecksDescription(unwrapped, propertyLevel);
         }
 
         private void WritePropertiesDescription(Type type, PropertyInfo info, int propertyLevel)
