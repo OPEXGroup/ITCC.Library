@@ -94,17 +94,19 @@ namespace ITCC.HTTP.API.Documentation.Core
             return targetType.GetCustomAttributes<ApiViewAttribute>().Any();
         }
 
-        private void WriteAdditionalChecksDescription(Type type, int propertyLevel)
+        private void WriteAdditionalChecksDescription(IReflect type, int propertyLevel)
         {
             var additionalChecks = type
-                .GetCustomAttributes<ApiViewCheckAttribute>()
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Where(mi => mi.ReturnType == typeof(bool) && mi.GetParameters().Length == 0)
+                .SelectMany(c => c.GetCustomAttributes<ApiViewCheckAttribute>())
                 .Where(ac => ac.CheckDescription != null)
                 .ToList();
+
             if (!additionalChecks.Any())
                 return;
 
-            WriteLine(_settings.AdditionalChecksHeaderPattern, propertyLevel);
-            WriteLine(@"", propertyLevel);
+            WritePaddedLine(_settings.AdditionalChecksHeaderPattern, propertyLevel);
             foreach (var additionalCheck in additionalChecks)
             {
                 WriteLine($"* {additionalCheck.CheckDescription}");
@@ -115,6 +117,13 @@ namespace ITCC.HTTP.API.Documentation.Core
         {
             var prefix = string.Concat(Enumerable.Repeat(PrefixUnit, propertyLevel));
             _builder.AppendLine($"{prefix}{line}");
+        }
+
+        private void WritePaddedLine(string line = @"", int propertyLevel = 0)
+        {
+            _builder.AppendLine();
+            WriteLine(line, propertyLevel);
+            _builder.AppendLine();
         }
 
         private readonly StringBuilder _builder;
