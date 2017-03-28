@@ -608,7 +608,7 @@ namespace ITCC.HTTP.Server.Core
             var processorsForUri = InnerRequestProcessors.Where(requestProcessor => CommonHelper.UriMatchesString(request.Url, requestProcessor.SubUri)).ToList();
             if (processorsForUri.Count == 0)
                 return null;
-            var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get);
+            var suitableProcessor = processorsForUri.FirstOrDefault(rp => rp.Method == requestMethod || requestMethod == HttpMethod.Head && rp.Method == HttpMethod.Get); //-V3130
             return new RequestProcessorSelectionResult<TAccount>
             {
                 RequestProcessor = suitableProcessor,
