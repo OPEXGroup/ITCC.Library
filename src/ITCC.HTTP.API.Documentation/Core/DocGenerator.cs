@@ -12,6 +12,7 @@ using ITCC.HTTP.API.Attributes;
 using ITCC.HTTP.API.Documentation.Enums;
 using ITCC.HTTP.API.Documentation.Utils;
 using ITCC.HTTP.API.Enums;
+using ITCC.HTTP.API.Extensions;
 using ITCC.HTTP.API.Interfaces;
 using ITCC.HTTP.API.Utils;
 using ITCC.HTTP.Common.Interfaces;
@@ -308,7 +309,7 @@ namespace ITCC.HTTP.API.Documentation.Core
 
             var staticRequestProcessorProperties = properties
                 .Where(p => p.GetGetMethod().IsStatic
-                    && p.PropertyType.GetInterfaces().Contains(typeof(IRequestProcessor)))
+                    && p.ExtendsOrImplements<IRequestProcessor>())
                 .ToList();
 
             var incorrectAnnotatedProperties = apiMethodAnnotatedProperties

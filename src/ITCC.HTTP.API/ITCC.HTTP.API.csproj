@@ -62,6 +62,7 @@
     <Compile Include="Enums\ApiMethodState.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\PropertyInfoExtensions.cs" />
     <Compile Include="Interfaces\IExampleSerializer.cs" />
     <Compile Include="Interfaces\ITypeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
