@@ -121,7 +121,7 @@
       <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
-      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">

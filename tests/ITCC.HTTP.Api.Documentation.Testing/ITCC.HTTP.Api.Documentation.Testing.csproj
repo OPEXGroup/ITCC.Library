@@ -142,7 +142,7 @@
       <Name>ITCC.Logging.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.HTTP.API.Samples.Testing\ITCC.HTTP.API.Samples.Testing.csproj">
-      <Project>{0670E62A-B54F-4480-B91A-8D4A594F762B}</Project>
+      <Project>{0670e62a-b54f-4480-b91a-8d4a594f762b}</Project>
       <Name>ITCC.HTTP.API.Samples.Testing</Name>
     </ProjectReference>
   </ItemGroup>
