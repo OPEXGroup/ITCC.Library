@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
+    <Version>2.10.0</Version>
+    <AssemblyVersion>2.10.0.0</AssemblyVersion>
+    <FileVersion>2.10.0.0</FileVersion>
+    <RepositoryUrl>https://github.com/OPEXGroup/ITCC.Library</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/OPEXGroup/ITCC.Library</PackageProjectUrl>
+    <Authors>VladimirTyrin,VladislavPrishchepa</Authors>
+    <Company>ITCC</Company>
+    <Product>ITCC Library</Product>
+    <PackageTags>Logging</PackageTags>
+    <Description>Cross-platform event-based logging library.</Description>
+    <PackageReleaseNotes>First release.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

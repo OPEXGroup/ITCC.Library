@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
+    <AssemblyVersion>2.10.0.0</AssemblyVersion>
+    <FileVersion>2.10.0.0</FileVersion>
+    <Version>2.10.0</Version>
+    <RepositoryUrl>https://github.com/OPEXGroup/ITCC.Library</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/OPEXGroup/ITCC.Library</PackageProjectUrl>
+    <Authors>VladimirTyrin,VladislavPrishchepa</Authors>
+    <Company>ITCC</Company>
+    <Product>ITCC Library</Product>
+    <PackageReleaseNotes>First release.</PackageReleaseNotes>
+    <Description>Base library for other networking-related components of ITCC Library. Contains common enums and interfaces.</Description>
+    <PackageTags>Networking HTTP</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

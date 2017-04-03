@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Version>2.10.0</Version>
+    <AssemblyVersion>2.10.0.0</AssemblyVersion>
+    <FileVersion>2.10.0.0</FileVersion>
+    <Authors>VladimirTyrin,VladislavPrishchepa</Authors>
+    <Company>ITCC</Company>
+    <Product>ITCC Library</Product>
+    <PackageProjectUrl>https://github.com/OPEXGroup/ITCC.Library</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OPEXGroup/ITCC.Library</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
