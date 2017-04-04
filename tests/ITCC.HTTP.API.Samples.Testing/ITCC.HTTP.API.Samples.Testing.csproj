@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFrameworks>netstandard1.3;net45;net46</TargetFrameworks>
     <Version>2.10.0</Version>
     <AssemblyVersion>2.10.0.0</AssemblyVersion>
     <FileVersion>2.10.0.0</FileVersion>
@@ -15,6 +15,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ITCC.HTTP.API\ITCC.HTTP.API.csproj" />
     <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Net.Http" Condition="'$(TargetFramework)'=='net45' or '$(TargetFramework)'=='net46'" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3'">
+    <PackageReference Include="System.Net.Http" Version="4.3.1" />
   </ItemGroup>
 
 </Project>

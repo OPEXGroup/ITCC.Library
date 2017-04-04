@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;net45;net46</TargetFrameworks>
     <AssemblyVersion>2.10.0.0</AssemblyVersion>
     <FileVersion>2.10.0.0</FileVersion>
     <Version>2.10.0</Version>
@@ -31,9 +31,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="System.Net.Http" Condition="'$(TargetFramework)'=='net46'" />
+    <Reference Include="System.Net.Http" Condition="'$(TargetFramework)'=='net45' or '$(TargetFramework)'=='net46'" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3'">
     <PackageReference Include="System.Net.Http" Version="4.3.1" />
   </ItemGroup>
