@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ITCC.HTTP.API.Documentation")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Automatic API documentation generation based on attributes")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ITCC")]
 [assembly: AssemblyProduct("ITCC Library")]

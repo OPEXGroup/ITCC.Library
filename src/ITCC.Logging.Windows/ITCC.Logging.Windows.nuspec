@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>VladimirTyrin,VladislavPrishchepa</authors>
+    <owners>VladimirTyrin,VladislavPrishchepa</owners>
+    <projectUrl>https://github.com/OPEXGroup/ITCC.Library</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First release.</releaseNotes>
+    <copyright></copyright>
+    <tags></tags>
+    <dependencies>
+        <dependency id="ITCC.Logging.Core" version="2.10.0" />
+    </dependencies>
+  </metadata>
+</package>
