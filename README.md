@@ -149,7 +149,7 @@ git submodule update
 ```
 ### Замечания по сборке
 
-Собирается из Visual Studio 2015/2017. Целевая среда:
+Собирается из Visual Studio 2017. Целевая среда:
 
 * `.Net 4.5` для всех  
 * `.Net 4.6` и `netstandard 1.3` для проектов `ITCC.Logging.Core`, `ITCC.HTTP.Common` `ITCC.HTTP.API` и `ITCC.UI`  
