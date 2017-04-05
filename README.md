@@ -147,28 +147,9 @@ git submodule add https://github.com/OPEXGroup/ITCC.Library.git
 git submodule init
 git submodule update
 ```
-
-Собирается из Visual Studio 2015. Целевая среда:
-
-* `netstandard 1.3` для проектов `ITCC.Logging.Core`, `ITCC.HTTP.API` и `ITCC.UI`
-* `.Net 4.6` для всех остальных
-
 ### Замечания по сборке
 
-#### Prebuild
+Собирается из Visual Studio 2015/2017. Целевая среда:
 
-При сборке `ITCC.HTTP.Client`, `ITCC.HTTP.SslConfigUtils`, `ITCC.HTTP.Server` и `ITCC.Geocoding` выполняются prebuild-скрипты для установки nuget-пакетов в каталоги проектов (Prebuild.ps1).
-Для того, чтобы они могли выполниться, нужно в PowerShell выполнить
-
-```
-Set-ExecutionPolicy Unrestricted
-```
-
-После сборки имеет смысл снова сделать
-
-```
-Set-ExecutionPolicy Restricted
-```
-
-Как вариант, можно вручную скачать nuget и выполнить `nuget restore` для нужных проектов, указав их директорию packages в качестве выходной.
-
+* `.Net 4.5` для всех  
+* `.Net 4.6` и `netstandard 1.3` для проектов `ITCC.Logging.Core`, `ITCC.HTTP.Common` `ITCC.HTTP.API` и `ITCC.UI`  
