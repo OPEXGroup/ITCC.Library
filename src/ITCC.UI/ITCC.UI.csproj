@@ -24,13 +24,13 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\build\ITCC.UI\Release\</OutputPath>
+    <DocumentationFile>..\..\build\ITCC.UI\Release\netstandard1.3\ITCC.UI.xml</DocumentationFile>
+    <DebugType>none</DebugType>
+    <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.3|AnyCPU'">
     <DefineConstants>RELEASE;NETSTANDARD1_3</DefineConstants>
-    <DocumentationFile>..\..\build\ITCC.UI\Release\ITCC.UI.xml</DocumentationFile>
-    <DebugType>none</DebugType>
-    <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>

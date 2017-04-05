@@ -23,13 +23,13 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\build\ITCC.Logging.Core\Release</OutputPath>
+    <DocumentationFile>..\..\build\ITCC.Logging.Core\Release\netstandard1.3\ITCC.Logging.Core.xml</DocumentationFile>
+    <DebugType>none</DebugType>
+    <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.3|AnyCPU'">
     <DefineConstants>RELEASE;NETSTANDARD1_3</DefineConstants>
-    <DocumentationFile>..\..\build\ITCC.Logging.Core\Release\netstandard1.3\ITCC.Logging.Core.xml</DocumentationFile>
-    <DebugType>none</DebugType>
-    <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
 </Project>
