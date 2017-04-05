@@ -1,14 +1,3 @@
-## 3.0.0 (2017-04-05)
-
-* **New**:  Library can now be built for NuGet deploy  
-* **New**:  `ITCC.HTTP.API.Documentation` added for automatic docs generation  
-* **New**:  `ITCC.HTTP.API` extended (a lot of attributes for method and view descriptions)  
-* **Edit**: **BREAKING CHANGE**: solution layout changed (src/tests/build)  
-* **Edit**: License updated  
-* **Edit**: Dependencies updated  
-* **Edit**: `ITCC.HTTP.Server.Core.RequestProcessor` now uses properties instead of fields and implements `IRequestProcessor`  
-* **Edit**: Dependencies updated  
-
 ## 2.9.0 (2017-03-01)
 
 * **New**:  `EnumInfoProvider` and `EnumValueInfoAttribute` added to `ITCC.HTTP.API`   

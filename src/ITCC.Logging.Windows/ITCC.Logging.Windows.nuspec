@@ -14,7 +14,7 @@
     <copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</copyright>
     <tags></tags>
     <dependencies>
-        <dependency id="ITCC.Logging.Core" version="2.10.0" />
+        <dependency id="ITCC.Logging.Core" version="3.0.0" />
     </dependencies>
   </metadata>
 </package>
