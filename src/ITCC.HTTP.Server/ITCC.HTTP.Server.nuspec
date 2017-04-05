@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>VladimirTyrin,VladislavPrishchepa</authors>
+    <owners>VladimirTyrin,VladislavPrishchepa</owners>
+    <projectUrl>https://github.com/OPEXGroup/ITCC.Library</projectUrl>
+    <licenseUrl>https://github.com/OPEXGroup/ITCC.Library/blob/master/LICENSE.md</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First release.</releaseNotes>
+    <copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</copyright>
+    <tags></tags>
+    <dependencies>
+    	<dependency id="ITCC.HTTP.Common" version="2.10.0" />
+        <dependency id="ITCC.HTTP.SslConfigUtil.Core" version="2.10.0" />
+        <dependency id="ITCC.Logging.Windows" version="2.10.0" />
+    </dependencies>
+  </metadata>
+</package>

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ITCC.Logging.Testing</RootNamespace>
     <AssemblyName>ITCC.Logging.Testing</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -92,11 +92,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
-      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ITCC.Logging.Reader.Core\ITCC.Logging.Reader.Core.csproj">

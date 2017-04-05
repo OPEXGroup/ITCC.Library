@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ITCC.HTTP.SslConfigUtil.GUI</RootNamespace>
     <AssemblyName>ITCC.HTTP.SslConfigUtil.GUI</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -172,7 +172,7 @@
       <Name>ITCC.HTTP.SslConfigUtil.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
-      <Project>{FC73DFCF-4D11-4400-BB98-5115CA2608E1}</Project>
+      <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>
       <Name>ITCC.Logging.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ITCC.Logging.Windows\ITCC.Logging.Windows.csproj">

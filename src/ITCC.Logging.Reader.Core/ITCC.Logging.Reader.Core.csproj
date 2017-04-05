@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ITCC.Logging.Reader.Core</RootNamespace>
     <AssemblyName>ITCC.Logging.Reader.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -89,7 +89,6 @@
     <Compile Include="Utils\ByteBuffer.cs" />
     <Compile Include="Utils\EntryTokenizer.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ITCC.Logging.Core\ITCC.Logging.Core.csproj">
       <Project>{fc73dfcf-4d11-4400-bb98-5115ca2608e1}</Project>

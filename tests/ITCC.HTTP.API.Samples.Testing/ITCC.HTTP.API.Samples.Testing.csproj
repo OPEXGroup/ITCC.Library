@@ -1,72 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0670E62A-B54F-4480-B91A-8D4A594F762B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ITCC.HTTP.API.Samples.Testing</RootNamespace>
-    <AssemblyName>ITCC.HTTP.API.Samples.Testing</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworks>netstandard1.3;net45;net46</TargetFrameworks>
+    <Version>3.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Authors>VladimirTyrin,VladislavPrishchepa</Authors>
+    <Company>ITCC</Company>
+    <Product>ITCC Library</Product>
+    <PackageProjectUrl>https://github.com/OPEXGroup/ITCC.Library</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OPEXGroup/ITCC.Library</RepositoryUrl>
+    <Copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</Copyright>
+    <PackageLicenseUrl>https://github.com/OPEXGroup/ITCC.Library/blob/master/LICENSE.md</PackageLicenseUrl>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <None Include="project.json" />
+    <ProjectReference Include="..\..\src\ITCC.HTTP.API\ITCC.HTTP.API.csproj" />
+    <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Containers\ApiMethodContainer.cs" />
-    <Compile Include="Enums\FirstEnum.cs" />
-    <Compile Include="Enums\SecondEnum.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\CustomRequestProcessor.cs" />
-    <Compile Include="Utils\TestMarkerType.cs" />
-    <Compile Include="Views\FirstListEntryView.cs" />
-    <Compile Include="Views\FirstRootView.cs" />
-    <Compile Include="Views\SecondChildView.cs" />
-    <Compile Include="Views\SecondRootView.cs" />
+    <Reference Include="System.Net.Http" Condition="'$(TargetFramework)'=='net45' or '$(TargetFramework)'=='net46'" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ITCC.HTTP.API\ITCC.HTTP.API.csproj">
-      <Project>{A0AD6ED0-19AF-4980-AAF8-BA3A4A12A46D}</Project>
-      <Name>ITCC.HTTP.API</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ITCC.HTTP.Common\ITCC.HTTP.Common.csproj">
-      <Project>{34EDC98B-827D-4419-AA2D-9FDCACAA043D}</Project>
-      <Name>ITCC.HTTP.Common</Name>
-    </ProjectReference>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3'">
+    <PackageReference Include="System.Net.Http" Version="4.3.1" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
