@@ -152,13 +152,9 @@ namespace ITCC.HTTP.Server.Service
         {
             lock (_threadsLock)
             {
-                int totalWorkerThreads;
-                int totalIocpThreads;
-                int availableWorkerThreads;
-                int availableIocpThreads;
                 Thread.MemoryBarrier();
-                ThreadPool.GetMaxThreads(out totalWorkerThreads, out totalIocpThreads);
-                ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableIocpThreads);
+                ThreadPool.GetMaxThreads(out int totalWorkerThreads, out int totalIocpThreads);
+                ThreadPool.GetAvailableThreads(out int availableWorkerThreads, out int availableIocpThreads);
                 Thread.MemoryBarrier();
 
                 _currentWorkerThreads = totalWorkerThreads - availableWorkerThreads;
@@ -283,11 +279,9 @@ namespace ITCC.HTTP.Server.Service
                 uris.ForEach(u =>
                 {
                     var methodDict = _requestMethodCounters[u];
-                    double totalSuccessTime;
-                    double totalFailTime;
-                    if (!_requestSuccessTimeCounters.TryGetValue(u, out totalSuccessTime))
+                    if (!_requestSuccessTimeCounters.TryGetValue(u, out double totalSuccessTime))
                         totalSuccessTime = 0;
-                    if (!_requestFailTimeCounters.TryGetValue(u, out totalFailTime))
+                    if (!_requestFailTimeCounters.TryGetValue(u, out double totalFailTime))
                         totalFailTime = 0;
                     double averageSuccessTime;
                     double averageFailTime;

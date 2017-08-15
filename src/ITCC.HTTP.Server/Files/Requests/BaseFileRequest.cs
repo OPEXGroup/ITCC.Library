@@ -194,8 +194,7 @@ namespace ITCC.HTTP.Server.Files.Requests
             if (request.QueryString[paramName] == null)
                 return true;
 
-            int value;
-            if (! int.TryParse(request.QueryString[paramName], out value))
+            if (!int.TryParse(request.QueryString[paramName], out int value))
                 return false;
             try
             {
@@ -220,13 +219,11 @@ namespace ITCC.HTTP.Server.Files.Requests
             var parts = targetPart.Split('x');
             if (parts.Length != 2)
                 return InvalidResolutionTuple();
-            int width;
-            int height;
-            if (!int.TryParse(parts[0], out width))
+            if (!int.TryParse(parts[0], out int width))
                 return InvalidResolutionTuple();
             if (width < 0)
                 return InvalidResolutionTuple();
-            if (!int.TryParse(parts[1], out height))
+            if (!int.TryParse(parts[1], out int height))
                 return InvalidResolutionTuple();
             if (height < 0)
                 return InvalidResolutionTuple();

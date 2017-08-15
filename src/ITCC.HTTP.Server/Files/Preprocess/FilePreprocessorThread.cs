@@ -75,8 +75,7 @@ namespace ITCC.HTTP.Server.Files.Preprocess
                         }
                     }
 
-                    BaseFilePreprocessTask task;
-                    if (!_taskQueue.TryDequeue(out task))
+                    if (!_taskQueue.TryDequeue(out BaseFilePreprocessTask task))
                     {
                         Thread.Sleep(Constants.FilesPreprocessorThreadSleepInterval);
                         continue;

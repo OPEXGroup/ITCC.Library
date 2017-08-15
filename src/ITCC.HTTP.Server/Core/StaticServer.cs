@@ -603,8 +603,7 @@ namespace ITCC.HTTP.Server.Core
             var localUri = request.Url.LocalPath.Trim('/');
             if (requestMethod == HttpMethod.Get || requestMethod == HttpMethod.Head)
             {
-                string redirectionTarget;
-                if (InnerStaticRedirectionTable.TryGetValue(localUri, out redirectionTarget))
+                if (InnerStaticRedirectionTable.TryGetValue(localUri, out string redirectionTarget))
                 {
                     var correspondedProcessor =
                         InnerRequestProcessors.FirstOrDefault(
