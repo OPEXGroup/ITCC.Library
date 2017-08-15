@@ -152,7 +152,6 @@ namespace ITCC.HTTP.Server.Service
         {
             lock (_threadsLock)
             {
-                _threadingSamples++;
                 int totalWorkerThreads;
                 int totalIocpThreads;
                 int availableWorkerThreads;
