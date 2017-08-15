@@ -98,7 +98,7 @@ namespace ITCC.HTTP.Server.Core
                 httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
                 SetResponseBody(context, _defaultEncoder, _defaultEncoder.Serialize(_supportedContentTypes));
                 if (RequestTracingEnabled)
-                    Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
