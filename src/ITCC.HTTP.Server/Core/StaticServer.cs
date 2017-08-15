@@ -1,9 +1,5 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#if TRACE
-    #define ITCC_LOG_REQUEST_BODIES
-#endif
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
