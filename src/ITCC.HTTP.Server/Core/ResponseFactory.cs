@@ -1,5 +1,6 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,13 +21,12 @@ namespace ITCC.HTTP.Server.Core
     {
         #region public
 
-        public static bool SetCommonHeaders(IDictionary<string, string> headers)
+        public static void SetCommonHeaders(IDictionary<string, string> headers)
         {
             if (headers == null)
-                return false;
+                return;
 
             _commonHeaders = new Dictionary<string, string>(headers);
-            return true;
         }
 
         public static void SetBodyEncoders(List<IBodyEncoder> encoders)
@@ -76,7 +76,6 @@ namespace ITCC.HTTP.Server.Core
             IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
         {
             var httpResponse = context.Response;
-            // ReSharper disable once RedundantAssignment
             var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
             httpResponse.StatusCode = (int) code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
