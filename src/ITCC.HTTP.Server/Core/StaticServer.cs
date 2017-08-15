@@ -137,6 +137,7 @@ namespace ITCC.HTTP.Server.Core
             ResponseFactory.NonSerializableTypes = configuration.NonSerializableTypes;
             ResponseFactory.SetBodyEncoders(configuration.BodyEncoders);
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
+            ResponseFactory.RequestTracingEnabled = configuration.RequestTracingEnabled;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
             CommonHelper.SetSerializationLimitations(configuration.RequestBodyLogLimit,
                 configuration.LogProhibitedQueryParams,

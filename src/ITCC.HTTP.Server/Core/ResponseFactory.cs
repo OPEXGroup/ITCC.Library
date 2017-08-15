@@ -86,7 +86,8 @@ namespace ITCC.HTTP.Server.Core
 
             if (body == null)
             {
-                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                if (RequestTracingEnabled)
+                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
@@ -96,7 +97,8 @@ namespace ITCC.HTTP.Server.Core
                 httpResponse.StatusCode = (int)HttpStatusCode.NotAcceptable;
                 httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
                 SetResponseBody(context, _defaultEncoder, _defaultEncoder.Serialize(_supportedContentTypes));
-                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                if (RequestTracingEnabled)
+                    Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
@@ -119,7 +121,8 @@ namespace ITCC.HTTP.Server.Core
 
             SetResponseBody(context, encoder, bodyString);
 
-            Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
+            if (RequestTracingEnabled)
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
         }
 
         public static string SerializeResponse(HttpListenerResponse response, string bodyString)
@@ -172,6 +175,7 @@ namespace ITCC.HTTP.Server.Core
         
         public static List<Type> NonSerializableTypes = new List<Type>();
         public static bool LogResponseBodies = true;
+        public static bool RequestTracingEnabled = false;
         public static int ResponseBodyLogLimit = -1;
         public static readonly List<Tuple<string, string>> LogBodyReplacePatterns = new List<Tuple<string, string>>();
         public static readonly List<string> LogProhibitedHeaders = new List<string>();
