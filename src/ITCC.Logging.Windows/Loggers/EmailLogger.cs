@@ -70,9 +70,15 @@ namespace ITCC.Logging.Windows.Loggers
             _updateTimer.AutoReset = true;
             FlushAsync(EmailLoggerFlushReason.LoggerStarted).Wait();
             _updateTimer.Start();
+
+            _running = true;
         }
 
-        public void Stop() => _updateTimer.Stop();
+        public void Stop()
+        {
+            _running = false;
+            _updateTimer.Stop();
+        } 
 
         public string Login { get; private set; }
 
@@ -127,6 +133,9 @@ namespace ITCC.Logging.Windows.Loggers
 
         private async Task FlushAndRestartTimerAsync(EmailLoggerFlushReason reason)
         {
+            if (! _running)
+                return;
+
             _updateTimer.Stop();
             await FlushAsync(reason);
             _updateTimer.Start();
@@ -230,6 +239,8 @@ namespace ITCC.Logging.Windows.Loggers
         private readonly ConcurrentQueue<LogEntryEventArgs> _messageQueue = new ConcurrentQueue<LogEntryEventArgs>();
 
         private bool _flushInProgress;
+
+        private volatile bool _running;
 
         #endregion
     }
