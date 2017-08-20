@@ -1,5 +1,6 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,13 +21,12 @@ namespace ITCC.HTTP.Server.Core
     {
         #region public
 
-        public static bool SetCommonHeaders(IDictionary<string, string> headers)
+        public static void SetCommonHeaders(IDictionary<string, string> headers)
         {
             if (headers == null)
-                return false;
+                return;
 
             _commonHeaders = new Dictionary<string, string>(headers);
-            return true;
         }
 
         public static void SetBodyEncoders(List<IBodyEncoder> encoders)
@@ -76,7 +76,6 @@ namespace ITCC.HTTP.Server.Core
             IDictionary<string, string> additionalHeaders = null, bool alreadyEncoded = false)
         {
             var httpResponse = context.Response;
-            // ReSharper disable once RedundantAssignment
             var isHeadRequest = context.Request.HttpMethod.ToUpperInvariant() == "HEAD";
             httpResponse.StatusCode = (int) code;
             httpResponse.StatusDescription = SelectReasonPhrase(code);
@@ -87,7 +86,8 @@ namespace ITCC.HTTP.Server.Core
 
             if (body == null)
             {
-                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                if (RequestTracingEnabled)
+                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
@@ -97,7 +97,8 @@ namespace ITCC.HTTP.Server.Core
                 httpResponse.StatusCode = (int)HttpStatusCode.NotAcceptable;
                 httpResponse.StatusDescription = SelectReasonPhrase(HttpStatusCode.NotAcceptable);
                 SetResponseBody(context, _defaultEncoder, _defaultEncoder.Serialize(_supportedContentTypes));
-                Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, null)}");
+                if (RequestTracingEnabled)
+                    Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, null)}");
                 return;
             }
 
@@ -120,7 +121,8 @@ namespace ITCC.HTTP.Server.Core
 
             SetResponseBody(context, encoder, bodyString);
 
-            Logger.LogTrace("RESP FACTORY", $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
+            if (RequestTracingEnabled)
+                Logger.LogEntry("RESP FACTORY", LogLevel.Trace, $"Response built: \n{SerializeResponse(httpResponse, isHeadRequest ? null : bodyString)}");
         }
 
         public static string SerializeResponse(HttpListenerResponse response, string bodyString)
@@ -173,6 +175,7 @@ namespace ITCC.HTTP.Server.Core
         
         public static List<Type> NonSerializableTypes = new List<Type>();
         public static bool LogResponseBodies = true;
+        public static bool RequestTracingEnabled = false;
         public static int ResponseBodyLogLimit = -1;
         public static readonly List<Tuple<string, string>> LogBodyReplacePatterns = new List<Tuple<string, string>>();
         public static readonly List<string> LogProhibitedHeaders = new List<string>();

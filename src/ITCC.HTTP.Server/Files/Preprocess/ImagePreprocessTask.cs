@@ -35,11 +35,10 @@ namespace ITCC.HTTP.Server.Files.Preprocess
 
                 LogDebug($"Processing image {FileName}. Original resolution {(int) originalWidth}x{(int) originalHeight}");
 
-                ImageFormat format;
                 var extension = IoHelper.GetExtension(FileName);
                 if (extension == null)
                     return true;
-                if (!ImageFormatDictionary.TryGetValue(extension, out format))
+                if (!ImageFormatDictionary.TryGetValue(extension, out ImageFormat format))
                 {
                     LogMessage(LogLevel.Warning, $"Unknown image format: {extension}");
                     return false;

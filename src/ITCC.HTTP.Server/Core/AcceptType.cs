@@ -40,8 +40,7 @@ namespace ITCC.HTTP.Server.Core
                 if (!qPart.StartsWith("q="))
                     return null;
 
-                double qValue;
-                if (!double.TryParse(qPart.Substring(2), out qValue))
+                if (!double.TryParse(qPart.Substring(2), out double qValue))
                     return null;
 
                 result.Qvalue = qValue;

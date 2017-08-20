@@ -174,6 +174,16 @@ namespace ITCC.HTTP.Server.Core
         ///     Memory pressure alarm interval startegy
         /// </summary>
         public MemoryAlarmStrategy MemoryAlarmStrategy { get; set; } = MemoryAlarmStrategy.Fibonacci;
+   
+        /// <summary>
+        ///     If true, server lifecycle event will be written in debug log
+        /// </summary>
+        public bool DebugLogsEnabled { get; set; }
+
+        /// <summary>
+        ///     If true, server requests and responses will be written to trace log
+        /// </summary>
+        public bool RequestTracingEnabled { get; set; }
 
         public bool IsEnough()
         {

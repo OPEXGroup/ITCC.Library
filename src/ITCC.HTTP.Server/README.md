@@ -110,6 +110,18 @@ double RequestMaxServeTime { get; set; } = 1;                                   
 int CriticalMemoryValue { get; set; } = -1;                                       // Размер памяти процесса в мегабайтах, после которого выдается предупреждение. Отрицательные значения - предупреждения не выдаются
 MemoryAlarmStrategy MemoryAlarmStrategy { get; set; }                             // Стратегия задания интервалов предупреждений об избыточном потреблении памяти 
 = MemoryAlarmStrategy.Fibonacci;
+
+/*
+Включать ли отладочный вывод о событиях на сервере (через `ITCC.Logging.Logger`, уровень `Debug`)
+**Можно менять в рантайме**
+*/
+bool DebugLogsEnabled { get; set; }      
+/*
+Логгировать ли все запросы к серверу и ответы сервера (через `ITCC.Logging.Logger`, уровень `Trace`).
+Оказывает **сильное** влияние на производительность.
+**Можно менять в рантайме**
+*/
+bool RequestTracingEnabled { get; set; }
 ```
 
 #### `static class MimeTypes`
@@ -160,6 +172,17 @@ Stream GetFileStream(string sectionName, string filename);                      
 Task<string> GetFileString(string sectionName, string filename);                          // Получение содержимого файла в виде строки.
 Task<FileOperationStatus> AddFile(string sectionName, string filename, Stream content);   // Добавление файла на сервер
 FileOperationStatus DeleteFile(string sectionName, string filename);                      // Удаление файла
+```
+
+Свойства:
+
+```
+bool DebugLogsEnabled { get; set; }      // Включать ли отладочный вывод о событиях на сервере (через `ITCC.Logging.Logger`, уровень `Debug`)
+/*
+Логгировать ли все запросы к серверу и ответы сервера (через `ITCC.Logging.Logger`, уровень `Trace`).
+Оказывает **сильное** влияние на производительность
+*/
+bool RequestTracingEnabled { get; set; } 
 ```
 
 ### Encoders

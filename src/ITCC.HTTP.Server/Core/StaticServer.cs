@@ -1,9 +1,5 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#if TRACE
-    #define ITCC_LOG_REQUEST_BODIES
-#endif
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -26,6 +22,7 @@ using ITCC.HTTP.Server.Utils;
 using ITCC.HTTP.SslConfigUtil.Core;
 using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 // ReSharper disable StaticMemberInGenericType
 
@@ -55,6 +52,9 @@ namespace ITCC.HTTP.Server.Core
             }
             if (configuration == null || !configuration.IsEnough())
                 return ServerStartStatus.BadParameters;
+
+            DebugLogsEnabled = configuration.DebugLogsEnabled;
+            RequestTracingEnabled = configuration.RequestTracingEnabled;
 
             try
             {
@@ -133,6 +133,7 @@ namespace ITCC.HTTP.Server.Core
             ResponseFactory.NonSerializableTypes = configuration.NonSerializableTypes;
             ResponseFactory.SetBodyEncoders(configuration.BodyEncoders);
             ResponseFactory.LogResponseBodies = configuration.LogResponseBodies;
+            ResponseFactory.RequestTracingEnabled = configuration.RequestTracingEnabled;
             ResponseFactory.ResponseBodyLogLimit = configuration.ResponseBodyLogLimit;
             CommonHelper.SetSerializationLimitations(configuration.RequestBodyLogLimit,
                 configuration.LogProhibitedQueryParams,
@@ -321,8 +322,18 @@ namespace ITCC.HTTP.Server.Core
 
         #region log
 
-        [Conditional("DEBUG")]
-        private static void LogDebug(string message) => Logger.LogDebug("HTTP SERVER", message);
+        private static void LogDebug(string message)
+        {
+            if (! DebugLogsEnabled)
+                return;
+
+            Logger.LogEntry("HTTP SERVER", LogLevel.Debug, message);
+        }
+
+        private static void LogTrace(string message)
+        {
+            Logger.LogEntry("HTTP SERVER", LogLevel.Trace,  message);
+        }
 
         private static void LogMessage(LogLevel level, string message) => Logger.LogEntry("HTTP SERVER", level, message);
 
@@ -341,7 +352,8 @@ namespace ITCC.HTTP.Server.Core
             {
                 _statisticsController.Statistics?.AddRequest(request);
                 var isBinaryRequest = _fileRequestController != null && _fileRequestController.RequestIsSuitable(request);
-                LogDebug($"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context, false, ! isBinaryRequest)}");
+                if (RequestTracingEnabled)
+                    LogTrace($"Request from {request.RemoteEndPoint}.\n{CommonHelper.SerializeHttpRequest(context, false, ! isBinaryRequest)}");
 
                 var serviceProcessor =
                     ServiceRequestProcessors.FirstOrDefault(sp => sp.RequestIsSuitable(context.Request));
@@ -587,8 +599,7 @@ namespace ITCC.HTTP.Server.Core
             var localUri = request.Url.LocalPath.Trim('/');
             if (requestMethod == HttpMethod.Get || requestMethod == HttpMethod.Head)
             {
-                string redirectionTarget;
-                if (InnerStaticRedirectionTable.TryGetValue(localUri, out redirectionTarget))
+                if (InnerStaticRedirectionTable.TryGetValue(localUri, out string redirectionTarget))
                 {
                     var correspondedProcessor =
                         InnerRequestProcessors.FirstOrDefault(
@@ -621,6 +632,9 @@ namespace ITCC.HTTP.Server.Core
 
         public static Dictionary<string, string> StaticRedirectionTable => new Dictionary<string, string>(InnerStaticRedirectionTable);
         public static List<RequestProcessor<TAccount>> RequestProcessors => new List<RequestProcessor<TAccount>>(InnerRequestProcessors);
+
+        public static bool DebugLogsEnabled { get; set; }
+        public static bool RequestTracingEnabled { get; set; }
 
         private static readonly List<RequestProcessor<TAccount>> InnerRequestProcessors =
             new List<RequestProcessor<TAccount>>();

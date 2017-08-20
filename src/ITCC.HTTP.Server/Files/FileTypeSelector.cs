@@ -24,8 +24,7 @@ namespace ITCC.HTTP.Server.Files
                 return FileType.Default;
             lock (DictLock)
             {
-                FileType result;
-                if (FileTypeDictionary.TryGetValue(extension, out result)) 
+                if (FileTypeDictionary.TryGetValue(extension, out FileType result))
                     return result;
             }
             return FileType.Default;
