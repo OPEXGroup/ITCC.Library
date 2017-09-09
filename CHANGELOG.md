@@ -1,3 +1,10 @@
+## 3.0.1 (2017-09-09)
+
+* **New** : `DebugLogsEnabled` and `RequestTracingEnabled` added to `StaticServer` (can be turned on during startup via config and changed in runtime)  
+* **Fix** : Do not throw in Logger::FlushAsync if email logger is registered but not started  
+* **Fix** : Pass `checkDescription` to `ApiViewCheckAttribute` via `CallerMemberName`  
+* **Fix** : Thread pool usage statistics fixed in `StaticServer`
+
 ## 3.0.0 (2017-04-05)
 
 * **New**:  Library can now be built for NuGet deploy  
