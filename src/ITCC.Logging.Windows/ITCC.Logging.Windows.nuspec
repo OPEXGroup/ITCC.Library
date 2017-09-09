@@ -10,7 +10,7 @@
     <licenseUrl>https://github.com/OPEXGroup/ITCC.Library/blob/master/LICENSE.md</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First release.</releaseNotes>
+    <releaseNotes>Email logger fix.</releaseNotes>
     <copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</copyright>
     <tags></tags>
     <dependencies>

@@ -153,6 +153,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ITCC.HTTP.Server.nuspec" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
