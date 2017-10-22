@@ -85,7 +85,12 @@ namespace ITCC.HTTP.Server.Testing
                 new JsonBodyEncoder(isDefault: true),
                 new XmlBodyEncoder()
             },
-            CriticalMemoryValue = 1024
+            CriticalMemoryValue = 1024,
+            RequestTracingEnabled = true,
+            DebugLogsEnabled = true,
+            MaxConcurrentRequests = 24,
+            MaxRequestQueue = 1024,
+            ConfigurationViewEnabled = true
         };
     }
 }

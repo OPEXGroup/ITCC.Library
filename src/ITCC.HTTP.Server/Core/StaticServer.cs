@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Common;
@@ -62,6 +63,8 @@ namespace ITCC.HTTP.Server.Core
 
                 _optionsController = new OptionsController<TAccount>(InnerRequestProcessors);
                 _pingController = new PingController();
+
+                _configurationController = new ConfigurationController<TAccount>(configuration);
 
                 Protocol = configuration.Protocol;
                 _authorizer = configuration.Authorizer;
@@ -171,6 +174,18 @@ namespace ITCC.HTTP.Server.Core
         {
             var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
             ServicePointManager.DefaultConnectionLimit = 1000;
+
+            _requestExecutonBlock = new ActionBlock<HttpListenerContext>(HandleRequestAsync, new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = configuration.MaxConcurrentRequests > 0 ? configuration.MaxConcurrentRequests : -1,
+                BoundedCapacity = configuration.MaxRequestQueue > 0 ? configuration.MaxRequestQueue : -1
+            });
+
+            _serviceUnavailabeBlock = new ActionBlock<HttpListenerContext>((Action<HttpListenerContext>)ReportServiceUnavailable, new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = 1
+            });
+
             _listener = new HttpListener();
             _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
             _listener.IgnoreWriteExceptions = true;
@@ -185,7 +200,10 @@ namespace ITCC.HTTP.Server.Core
                     {
                         var context = _listener.GetContext();
                         LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
-                        Task.Run(async () => await OnMessageAsync(context));
+                        if (!_requestExecutonBlock.Post(context))
+                        {
+                            _serviceUnavailabeBlock.Post(context);
+                        }
                     }
                     catch (ThreadAbortException)
                     {
@@ -203,6 +221,22 @@ namespace ITCC.HTTP.Server.Core
             _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
         }
 
+        private static void ReportServiceUnavailable(HttpListenerContext context)
+        {
+            try
+            {
+                _statisticsController.Statistics?.AddRequest(context.Request);
+                ResponseFactory.BuildResponse(context, HttpStatusCode.ServiceUnavailable, null);
+                LogMessage(LogLevel.Info, $"Request from {context.Request.RemoteEndPoint} dropped, queue full");
+                _statisticsController.Statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), 0);
+                context.Response.Close();
+            }
+            catch (Exception e)
+            {
+                LogException(LogLevel.Warning, e);
+            }
+        }
+
         private static void StartServices(HttpServerConfiguration<TAccount> configuration)
         {
             ServiceUris.AddRange(configuration.GetReservedUris());
@@ -217,6 +251,8 @@ namespace ITCC.HTTP.Server.Core
             if (configuration.StatisticsEnabled)
                 ServiceRequestProcessors.Add(_statisticsController);
             ServiceRequestProcessors.Add(_pingController);
+            if (configuration.ConfigurationViewEnabled)
+                ServiceRequestProcessors.Add(_configurationController);
             ServiceRequestProcessors.Add(_authentificationController);
         }
 
@@ -242,6 +278,9 @@ namespace ITCC.HTTP.Server.Core
                 _listenerThread.Abort();
                 _listener.Stop();
                 _started = false;
+                _requestExecutonBlock.Complete();
+                _serviceUnavailabeBlock.Complete();
+                Task.WaitAll(_requestExecutonBlock.Completion, _serviceUnavailabeBlock.Completion);
                 CleanUp();
                 LogMessage(LogLevel.Info, "Stopped");
             }
@@ -272,6 +311,8 @@ namespace ITCC.HTTP.Server.Core
 
         private static bool _started;
         private static Thread _listenerThread;
+        private static ActionBlock<HttpListenerContext> _requestExecutonBlock;
+        private static ActionBlock<HttpListenerContext> _serviceUnavailabeBlock;
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
@@ -343,7 +384,7 @@ namespace ITCC.HTTP.Server.Core
 
         #region handlers
 
-        private static async Task OnMessageAsync(HttpListenerContext context)
+        private static async Task HandleRequestAsync(HttpListenerContext context)
         {
             var request = context.Request;
             // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
@@ -361,7 +402,7 @@ namespace ITCC.HTTP.Server.Core
                 {
                     LogDebug($"Service {serviceProcessor.Name} requested");
                     await serviceProcessor.HandleRequestAsync(context);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -369,7 +410,7 @@ namespace ITCC.HTTP.Server.Core
                 if (requestProcessorSelectionResult == null)
                 {
                     ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -377,14 +418,14 @@ namespace ITCC.HTTP.Server.Core
                 {
                     var redirectLocation = $"{_serverAddress}{requestProcessorSelectionResult.RequestProcessor.SubUri}";
                     context.Response.Redirect(redirectLocation);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
                 if (!requestProcessorSelectionResult.MethodMatches)
                 {
                     ResponseFactory.BuildResponse(context, HttpStatusCode.MethodNotAllowed, null);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -421,18 +462,18 @@ namespace ITCC.HTTP.Server.Core
                         ResponseFactory.BuildResponse(context, authResult);
                         break;
                 }
-                OnResponseReady(context, stopWatch);
+                CompleteContext(context, stopWatch);
             }
             catch (Exception exception)
             {
                 LogMessage(LogLevel.Warning, $"Error handling client request from {request.RemoteEndPoint}");
                 LogException(LogLevel.Warning, exception);
                 ResponseFactory.BuildResponse(context, HttpStatusCode.InternalServerError, null);
-                OnResponseReady(context, stopWatch);
+                CompleteContext(context, stopWatch);
             }
         }
 
-        private static void OnResponseReady(HttpListenerContext context, Stopwatch requestStopwatch)
+        private static void CompleteContext(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             try
             {
@@ -465,6 +506,7 @@ namespace ITCC.HTTP.Server.Core
         private static FileRequestController<TAccount> _fileRequestController;
         private static OptionsController<TAccount> _optionsController;
         private static PingController _pingController;
+        private static ConfigurationController<TAccount> _configurationController;
         private static AuthentificationController _authentificationController;
         private static StatisticsController<TAccount> _statisticsController;
 

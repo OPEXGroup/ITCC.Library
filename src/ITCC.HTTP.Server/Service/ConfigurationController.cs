@@ -9,20 +9,27 @@ using ITCC.HTTP.Server.Utils;
 
 namespace ITCC.HTTP.Server.Service
 {
-    public class PingController : IServiceController
+    internal class ConfigurationController<TAccount> : IServiceController
+        where TAccount : class
     {
+        private readonly HttpServerConfiguration<TAccount> _configuration;
+
+        public ConfigurationController(HttpServerConfiguration<TAccount> configuration)
+        {
+            _configuration = configuration;
+        }
+
         #region IServiceController
         public bool RequestIsSuitable(HttpListenerRequest request)
-            => request != null && CommonHelper.UriMatchesString(request.Url, "ping");
+            => request != null && CommonHelper.UriMatchesString(request.Url, "config");
 
         public Task HandleRequestAsync(HttpListenerContext context)
         {
-            var responseBody = new PingResponse(CommonHelper.SerializeHttpRequest(context, true));
-            ResponseFactory.BuildResponse(context, HttpStatusCode.OK, responseBody);
+            ResponseFactory.BuildResponse(context, HttpStatusCode.OK, _configuration);
             return Task.FromResult(0);
         }
 
-        public string Name => "Ping";
+        public string Name => "Configuration";
         #endregion
     }
 }

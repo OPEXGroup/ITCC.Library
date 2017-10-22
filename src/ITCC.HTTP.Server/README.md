@@ -122,6 +122,10 @@ bool DebugLogsEnabled { get; set; }
 **Можно менять в рантайме**
 */
 bool RequestTracingEnabled { get; set; }
+
+int MaxConcurrentRequests { get; set; } = -1;   // Максимальное количество одновременно обрабатываемых запросов. Отрицательные значения - не ограничено
+int MaxRequestQueue { get; set; } = -1;         // Максимальное количество запросов в очереди обработки (если очередь полна, клиенту сразу отдается 503). Отрицательные значения - не ограничено
+bool ConfigurationViewEnabled { get; set; }     // Позволяет получить конфигурацию сервера по URL <SubjectName>:<Port>/config. **ВАЖНО**: не требует авторизации.
 ```
 
 #### `static class MimeTypes`

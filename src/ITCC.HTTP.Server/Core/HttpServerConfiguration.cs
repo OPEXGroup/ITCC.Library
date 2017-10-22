@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Common;
 using ITCC.HTTP.Server.Encoders;
@@ -11,6 +12,7 @@ using ITCC.HTTP.Server.Files;
 using ITCC.HTTP.Server.Interfaces;
 using ITCC.HTTP.SslConfigUtil.Core.Enums;
 using ITCC.Logging.Core;
+using Newtonsoft.Json;
 
 namespace ITCC.HTTP.Server.Core
 {
@@ -85,24 +87,32 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     File sections for separate access grants
         /// </summary>
-        public List<FileSection> FileSections { get; set; } = new List<FileSection>(); 
+        public List<FileSection> FileSections { get; set; } = new List<FileSection>();
         /// <summary>
         ///     Method used to check authorization tokens for files requests
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public Delegates.FilesAuthorizer<TAccount> FilesAuthorizer { get; set; }
 
         /// <summary>
         ///     Method used to receive authorization tokens
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public Delegates.Authentificator Authentificator { get; set; }
         /// <summary>
         ///     Method used to check authorization tokens
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public Delegates.Authorizer<TAccount> Authorizer { get; set; }
 
         /// <summary>
         ///     Used to process response bodies. Defaults to application/json; charset=utf-8
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public List<IBodyEncoder> BodyEncoders { get; set; } = new List<IBodyEncoder> {new PlainTextBodyEncoder()};
 
         /// <summary>
@@ -128,6 +138,8 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Message body parts patterns that must NEVER be logger. Item1 will be replaced with Item2 (Regex support)
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public List<Tuple<string, string>> LogBodyReplacePatterns { get; set; } = new List<Tuple<string, string>>();
 
         /// <summary>
@@ -148,6 +160,8 @@ namespace ITCC.HTTP.Server.Core
         /// <summary>
         ///     Method used to grand or deny access to /statistics uri
         /// </summary>
+        [XmlIgnore]
+        [JsonIgnore]
         public Delegates.StatisticsAuthorizer StatisticsAuthorizer { get; set; }
 
         /// <summary>
@@ -184,6 +198,21 @@ namespace ITCC.HTTP.Server.Core
         ///     If true, server requests and responses will be written to trace log
         /// </summary>
         public bool RequestTracingEnabled { get; set; }
+
+        /// <summary>
+        ///     Maximum number of requests executing concurrently. Negative values mean no limit
+        /// </summary>
+        public int MaxConcurrentRequests { get; set; } = -1;
+
+        /// <summary>
+        ///     Maximum number of requests waiting in action block queue. Negative values mean no limit
+        /// </summary>
+        public int MaxRequestQueue { get; set; } = -1;
+
+        /// <summary>
+        ///     If true, then unauthorized /config requests are enabled
+        /// </summary>
+        public bool ConfigurationViewEnabled { get; set; }
 
         public bool IsEnough()
         {
