@@ -10,12 +10,12 @@
     <licenseUrl>https://github.com/OPEXGroup/ITCC.Library/blob/master/LICENSE.md</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First release.</releaseNotes>
+    <releaseNotes>Dependencies update.</releaseNotes>
     <copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</copyright>
     <tags></tags>
     <dependencies>
-        <dependency id="ITCC.Logging.Windows" version="3.0.0" />
-        <dependency id="Geocoding.net" version="3.6.0" />
+        <dependency id="ITCC.Logging.Windows" version="3.0.1" />
+        <dependency id="Geocoding.net" version="3.6.1" />
     </dependencies>
   </metadata>
 </package>

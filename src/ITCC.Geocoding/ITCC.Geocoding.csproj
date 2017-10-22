@@ -76,8 +76,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Geocoding, Version=3.6.0.0, Culture=neutral, PublicKeyToken=7c714700b88674c7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Geocoding.net.3.6.0\lib\net40\Geocoding.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\Geocoding.net.3.6.1\lib\net40\Geocoding.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -110,6 +109,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ITCC.Geocoding.nuspec" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
