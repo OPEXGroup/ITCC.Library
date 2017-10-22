@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using ITCC.HTTP.Common.Enums;
 using ITCC.HTTP.Server.Auth;
 using ITCC.HTTP.Server.Common;
@@ -62,6 +63,8 @@ namespace ITCC.HTTP.Server.Core
 
                 _optionsController = new OptionsController<TAccount>(InnerRequestProcessors);
                 _pingController = new PingController();
+
+                _configurationController = new ConfigurationController<TAccount>(configuration);
 
                 Protocol = configuration.Protocol;
                 _authorizer = configuration.Authorizer;
@@ -171,6 +174,13 @@ namespace ITCC.HTTP.Server.Core
         {
             var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
             ServicePointManager.DefaultConnectionLimit = 1000;
+
+            _actionBlock = new ActionBlock<HttpListenerContext>(OnMessageAsync, new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = configuration.MaxConcurrentRequests > 0 ? configuration.MaxConcurrentRequests : -1,
+                BoundedCapacity = configuration.MaxRequestQueue > 0 ? configuration.MaxRequestQueue : -1
+            });
+
             _listener = new HttpListener();
             _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
             _listener.IgnoreWriteExceptions = true;
@@ -185,7 +195,10 @@ namespace ITCC.HTTP.Server.Core
                     {
                         var context = _listener.GetContext();
                         LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
-                        Task.Run(async () => await OnMessageAsync(context));
+                        if (!_actionBlock.Post(context))
+                        {
+                            ReportServiceUnavailable(context);
+                        }
                     }
                     catch (ThreadAbortException)
                     {
@@ -203,6 +216,20 @@ namespace ITCC.HTTP.Server.Core
             _serverAddress = $"{protocolString}://{configuration.SubjectName}:{configuration.Port}/";
         }
 
+        private static void ReportServiceUnavailable(HttpListenerContext context)
+        {
+            try
+            {
+                ResponseFactory.BuildResponse(context, HttpStatusCode.ServiceUnavailable, null);
+                LogMessage(LogLevel.Info, $"Request from {context.Request.RemoteEndPoint} dropped, queue full");
+                context.Response.Close();
+            }
+            catch (Exception e)
+            {
+                LogException(LogLevel.Warning, e);
+            }
+        }
+
         private static void StartServices(HttpServerConfiguration<TAccount> configuration)
         {
             ServiceUris.AddRange(configuration.GetReservedUris());
@@ -217,6 +244,8 @@ namespace ITCC.HTTP.Server.Core
             if (configuration.StatisticsEnabled)
                 ServiceRequestProcessors.Add(_statisticsController);
             ServiceRequestProcessors.Add(_pingController);
+            if (configuration.ConfigurationViewEnabled)
+                ServiceRequestProcessors.Add(_configurationController);
             ServiceRequestProcessors.Add(_authentificationController);
         }
 
@@ -242,6 +271,8 @@ namespace ITCC.HTTP.Server.Core
                 _listenerThread.Abort();
                 _listener.Stop();
                 _started = false;
+                _actionBlock.Complete();
+                _actionBlock.Completion.Wait();
                 CleanUp();
                 LogMessage(LogLevel.Info, "Stopped");
             }
@@ -272,6 +303,7 @@ namespace ITCC.HTTP.Server.Core
 
         private static bool _started;
         private static Thread _listenerThread;
+        private static ActionBlock<HttpListenerContext> _actionBlock;
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
@@ -465,6 +497,7 @@ namespace ITCC.HTTP.Server.Core
         private static FileRequestController<TAccount> _fileRequestController;
         private static OptionsController<TAccount> _optionsController;
         private static PingController _pingController;
+        private static ConfigurationController<TAccount> _configurationController;
         private static AuthentificationController _authentificationController;
         private static StatisticsController<TAccount> _statisticsController;
 

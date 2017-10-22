@@ -4,13 +4,12 @@ using System;
 using System.Text;
 using ITCC.HTTP.Server.Testing.Enums;
 using ITCC.HTTP.Server.Testing.Utils;
-using ITCC.HTTP.Server.Utils;
 using ITCC.Logging.Core;
 using ITCC.Logging.Windows.Loggers;
 
 namespace ITCC.HTTP.Server.Testing
 {
-    internal class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {
