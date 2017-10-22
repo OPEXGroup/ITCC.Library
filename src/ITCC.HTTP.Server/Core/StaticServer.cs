@@ -181,6 +181,11 @@ namespace ITCC.HTTP.Server.Core
                 BoundedCapacity = configuration.MaxRequestQueue > 0 ? configuration.MaxRequestQueue : -1
             });
 
+            _serviceUnavailabeBlock = new ActionBlock<HttpListenerContext>((Action<HttpListenerContext>)ReportServiceUnavailable, new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = 1
+            });
+
             _listener = new HttpListener();
             _listener.Prefixes.Add($"{protocolString}://+:{configuration.Port}/");
             _listener.IgnoreWriteExceptions = true;
@@ -197,7 +202,7 @@ namespace ITCC.HTTP.Server.Core
                         LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
                         if (!_requestExecutonBlock.Post(context))
                         {
-                            ReportServiceUnavailable(context);
+                            _serviceUnavailabeBlock.Post(context);
                         }
                     }
                     catch (ThreadAbortException)
@@ -304,6 +309,7 @@ namespace ITCC.HTTP.Server.Core
         private static bool _started;
         private static Thread _listenerThread;
         private static ActionBlock<HttpListenerContext> _requestExecutonBlock;
+        private static ActionBlock<HttpListenerContext> _serviceUnavailabeBlock;
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
