@@ -225,8 +225,10 @@ namespace ITCC.HTTP.Server.Core
         {
             try
             {
+                _statisticsController.Statistics?.AddRequest(context.Request);
                 ResponseFactory.BuildResponse(context, HttpStatusCode.ServiceUnavailable, null);
                 LogMessage(LogLevel.Info, $"Request from {context.Request.RemoteEndPoint} dropped, queue full");
+                _statisticsController.Statistics?.AddResponse(context.Response, GetNormalizedRequestUri(context), 0);
                 context.Response.Close();
             }
             catch (Exception e)
