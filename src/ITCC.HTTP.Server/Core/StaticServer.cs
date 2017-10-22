@@ -175,7 +175,7 @@ namespace ITCC.HTTP.Server.Core
             var protocolString = configuration.Protocol == Protocol.Http ? "http" : "https";
             ServicePointManager.DefaultConnectionLimit = 1000;
 
-            _actionBlock = new ActionBlock<HttpListenerContext>(OnMessageAsync, new ExecutionDataflowBlockOptions
+            _requestExecutonBlock = new ActionBlock<HttpListenerContext>(HandleRequestAsync, new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = configuration.MaxConcurrentRequests > 0 ? configuration.MaxConcurrentRequests : -1,
                 BoundedCapacity = configuration.MaxRequestQueue > 0 ? configuration.MaxRequestQueue : -1
@@ -195,7 +195,7 @@ namespace ITCC.HTTP.Server.Core
                     {
                         var context = _listener.GetContext();
                         LogDebug($"Client connected: {context.Request.RemoteEndPoint}");
-                        if (!_actionBlock.Post(context))
+                        if (!_requestExecutonBlock.Post(context))
                         {
                             ReportServiceUnavailable(context);
                         }
@@ -271,8 +271,8 @@ namespace ITCC.HTTP.Server.Core
                 _listenerThread.Abort();
                 _listener.Stop();
                 _started = false;
-                _actionBlock.Complete();
-                _actionBlock.Completion.Wait();
+                _requestExecutonBlock.Complete();
+                _requestExecutonBlock.Completion.Wait();
                 CleanUp();
                 LogMessage(LogLevel.Info, "Stopped");
             }
@@ -303,7 +303,7 @@ namespace ITCC.HTTP.Server.Core
 
         private static bool _started;
         private static Thread _listenerThread;
-        private static ActionBlock<HttpListenerContext> _actionBlock;
+        private static ActionBlock<HttpListenerContext> _requestExecutonBlock;
         private static HttpListener _listener;
         private static bool _operationInProgress;
         private static readonly object OperationLock = new object();
@@ -375,7 +375,7 @@ namespace ITCC.HTTP.Server.Core
 
         #region handlers
 
-        private static async Task OnMessageAsync(HttpListenerContext context)
+        private static async Task HandleRequestAsync(HttpListenerContext context)
         {
             var request = context.Request;
             // This Stopwatch will be used by different threads, but sequentially (select processor => handle => completion)
@@ -393,7 +393,7 @@ namespace ITCC.HTTP.Server.Core
                 {
                     LogDebug($"Service {serviceProcessor.Name} requested");
                     await serviceProcessor.HandleRequestAsync(context);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -401,7 +401,7 @@ namespace ITCC.HTTP.Server.Core
                 if (requestProcessorSelectionResult == null)
                 {
                     ResponseFactory.BuildResponse(context, HttpStatusCode.NotFound, null);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -409,14 +409,14 @@ namespace ITCC.HTTP.Server.Core
                 {
                     var redirectLocation = $"{_serverAddress}{requestProcessorSelectionResult.RequestProcessor.SubUri}";
                     context.Response.Redirect(redirectLocation);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
                 if (!requestProcessorSelectionResult.MethodMatches)
                 {
                     ResponseFactory.BuildResponse(context, HttpStatusCode.MethodNotAllowed, null);
-                    OnResponseReady(context, stopWatch);
+                    CompleteContext(context, stopWatch);
                     return;
                 }
 
@@ -453,18 +453,18 @@ namespace ITCC.HTTP.Server.Core
                         ResponseFactory.BuildResponse(context, authResult);
                         break;
                 }
-                OnResponseReady(context, stopWatch);
+                CompleteContext(context, stopWatch);
             }
             catch (Exception exception)
             {
                 LogMessage(LogLevel.Warning, $"Error handling client request from {request.RemoteEndPoint}");
                 LogException(LogLevel.Warning, exception);
                 ResponseFactory.BuildResponse(context, HttpStatusCode.InternalServerError, null);
-                OnResponseReady(context, stopWatch);
+                CompleteContext(context, stopWatch);
             }
         }
 
-        private static void OnResponseReady(HttpListenerContext context, Stopwatch requestStopwatch)
+        private static void CompleteContext(HttpListenerContext context, Stopwatch requestStopwatch)
         {
             try
             {
