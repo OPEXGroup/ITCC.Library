@@ -279,7 +279,8 @@ namespace ITCC.HTTP.Server.Core
                 _listener.Stop();
                 _started = false;
                 _requestExecutonBlock.Complete();
-                _requestExecutonBlock.Completion.Wait();
+                _serviceUnavailabeBlock.Complete();
+                Task.WaitAll(_requestExecutonBlock.Completion, _serviceUnavailabeBlock.Completion);
                 CleanUp();
                 LogMessage(LogLevel.Info, "Stopped");
             }
