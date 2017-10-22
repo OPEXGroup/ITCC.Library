@@ -1,3 +1,8 @@
+## 3.0.2 (2017-10-22)
+
+* **New**:  `MaxConcurrentRequests`, `MaxRequestQueue` and `ConfigurationViewEnabled` added to `HttpServerConfiguration`  
+* **Edit**: Dependencies updated  
+
 ## 3.0.1 (2017-09-09)
 
 * **New** : `DebugLogsEnabled` and `RequestTracingEnabled` added to `StaticServer` (can be turned on during startup via config and changed in runtime)  
