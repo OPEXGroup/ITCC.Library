@@ -1,5 +1,7 @@
 ﻿# ITCC.HTTP.Client
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Client.svg)](https://badge.fury.io/nu/ITCC.HTTP.Client)
+
 HTTP-клиенты. Не бросают исключений, сильно настраиваемы.
 
 ### Common

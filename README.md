@@ -18,11 +18,15 @@
 
 ### ITCC.Geocoding
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.Geocoding.svg)](https://badge.fury.io/nu/ITCC.Geocoding)
+
 Классы для работы с геокодерами Яндекса и Google. Интересные классы:
 
 * `ITCC.Geocoding.Geocoder.cs`
 
 ### ITCC.HTTP.API
+
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.API.svg)](https://badge.fury.io/nu/ITCC.HTTP.API)
 
 Библиотека для декларативного описания и автоматической проверки контрактов сетевого API.
 Изначально предназначена для работы с HTTP.
@@ -35,9 +39,13 @@
 
 ### ITCC.HTTP.API.Documentation
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.API.Documentation.svg)](https://badge.fury.io/nu/ITCC.HTTP.API.Documentation)
+
 Библиотека для автоматической генерации документации на основе аннотаций методов API из ITCC.HTTP.API
 
 ### ITCC.HTTP.Client
+
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Client.svg)](https://badge.fury.io/nu/ITCC.HTTP.Client)
 
 Реализация HTTP-клиентов. Интересные классы:
 
@@ -46,9 +54,13 @@
 
 ### ITCC.HTTP.Common
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Common.svg)](https://badge.fury.io/nu/ITCC.HTTP.Common)
+
 Маленькая общая часть реализации HTTP
 
 ### ITCC.HTTP.Server
+
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Server.svg)](https://badge.fury.io/nu/ITCC.HTTP.Server)
 
 HTTP-сервер для быстрого развертывания приложений. 
 Поддерживает дополнительную функциональность (работа со статичными файлами, предобработка контента).
@@ -77,6 +89,8 @@ HTTP-сервер для быстрого развертывания прило�
 
 ### ITCC.HTTP.SslConfigUtil.Core
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.SslConfigUtil.Core.svg)](https://badge.fury.io/nu/ITCC.HTTP.SslConfigUtil.Core)
+
 Библиотека для генерации и установки TLS-сертификатов. 
 Интегрирована в `ITCC.HTTP.Server`, но может использоваться и самостоятельно. 
 Интересные классы:
@@ -89,6 +103,8 @@ HTTP-сервер для быстрого развертывания прило�
 WPF-приложение для генерации и установки TLS-сертификатов  
 
 ### ITCC.Logging.Core
+
+[![NuGet version](https://badge.fury.io/nu/ITCC.Logging.Core.svg)](https://badge.fury.io/nu/ITCC.Logging.Core)
 
 Логгирование. Система подписчик-получатель с возможностью добавления получателей. Надо просто реализовать интерфейс `ILogReceiver`. **Собирается везде.** Интересные классы:
 
@@ -104,6 +120,8 @@ WPF-приложение для генерации и установки TLS-с�
 
 ### ITCC.Logging.Windows
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.Logging.Windows.svg)](https://badge.fury.io/nu/ITCC.Logging.Windows)
+
 Различные реализации логов для .Net 4.6. Интересные классы:
 
 * `ITCC.Logging.Loggers.ColouredConsoleLogger`  
@@ -113,6 +131,8 @@ WPF-приложение для генерации и установки TLS-с�
 
 ### ITCC.UI
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.UI.svg)](https://badge.fury.io/nu/ITCC.UI)
+
 Библиотека классов для использования в GUI-приложениях на WPF, UWP и Xamarin Forms. Интересные классы:
 
 * `ITCC.UI.Commands.AsyncCommand`  
@@ -120,6 +140,8 @@ WPF-приложение для генерации и установки TLS-с�
 * `ITCC.UI.Utils.ObservableRingBuffer`  
 
 ### ITCC.WPF
+
+[![NuGet version](https://badge.fury.io/nu/ITCC.WPF.svg)](https://badge.fury.io/nu/ITCC.WPF)
 
 Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов. Интересные классы:  
 

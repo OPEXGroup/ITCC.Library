@@ -1,5 +1,7 @@
 ﻿# ITCC.HTTP.API
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.API.svg)](https://badge.fury.io/nu/ITCC.HTTP.API)
+
 **Компонент работает в .Net 4.6, .Net Core, ASP.NET Core, Xamarin**  
 Библиотека для декларативного описания и автоматической проверки контрактов сетевого API.
 Изначально предназначена для работы с HTTP.

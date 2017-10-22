@@ -1,5 +1,7 @@
 ﻿## ITCC.UI
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.UI.svg)](https://badge.fury.io/nu/ITCC.UI)
+
 Библиотека классов для использования в GUI-приложениях на WPF, UWP и Xamarin Forms.
 
 ### Attributes

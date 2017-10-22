@@ -1,5 +1,7 @@
 ﻿# ITCC.HTTP.Server
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Server.svg)](https://badge.fury.io/nu/ITCC.HTTP.Server)
+
 `HTTP`-сервер. Доступен один экземпляр для приложения.
 
 ### Auth

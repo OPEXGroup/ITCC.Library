@@ -1,5 +1,7 @@
 ﻿# ITCC.Logging.Windows
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.Logging.Windows.svg)](https://badge.fury.io/nu/ITCC.Logging.Windows)
+
 Различные реализации логов для .Net 4.6. Содержит следующие компоненты (более подробное описание - исходники):
 
 ### Loggers

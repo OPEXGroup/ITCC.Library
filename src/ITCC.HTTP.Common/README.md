@@ -1,5 +1,7 @@
 ﻿# ITCC.HTTP.Common
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.HTTP.Common.svg)](https://badge.fury.io/nu/ITCC.HTTP.Common)
+
 Общие классы и перечисления
 
 ### `static class Constants`

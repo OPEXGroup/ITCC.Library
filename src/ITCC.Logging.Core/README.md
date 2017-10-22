@@ -1,5 +1,7 @@
 ﻿# ITCC.Logging.Core
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.Logging.Core.svg)](https://badge.fury.io/nu/ITCC.Logging.Core)
+
 **Компонент работает в .Net 4.6, .Net Core, ASP.NET Core, Xamarin**  
 Библиотека для логгирования в сильно многопоточной среде. Основана на `event`'ах. Работает по упрощенному принципу `pub-sub`, при этом логгер выступает брокером. Содержит следующие компоненты (более подробное описание - исходники):
 

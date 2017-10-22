@@ -1,5 +1,7 @@
 ﻿# ITCC.Geocoding
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.Geocoding.svg)](https://badge.fury.io/nu/ITCC.Geocoding)
+
 Библиотека небольших классов, полезных при работе с геокодерами
 
 ### Корневые

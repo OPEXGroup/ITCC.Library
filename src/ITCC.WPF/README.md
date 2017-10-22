@@ -1,5 +1,7 @@
 ﻿## ITCC.WPF
 
+[![NuGet version](https://badge.fury.io/nu/ITCC.WPF.svg)](https://badge.fury.io/nu/ITCC.WPF)
+
 Библиотека классов (в том числе, окон) для использования в WPF-приложениях
 
 ### Loggers
