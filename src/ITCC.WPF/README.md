@@ -16,7 +16,7 @@
 CredentialType CredentialType { get; }  // Тип учетных данных
 string ApplicationName { get; }         // Имя приложения, к которому относятся учетные данные
 string UserName { get; }                // Имя пользователя
-string Password { get; }                // Пароль/секрет
+SecureString Password { get; }          // Пароль/секрет
 ```
 
 #### `class CredentialManager`
@@ -131,6 +131,17 @@ public enum MyEnum
 
 ```
 bool AlwaysScrollToEnd; // Автоматическая прокрутка вниз при добавлении содержимого
+```
+
+#### `static class SecureStringHelper`
+
+Класс для работы с `SecureString`. Основные методы:
+
+```
+string GetInsecureString(SecureString secureString);
+SecureString GetSecureString(string insecureString);
+int GetSecureStringLength(SecureString secureString);
+bool IsMatch(SecureString secureString1, SecureString secureString2);
 ```
 
 ### Windows

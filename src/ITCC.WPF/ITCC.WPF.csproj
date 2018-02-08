@@ -90,6 +90,7 @@
   <ItemGroup>
     <Compile Include="Credentials\Credential.cs" />
     <Compile Include="Credentials\CredentialManager.cs" />
+    <Compile Include="Utils\SecureStringHelper.cs" />
     <Compile Include="Enums\CredentialPersistence.cs" />
     <Compile Include="Enums\CredentialType.cs" />
     <Compile Include="Loggers\MessageLogger.cs" />

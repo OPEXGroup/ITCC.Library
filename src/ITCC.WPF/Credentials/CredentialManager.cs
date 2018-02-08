@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using ITCC.Logging.Core;
 using ITCC.WPF.Enums;
+using ITCC.WPF.Utils;
 using Microsoft.Win32.SafeHandles;
 
 namespace ITCC.WPF.Credentials
@@ -125,12 +126,13 @@ namespace ITCC.WPF.Credentials
         {
             var applicationName = Marshal.PtrToStringUni(credential.TargetName);
             var userName = Marshal.PtrToStringUni(credential.UserName);
-            string secret = null;
+            string insecureSecret = null;
             if (credential.CredentialBlob != IntPtr.Zero)
             {
-                secret = Marshal.PtrToStringUni(credential.CredentialBlob, (int)credential.CredentialBlobSize / 2);
+                insecureSecret = Marshal.PtrToStringUni(credential.CredentialBlob, (int)credential.CredentialBlobSize / 2);
             }
 
+            var secret = SecureStringHelper.GetSecureString(insecureSecret);
             return new Credential(credential.Type, applicationName, userName, secret);
         }
 

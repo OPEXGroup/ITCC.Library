@@ -1,6 +1,7 @@
 ﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
+using System.Security;
 using ITCC.WPF.Enums;
 
 namespace ITCC.WPF.Credentials
@@ -13,9 +14,9 @@ namespace ITCC.WPF.Credentials
         public CredentialType CredentialType { get; }
         public string ApplicationName { get; }
         public string UserName { get; }
-        public string Password { get; }
+        public SecureString Password { get; }
 
-        public Credential(CredentialType credentialType, string applicationName, string userName, string password)
+        public Credential(CredentialType credentialType, string applicationName, string userName, SecureString password)
         {
             ApplicationName = applicationName;
             UserName = userName;
