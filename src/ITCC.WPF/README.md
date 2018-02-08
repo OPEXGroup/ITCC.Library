@@ -4,6 +4,30 @@
 
 Библиотека классов (в том числе, окон) для использования в WPF-приложениях
 
+### Behaviors
+
+Расширения элементов управления
+
+#### SecurePasswordBindingBehavior
+
+Предоставляет возможность привязки `PasswordBox.SecurePassword` к свойству модели:
+
+```
+class ViewModel : INotifyPropertyChanged
+{
+	public SecureString Password { ... }
+}
+```
+
+```
+<PasswordBox>
+	<i:Interaction.Behaviors>
+		<SecurePasswordBindingBehavior Password="{Binding Password, Mode=TwoWay}" />
+	</i:Interaction.Behaviors>
+</PasswordBox>
+```
+
+
 ### Credentials
 
 Классы для работы с учетными данными
