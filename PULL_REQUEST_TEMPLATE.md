@@ -23,5 +23,7 @@
 - [ ] ITCC.Logging.Windows  
 - [ ] ITCC.UI  
 - [ ] ITCC.WPF  
-  
+
+### Breaking changes
+
 - [ ] BREAKING CHANGES
