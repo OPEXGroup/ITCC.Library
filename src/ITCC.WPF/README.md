@@ -4,6 +4,90 @@
 
 Библиотека классов (в том числе, окон) для использования в WPF-приложениях
 
+### Behaviors
+
+Расширения элементов управления
+
+#### SecurePasswordBindingBehavior
+
+Предоставляет возможность привязки `PasswordBox.SecurePassword` к свойству модели:
+
+```
+class ViewModel : INotifyPropertyChanged
+{
+	public SecureString Password { ... }
+}
+```
+
+```
+<PasswordBox>
+	<i:Interaction.Behaviors>
+		<SecurePasswordBindingBehavior Password="{Binding Password, Mode=TwoWay}" />
+	</i:Interaction.Behaviors>
+</PasswordBox>
+```
+
+
+### Credentials
+
+Классы для работы с учетными данными
+
+#### `class Credential`
+
+Объект учетных данных пользователя. Свойства:
+
+```
+CredentialType CredentialType { get; }  // Тип учетных данных
+string ApplicationName { get; }         // Имя приложения, к которому относятся учетные данные
+string UserName { get; }                // Имя пользователя
+SecureString Password { get; }          // Пароль/секрет
+```
+
+#### `class CredentialManager`
+
+Класс для работы с учетными данными (чтение/сохранение). Создание:
+
+```
+CredentialManager(string applicationName);  // Имя приложения не может быть изменено после создания
+```
+
+Основные методы:
+
+```
+Credential ReadCredential();
+int WriteCredential(string userName, string secret, CredentialPersistence credentialPersistence);
+IReadOnlyList<Credential> EnumerateCrendentials();
+```
+
+### Enums
+
+Используемые перечисления
+
+#### `enum CredentialPersistence`
+
+Тип сохранения учетных данных
+
+```
+Session = 1,      //
+LocalMachine = 2, //
+Enterprise = 3    //
+```
+
+#### `enum CredentialType`
+
+Тип учетных данных
+
+```
+Generic = 1,                   //
+DomainPassword,                //
+DomainCertificate,             //
+DomainVisiblePassword,         //
+GenericCertificate,            //
+DomainExtended,                //
+Maximum,                       //
+MaximumEx = Maximum + 1000,    //
+```
+
 ### Loggers
 
 Уже написанные варианты получателя лога для WPF-прриложений
@@ -71,6 +155,17 @@ public enum MyEnum
 
 ```
 bool AlwaysScrollToEnd; // Автоматическая прокрутка вниз при добавлении содержимого
+```
+
+#### `static class SecureStringHelper`
+
+Класс для работы с `SecureString`. Основные методы:
+
+```
+string GetInsecureString(SecureString secureString);
+SecureString GetSecureString(string insecureString);
+int GetSecureStringLength(SecureString secureString);
+bool IsMatch(SecureString secureString1, SecureString secureString2);
 ```
 
 ### Windows

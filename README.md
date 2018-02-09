@@ -145,6 +145,7 @@ WPF-приложение для генерации и установки TLS-с�
 
 Маленькие полезные классы для работы с WPF. Включает, в том числе, работу с `ITCC.Logging` из WPF и специальное окошко `LogWindow` для вывода логов. Интересные классы:  
 
+* `ITCC.WPF.Credentials.CredentialManager`  
 * `ITCC.WPF.Windows.LogWindow`  
 * `ITCC.WPF.Utils.DataGridHelper`  
 * `ITCC.WPF.Utils.ScrollViewerExtensions`  
