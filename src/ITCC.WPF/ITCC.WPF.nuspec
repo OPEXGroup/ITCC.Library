@@ -10,12 +10,13 @@
     <licenseUrl>https://github.com/OPEXGroup/ITCC.Library/blob/master/LICENSE.md</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First release.</releaseNotes>
-    <copyright>Copyright (c) 2016-2017, Vladimir Tyrin, Vladislav Prishchepa</copyright>
+    <releaseNotes>Credentials processing added.</releaseNotes>
+    <copyright>Copyright (c) 2016-2018, Vladimir Tyrin, Vladislav Prishchepa</copyright>
     <tags></tags>
     <dependencies>
         <dependency id="ITCC.UI" version="3.0.0" />
         <dependency id="ITCC.Logging.Windows" version="3.0.0" />
+        <dependency id="Expression.Blend.Sdk.WPF" version="1.0.1" />
     </dependencies>
   </metadata>
 </package>
