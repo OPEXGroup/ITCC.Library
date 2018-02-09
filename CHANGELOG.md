@@ -1,3 +1,7 @@
+## 3.1.0 (2018-02-09)
+
+* **New**:  Credential, CredentialType, CredentialPersistence, CredentialManager, SecureStringHelper and SecurePasswordBindingBehavior added to ITCC.WPF
+
 ## 3.0.2 (2017-10-22)
 
 * **New**:  `MaxConcurrentRequests`, `MaxRequestQueue` and `ConfigurationViewEnabled` added to `HttpServerConfiguration`  
